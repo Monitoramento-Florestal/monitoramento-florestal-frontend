@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Arbor Florest Monitoring
 
-## Getting Started
+Template inicial de frontend para monitoramento florestal com Next.js (App Router), TypeScript e organização por camadas e papéis.
+Exigência para rodar o projeto: NodeJS instalado em versão LTS.
 
-First, run the development server:
+Como rodar o projeto:
+1 - Clone o projeto
+2 - Rode no terminal: cd arbor-florest-monitoring
+3 - Rode no termnal: npm install
+
+## Stack
+
+- Next.js 16 (App Router)
+- TypeScript 5
+- Tailwind CSS 4
+- TanStack Query
+- Context API
+- React Hook Form + Zod
+- Axios
+- MSW
+- Leaflet + react-leaflet
+- Recharts
+- date-fns
+
+## Estrutura base
+
+```text
+src/
+  app/
+    (auth)/login
+    (public)/public
+    (citizen)/citizen
+      profile
+      reports
+      map
+    (researcher)/researcher
+      trees
+      measurements
+      reports
+      map
+    (manager)/manager
+      approvals
+      users
+      export
+  components/
+  services/
+  hooks/
+  contexts/
+  constants/
+  types/
+  utils/
+  mocks/
+  styles/
+```
+
+## Access model
+
+- Public view (`/public`): dados abertos e limitados para visitantes anônimos
+- Citizen (`/citizen`): usuário autenticado com dados privados próprios
+- Researcher (`/researcher`): área autenticada de pesquisa
+- Manager (`/manager`): área autenticada de gestão
+
+## Configuração
+
+1. Instalar dependências:
+
+```bash
+npm install
+```
+
+2. Criar arquivo de ambiente copiando `.env.local.example` para `.env.local`.
+
+```bash
+copy .env.local.example .env.local
+```
+
+3. Executar em desenvolvimento:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev`
+- `npm run build`
+- `npm run start`
+- `npm run lint`
+- `npm run type-check`
+- `npm run format`

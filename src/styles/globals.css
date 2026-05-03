@@ -174,15 +174,27 @@
   .leaflet-arbor .leaflet-tile-pane {
     filter: saturate(0.55) sepia(0.15) brightness(0.98);
   }
-  .leaflet-arbor .leaflet-control-zoom a {
-    background: var(--color-cream);
-    color: var(--color-burgundy);
+  .leaflet-arbor img {
+    max-width: none !important;
+  }
+  .leaflet-arbor .leaflet-control-zoom {
+    margin: 0;
+    border: 0 !important;
+  }
+  
+.leaflet-arbor .leaflet-bar .leaflet-control-zoom-in,
+.leaflet-arbor .leaflet-bar .leaflet-control-zoom-out {
+    background: var(--color-cream) !important; 
+    color: var(--color-burgundy) !important;
     border: 1px solid color-mix(in srgb, var(--color-rosewood) 30%, transparent) !important;
     border-radius: 6px !important;
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
-    font-weight: 400;
+    width: 40px !important;
+    height: 40px !important;
+    line-height: 40px!important;
+    font-weight: 400 !important;
+  }
+  .leaflet-arbor .leaflet-control-zoom a + a {
+    margin-top: 2px;
   }
   .leaflet-arbor .leaflet-control-zoom a:hover {
     background: var(--color-secondary);

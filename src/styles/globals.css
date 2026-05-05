@@ -181,16 +181,16 @@
     margin: 0;
     border: 0 !important;
   }
-  
-.leaflet-arbor .leaflet-bar .leaflet-control-zoom-in,
-.leaflet-arbor .leaflet-bar .leaflet-control-zoom-out {
-    background: var(--color-cream) !important; 
+  .leaflet-arbor .leaflet-bar .leaflet-control-zoom-in,
+  .leaflet-arbor .leaflet-bar .leaflet-control-zoom-out {
+    background: var(--color-cream) !important;
     color: var(--color-burgundy) !important;
-    border: 1px solid color-mix(in srgb, var(--color-rosewood) 30%, transparent) !important;
+    border: 1px solid
+      color-mix(in srgb, var(--color-rosewood) 30%, transparent) !important;
     border-radius: 6px !important;
     width: 40px !important;
     height: 40px !important;
-    line-height: 40px!important;
+    line-height: 40px !important;
     font-weight: 400 !important;
   }
   .leaflet-arbor .leaflet-control-zoom a + a {
@@ -204,6 +204,10 @@
     color: var(--color-rosewood);
     font-family: var(--font-sans);
     font-size: 10px;
+  }
+  .arbor-cluster-wrap {
+    background: transparent !important;
+    border: 0 !important;
   }
 
   /* ── Map cluster marker ─────────────────────────────────────────────

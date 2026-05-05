@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
 import '@/styles/globals.css'
 import '@/styles/themes.css'
 import { AuthProvider } from '@/contexts/AuthContext'

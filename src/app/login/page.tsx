@@ -78,7 +78,9 @@ export default function LoginForm() {
             placeholder="seu@email.com"
           />
           {errors.email && (
-            <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>
+            <p className="text-[#940028] text-xs mt-1">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
@@ -92,7 +94,7 @@ export default function LoginForm() {
             className="w-full p-2.5 border border-[#866969]/40 rounded-xl bg-cream focus:ring-1 focus:ring-sage outline-none transition-all"
           />
           {errors.password && (
-            <p className="text-red-600 text-xs mt-1">
+            <p className="text-[#940028] text-xs mt-1">
               {errors.password.message}
             </p>
           )}

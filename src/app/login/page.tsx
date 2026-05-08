@@ -2,9 +2,13 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { loginSchema, type LoginFormValues } from '../../utils/validations/schema'
+import {
+  loginSchema,
+  type LoginFormValues,
+} from '../../utils/validations/schema'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 export default function LoginForm() {
   const {
@@ -94,12 +98,12 @@ export default function LoginForm() {
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
-          className="w-full py-3 bg-sage text-cream rounded-xl font hover:bg-sage transition-all shadow-sm mb-6"
+          className="w-full py-3 bg-sage text-white rounded- font hover:bg-sage transition-all shadow-sm mb-6"
         >
           Entrar
-        </button>
+        </Button>
 
         <div className="text-center">
           <a href="#" className="text-sm text-rosewood hover:underline">

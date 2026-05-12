@@ -108,9 +108,9 @@ export default function LoginForm() {
         </Button>
 
         <div className="text-center">
-          <a href="#" className="text-sm text-rosewood hover:underline">
+          <Link href="/password-reset" className="text-sm text-rosewood hover:underline">
             Esqueci minha senha
-          </a>
+          </Link>
         </div>
       </form>
 

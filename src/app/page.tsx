@@ -52,7 +52,7 @@ export default function LandingPage() {
             </p>
 
             <div className="mt-9 flex flex-wrap gap-3 animate-fade-up [animation-delay:180ms]">
-              <Button text="Visualizar mapa"   icon={ArrowRight} variant="primary" size="lg" href="/public/mapa" />
+              <Button text="Visualizar mapa"   icon={ArrowRight} variant="primary" size="lg" href="/map" />
               <Button text="Entrar no sistema" variant="outline" size="lg" href="/login" />
             </div>
 
@@ -140,7 +140,7 @@ export default function LandingPage() {
                 Abra o mapa interativo — sem cadastro, sem barreiras.
               </p>
             </div>
-            <Button text="Visualizar mapa" icon={ArrowRight} variant="primary" size="lg" href="/public/mapa" />
+            <Button text="Visualizar mapa" icon={ArrowRight} variant="primary" size="lg" href="/map" />
           </div>
         </div>
       </section>

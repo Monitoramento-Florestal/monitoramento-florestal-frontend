@@ -8,7 +8,7 @@ export const TREE_STATUS_COLORS: Record<
 > = {
   saudavel: { fill: "#1e3d22", stroke: "#122616", shadow: "#0a1a0c" },
   injuria: { fill: "#5a3a3a", stroke: "#2e1b1b", shadow: "#1a0e0e" },
-  cortada: { fill: "#3E000C", stroke: "#1f0006", shadow: "#0d0003" },
+  cortada: { fill: "#3e000c", stroke: "#1f0006", shadow: "#0d0003" },
 };
 
 const STATUS_ICON_URL: Record<TreeStatus, string> = {

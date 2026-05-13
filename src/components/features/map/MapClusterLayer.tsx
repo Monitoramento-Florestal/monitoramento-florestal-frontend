@@ -6,7 +6,6 @@ import { useMap } from "react-leaflet";
 import {
   makeClusterIcon,
   makeTreeImageIcon,
-  TREE_STATUS_LABEL,
 } from "./mapIcons";
 import type { Tree } from "@/types/trees";
 
@@ -63,7 +62,7 @@ export function MapClusterLayer({
         spiderfyOnMaxZoom: true,
         removeOutsideVisibleBounds: true,
         chunkedLoading: true,
-        maxClusterRadius: 50,
+        maxClusterRadius: 64,
       });
 
       clusterGroup.addTo(map);
@@ -104,14 +103,6 @@ export function MapClusterLayer({
         }),
       });
 
-      marker.bindPopup(`
-        <div class="space-y-1 text-sm">
-          <div class="font-medium text-burgundy">${tree.nomeComum}</div>
-          <div class="italic text-rosewood">${tree.especie}</div>
-          <div class="text-rosewood/90">Status: ${TREE_STATUS_LABEL[tree.status]}</div>
-        </div>
-      `);
-
       if (onSelect) {
         marker.on("click", () => onSelect(tree));
       }
@@ -134,7 +125,6 @@ export function MapClusterLayer({
     clusterGroupRef.current.zoomToShowLayer(marker, () => {
       const latLng = marker.getLatLng();
       map.flyTo(latLng, Math.max(map.getZoom(), 18), { duration: 0.8 });
-      marker.openPopup();
     });
   }, [clusterReady, focusTreeId, map]);
 

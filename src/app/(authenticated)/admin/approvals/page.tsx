@@ -1,14 +1,6 @@
-import { DashboardCard } from "@/components/features/dashboard";
+import { ApprovalsScreen } from "@/components/features/approvals/ApprovalsScreen";
+import { mockTrees } from "@/types/mockTrees";
 
 export default function AdminApprovalsPage() {
-  return (
-    <DashboardCard>
-      <h2 className="text-xl tracking-tight text-burgundy">
-        Fila de aprovacao
-      </h2>
-      <p className="mt-2 text-sm leading-6 text-rosewood">
-        Scaffold reservado para a futura rotina de aprovacoes.
-      </p>
-    </DashboardCard>
-  );
+  return <ApprovalsScreen initialRecords={mockTrees} />;
 }

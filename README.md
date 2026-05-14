@@ -29,19 +29,25 @@ src/
   app/
     (auth)/login
     (public)/public
-    (citizen)/citizen
-      profile
-      reports
-      map
-    (researcher)/researcher
-      trees
-      measurements
-      reports
-      map
-    (manager)/manager
-      approvals
-      users
-      export
+    (authenticated)
+      citizen
+        profile
+        map
+      researcher
+        trees
+        measurements
+        reports
+        map
+      manager
+        trees
+        approvals
+        users
+        management
+        map
+      admin
+        approvals
+        users
+        management
   components/
   services/
   hooks/

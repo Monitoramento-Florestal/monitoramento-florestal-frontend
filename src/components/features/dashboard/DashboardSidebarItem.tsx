@@ -15,6 +15,12 @@ function isActivePath(currentPath: string, href: string) {
     return true;
   }
 
+  const hrefDepth = href.split("/").filter(Boolean).length;
+
+  if (hrefDepth <= 1) {
+    return false;
+  }
+
   return href !== "/" && currentPath.startsWith(`${href}/`);
 }
 

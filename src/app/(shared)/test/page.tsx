@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 
 import { UserRole } from "@/constants/roles";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { getDashboardNavigation } from "@/utils/dashboard";
 import {
   DashboardCard,

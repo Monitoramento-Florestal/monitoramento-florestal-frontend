@@ -11,7 +11,12 @@ export function proxy(request: NextRequest) {
   const isProtectedPath =
     pathname.startsWith('/citizen') ||
     pathname.startsWith('/researcher') ||
-    pathname.startsWith('/manager')
+    pathname.startsWith('/manager') ||
+    pathname.startsWith('/admin')
+
+  if (process.env.NODE_ENV === 'development' && isProtectedPath) {
+    return NextResponse.next()
+  }
 
   if (isProtectedPath && !token) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -25,5 +30,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/public/:path*', '/citizen/:path*', '/researcher/:path*', '/manager/:path*', '/login'],
+  matcher: ['/public/:path*', '/citizen/:path*', '/researcher/:path*', '/manager/:path*', '/admin/:path*', '/login'],
 }

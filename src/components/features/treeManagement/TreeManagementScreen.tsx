@@ -48,7 +48,7 @@ export function TreeManagementScreen({
   return (
     <>
       <div className="space-y-6">
-        <DashboardCard>
+        <DashboardCard className="px-4 py-4 sm:px-5">
           <TreeManagementFilters
             activeStatus={status}
             filters={TREE_MANAGEMENT_FILTERS}

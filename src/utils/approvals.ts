@@ -1,6 +1,8 @@
 import type { Tree } from "@/types/trees";
 import { formatDate } from "@/utils/format";
 
+export type ApprovalSearchField = "researcher" | "species";
+
 export function getApprovalRecordStatusLabel(tree: Tree) {
   if (tree.status === "saudavel") {
     return "Saudavel";
@@ -15,6 +17,26 @@ export function getApprovalRecordStatusLabel(tree: Tree) {
 
 export function getPendingApprovalRecords(trees: Tree[]) {
   return trees.filter((tree) => tree.registro.aprovacao === "pendente");
+}
+
+export function filterApprovalRecords(
+  records: Tree[],
+  query: string,
+  field: ApprovalSearchField
+) {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    return records;
+  }
+
+  return records.filter((record) => {
+    if (field === "researcher") {
+      return record.registro.registradoPor.toLowerCase().includes(normalizedQuery);
+    }
+
+    return record.especie.toLowerCase().includes(normalizedQuery);
+  });
 }
 
 export function approveRecord(records: Tree[], id: string) {

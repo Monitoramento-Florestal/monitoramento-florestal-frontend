@@ -26,6 +26,32 @@ function getInitials(name: string) {
     .join("");
 }
 
+function isMatchingPath(currentPath: string, href: string) {
+  if (currentPath === href) {
+    return true;
+  }
+
+  const hrefDepth = href.split("/").filter(Boolean).length;
+
+  if (hrefDepth <= 1) {
+    return false;
+  }
+
+  return href !== "/" && currentPath.startsWith(`${href}/`);
+}
+
+function getActiveItemHref(currentPath: string, items: DashboardNavigationItem[]) {
+  const matches = items.filter((item) => isMatchingPath(currentPath, item.href));
+
+  if (matches.length === 0) {
+    return null;
+  }
+
+  return matches
+    .sort((left, right) => right.href.length - left.href.length)[0]
+    .href;
+}
+
 export function DashboardSidebar({
   className,
   currentPath,
@@ -35,6 +61,7 @@ export function DashboardSidebar({
   userRole,
 }: DashboardSidebarProps) {
   const initials = getInitials(userName) || "?";
+  const activeHref = getActiveItemHref(currentPath, items);
 
   return (
     <div className={cn("flex h-full min-h-screen flex-col bg-forest", className)}>
@@ -64,8 +91,8 @@ export function DashboardSidebar({
           <ul className="space-y-1">
             {items.map((item) => (
               <DashboardSidebarItem
+                active={item.href === activeHref}
                 key={item.key}
-                currentPath={currentPath}
                 item={item}
               />
             ))}

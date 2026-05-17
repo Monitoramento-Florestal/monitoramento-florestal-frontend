@@ -74,6 +74,15 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
     roles: [UserRole.MANAGER, UserRole.ADMIN],
   },
   {
+    key: "tree-management",
+    label: "Gerenciamento de arvores",
+    href: {
+      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_TREES,
+    },
+    icon: Trees,
+    roles: [UserRole.RESEARCHER],
+  },
+  {
     key: "management",
     label: "Gerenciamento",
     href: {

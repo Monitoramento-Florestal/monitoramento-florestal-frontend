@@ -1,20 +1,21 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('forest_token')?.value
   const pathname = request.nextUrl.pathname
+  const isDev = process.env.NODE_ENV === 'development'
 
   const isPublicPath =
     pathname === '/' || pathname === '/login' || pathname.startsWith('/public')
 
   const isProtectedPath =
+    pathname.startsWith('/admin') ||
     pathname.startsWith('/citizen') ||
     pathname.startsWith('/researcher') ||
-    pathname.startsWith('/manager') ||
-    pathname.startsWith('/admin')
+    pathname.startsWith('/manager')
 
-  if (process.env.NODE_ENV === 'development' && isProtectedPath) {
+  if (isDev && isProtectedPath) {
     return NextResponse.next()
   }
 

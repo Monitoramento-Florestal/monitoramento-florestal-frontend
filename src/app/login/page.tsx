@@ -28,7 +28,7 @@ export default function LoginForm() {
       <div className="absolute left-6 top-6 sm:left-10 sm:top-10">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm text-rosewood hover:text-burgundy transition-colors font-segoe"
+          className="flex items-center gap-2 text-sm text-rosewood hover:text-burgundy transition-colors"
         >
           <svg
             width="16"
@@ -59,7 +59,7 @@ export default function LoginForm() {
           />
         </div>
 
-        <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.6px] font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] text-burgundy">
+        <h1 className="text-[24px] font-normal leading-8 text-burgundy">
           Entrar no Arbor
         </h1>
       </div>
@@ -69,7 +69,7 @@ export default function LoginForm() {
         className="w-full max-w-100 rounded-xl border border-rosewood/25 p-8 bg-[#F9F1EB]"
       >
         <div className="mb-6">
-          <label className="block text-xs font text-shadow-burgundy mb-2 uppercase tracking-wider">
+          <label className="block text-xs font-normal text-burgundy mb-2 uppercase tracking-wider">
             E-mail
           </label>
           <input
@@ -85,7 +85,7 @@ export default function LoginForm() {
         </div>
 
         <div className="mb-8">
-          <label className="block text-xs font text-burgundy mb-2 uppercase tracking-wider">
+          <label className="block text-xs font-normal text-burgundy mb-2 uppercase tracking-wider">
             Senha
           </label>
           <input
@@ -102,7 +102,7 @@ export default function LoginForm() {
 
         <Button
           type="submit"
-          className="w-full py-3 bg-sage text-white rounded- font hover:bg-sage transition-all shadow-sm mb-6"
+          className="w-full py-3 bg-sage text-white rounded-xl font-normal hover:bg-sage transition-all shadow-sm mb-6"
         >
           Entrar
         </Button>
@@ -117,7 +117,7 @@ export default function LoginForm() {
       <div className="mt-8">
         <p className="text-sm text-rosewood">
           Não tem conta?{' '}
-          <a href="#" className="font text-burgundy hover:underline">
+          <a href="#" className="font-normal text-burgundy hover:underline">
             Cadastre-se
           </a>
         </p>

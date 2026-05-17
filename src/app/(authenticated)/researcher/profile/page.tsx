@@ -1,20 +1,11 @@
-import { DashboardCard, DashboardPageHeader } from "@/components/features/dashboard";
+﻿import { DashboardProfilePage } from "@/components/features/dashboard";
 
 export default function ResearcherProfilePage() {
   return (
-    <>
-      <DashboardPageHeader
-        title="Perfil"
-        subtitle="Dados da conta de pesquisa e futuras acoes de sessao."
-      />
-      <div className="p-6">
-        <DashboardCard>
-          <h2 className="text-xl tracking-tight text-burgundy">Perfil</h2>
-          <p className="mt-2 text-sm leading-6 text-rosewood">
-            Scaffold reservado para a futura tela de perfil.
-          </p>
-        </DashboardCard>
-      </div>
-    </>
+    <DashboardProfilePage
+      defaultCpf="123.456.789-00"
+      defaultEmail="ana.lima@ufrpe.br"
+      defaultName="Ana Beatriz Lima"
+    />
   );
 }

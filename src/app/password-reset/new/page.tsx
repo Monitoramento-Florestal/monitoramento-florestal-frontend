@@ -61,7 +61,7 @@ export default function NewPasswordPage() {
           <Image src="/arbor-logo.png" alt="Arbor Logo" width={72} height={72}
             className="object-contain" priority />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-burgundy">Crie uma nova senha</h1>
+        <h1 className="text-2xl font-normal tracking-tight text-burgundy">Crie uma nova senha</h1>
         <p className="mt-2 max-w-xs text-sm text-rosewood leading-relaxed">
           A senha deve ter pelo menos 6 caracteres.
         </p>
@@ -72,7 +72,7 @@ export default function NewPasswordPage() {
 
         <div className="mb-5">
           <label htmlFor="password"
-            className="mb-2 block text-xs font-medium uppercase tracking-wider text-burgundy">
+            className="mb-2 block text-xs font-normal uppercase tracking-wider text-burgundy">
             Nova senha
           </label>
           <div className="relative">
@@ -90,7 +90,7 @@ export default function NewPasswordPage() {
 
         <div className="mb-7">
           <label htmlFor="confirmPassword"
-            className="mb-2 block text-xs font-medium uppercase tracking-wider text-burgundy">
+            className="mb-2 block text-xs font-normal uppercase tracking-wider text-burgundy">
             Confirmar nova senha
           </label>
           <div className="relative">
@@ -107,7 +107,7 @@ export default function NewPasswordPage() {
         </div>
 
         <Button type="submit" disabled={isSubmitting}
-          className="w-full rounded-xl bg-sage py-3 text-sm font-medium text-cream hover:opacity-90 disabled:opacity-50 transition-all shadow-sm">
+          className="w-full rounded-xl bg-sage py-3 text-sm font-normal text-cream hover:opacity-90 disabled:opacity-50 transition-all shadow-sm">
           {isSubmitting ? 'Salvando…' : 'Salvar nova senha'}
         </Button>
       </form>

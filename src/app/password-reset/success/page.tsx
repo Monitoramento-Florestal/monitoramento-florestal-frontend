@@ -33,7 +33,7 @@ export default function PasswordSuccessPage() {
           </svg>
         </div>
 
-        <h1 className="mb-2 text-xl font-semibold tracking-tight text-burgundy">
+        <h1 className="mb-2 text-xl font-normal tracking-tight text-burgundy">
           Senha redefinida
         </h1>
         <p className="mb-6 text-sm text-rosewood leading-relaxed">
@@ -41,7 +41,7 @@ export default function PasswordSuccessPage() {
         </p>
 
         <Button href="/login"
-          className="w-full rounded-xl bg-sage py-3 text-sm font-medium text-cream hover:opacity-90 transition-all shadow-sm">
+          className="w-full rounded-xl bg-sage py-3 text-sm font-normal text-cream hover:opacity-90 transition-all shadow-sm">
           Voltar para entrar
         </Button>
       </div>

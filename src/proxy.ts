@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function proxy(request: NextRequest) {
@@ -15,7 +15,11 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/researcher') ||
     pathname.startsWith('/manager')
 
-  if (isProtectedPath && !token && !isDev) {
+  if (isDev && isProtectedPath) {
+    return NextResponse.next()
+  }
+
+  if (isProtectedPath && !token) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -27,5 +31,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/public/:path*', '/admin/:path*', '/citizen/:path*', '/researcher/:path*', '/manager/:path*', '/login'],
+  matcher: ['/public/:path*', '/citizen/:path*', '/researcher/:path*', '/manager/:path*', '/admin/:path*', '/login'],
 }

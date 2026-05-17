@@ -1,19 +1,17 @@
-"use client";
+﻿"use client";
 
 import { LogOut, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { UserRole } from "@/constants/roles";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "./DashboardCard";
-import { DashboardRoleLayout } from "./DashboardRoleLayout";
+import { DashboardPageHeader } from "./DashboardPageHeader";
 
 interface DashboardProfilePageProps {
   defaultCpf: string;
   defaultEmail: string;
   defaultName: string;
-  role: UserRole;
 }
 
 function Field({
@@ -43,7 +41,6 @@ export function DashboardProfilePage({
   defaultCpf,
   defaultEmail,
   defaultName,
-  role,
 }: DashboardProfilePageProps) {
   const router = useRouter();
   const { clearAuth, user } = useAuthContext();
@@ -57,59 +54,60 @@ export function DashboardProfilePage({
   }
 
   return (
-    <DashboardRoleLayout
-      defaultUserName={defaultName}
-      headerTitle="Meu perfil"
-      headerSubtitle="Dados pessoais e seguranca"
-      role={role}
-    >
-      <div className="max-w-2xl space-y-6">
-        <DashboardCard className="bg-white/55 shadow-none">
-          <div className="mb-6">
-            <h2 className="text-base font-medium text-burgundy">Dados pessoais</h2>
-            <p className="mt-1 text-sm text-rosewood">
-              Atualize suas informacoes de contato.
-            </p>
-          </div>
-
-          <form className="space-y-5">
-            <Field label="Nome completo" defaultValue={userName} />
-            <Field label="E-mail" defaultValue={userEmail} type="email" />
-            <Field label="CPF" defaultValue={defaultCpf} />
-
-            <div className="flex justify-end">
-              <Button type="button" text="Salvar" icon={Save} iconSide="left" />
+    <>
+      <DashboardPageHeader
+        title="Meu perfil"
+        subtitle="Dados pessoais e seguranca"
+      />
+      <div className="p-6">
+        <div className="max-w-2xl space-y-6">
+          <DashboardCard className="bg-white/55 shadow-none">
+            <div className="mb-6">
+              <h2 className="text-base font-medium text-burgundy">Dados pessoais</h2>
+              <p className="mt-1 text-sm text-rosewood">
+                Atualize suas informacoes de contato.
+              </p>
             </div>
-          </form>
-        </DashboardCard>
 
-        <DashboardCard className="bg-white/55 shadow-none">
-          <div className="mb-6">
-            <h2 className="text-base font-medium text-burgundy">Alterar senha</h2>
-            <p className="mt-1 text-sm text-rosewood">
-              Recomendado a cada 90 dias.
-            </p>
-          </div>
+            <form className="space-y-5">
+              <Field label="Nome completo" defaultValue={userName} />
+              <Field label="E-mail" defaultValue={userEmail} type="email" />
+              <Field label="CPF" defaultValue={defaultCpf} />
 
-          <form className="space-y-5">
-            <Field label="Senha atual" type="password" />
-            <Field label="Nova senha" type="password" />
-            <Field label="Confirmar nova senha" type="password" />
+              <div className="flex justify-end">
+                <Button type="button" text="Salvar" icon={Save} iconSide="left" />
+              </div>
+            </form>
+          </DashboardCard>
 
-            <div className="flex flex-wrap justify-end gap-3">
-              <Button
-                type="button"
-                text="Sair da conta"
-                icon={LogOut}
-                iconSide="left"
-                variant="ghost"
-                onClick={handleLogout}
-              />
-              <Button type="button" text="Atualizar senha" variant="outline" />
+          <DashboardCard className="bg-white/55 shadow-none">
+            <div className="mb-6">
+              <h2 className="text-base font-medium text-burgundy">Alterar senha</h2>
+              <p className="mt-1 text-sm text-rosewood">
+                Recomendado a cada 90 dias.
+              </p>
             </div>
-          </form>
-        </DashboardCard>
+
+            <form className="space-y-5">
+              <Field label="Senha atual" type="password" />
+              <Field label="Nova senha" type="password" />
+              <Field label="Confirmar nova senha" type="password" />
+
+              <div className="flex flex-wrap justify-end gap-3">
+                <Button
+                  type="button"
+                  text="Sair da conta"
+                  icon={LogOut}
+                  iconSide="left"
+                  variant="ghost"
+                  onClick={handleLogout}
+                />
+                <Button type="button" text="Atualizar senha" variant="outline" />
+              </div>
+            </form>
+          </DashboardCard>
+        </div>
       </div>
-    </DashboardRoleLayout>
+    </>
   );
 }

@@ -1,6 +1,5 @@
-import type { LucideIcon } from "lucide-react";
+﻿import type { LucideIcon } from "lucide-react";
 import {
-  ClipboardList,
   LayoutDashboard,
   ListChecks,
   Map,
@@ -10,6 +9,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { APP_ROUTES } from "@/constants/routes";
 import { UserRole } from "@/constants/roles";
 
 export interface DashboardNavigationItem {
@@ -20,81 +20,110 @@ export interface DashboardNavigationItem {
   roles: UserRole[];
 }
 
-type DashboardNavigationTemplate = Omit<DashboardNavigationItem, "href"> & {
-  href: string | ((role: UserRole) => string);
-};
+type RoleHrefMap = Partial<Record<UserRole, string>>;
 
-const DASHBOARD_HOME_PATHS: Record<UserRole, string> = {
-  [UserRole.CITIZEN]: "/citizen",
-  [UserRole.RESEARCHER]: "/researcher",
-  [UserRole.MANAGER]: "/manager",
-  [UserRole.ADMIN]: "/admin",
-};
+interface DashboardNavigationDefinition
+  extends Omit<DashboardNavigationItem, "href"> {
+  href: RoleHrefMap;
+}
 
-const DASHBOARD_NAVIGATION: DashboardNavigationTemplate[] = [
+const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
   {
     key: "dashboard",
     label: "Dashboard",
-    href: (role) => DASHBOARD_HOME_PATHS[role],
+    href: {
+      [UserRole.CITIZEN]: APP_ROUTES.CITIZEN_HOME,
+      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_HOME,
+      [UserRole.MANAGER]: APP_ROUTES.MANAGER_HOME,
+      [UserRole.ADMIN]: APP_ROUTES.ADMIN_HOME,
+    },
     icon: LayoutDashboard,
     roles: [UserRole.CITIZEN, UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
   {
     key: "map",
     label: "Mapa",
-    href: "/map",
+    href: {
+      [UserRole.CITIZEN]: APP_ROUTES.CITIZEN_MAP,
+      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_MAP,
+      [UserRole.MANAGER]: APP_ROUTES.MANAGER_MAP,
+      [UserRole.ADMIN]: APP_ROUTES.ADMIN_MAP,
+    },
     icon: Map,
     roles: [UserRole.CITIZEN, UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
   {
     key: "register-tree",
     label: "Registrar arvore",
-    href: "/trees/new",
+    href: {
+      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_TREES_NEW,
+      [UserRole.MANAGER]: APP_ROUTES.MANAGER_TREES_NEW,
+      [UserRole.ADMIN]: APP_ROUTES.ADMIN_TREES_NEW,
+    },
     icon: PlusCircle,
     roles: [UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
   {
     key: "approvals",
     label: "Fila de aprovacao",
-    href: "/approvals",
+    href: {
+      [UserRole.MANAGER]: APP_ROUTES.MANAGER_APPROVALS,
+      [UserRole.ADMIN]: APP_ROUTES.ADMIN_APPROVALS,
+    },
     icon: ListChecks,
     roles: [UserRole.MANAGER, UserRole.ADMIN],
   },
   {
+    key: "tree-management",
+    label: "Gerenciamento de arvores",
+    href: {
+      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_TREES,
+    },
+    icon: Trees,
+    roles: [UserRole.RESEARCHER],
+  },
+  {
     key: "management",
     label: "Gerenciamento",
-    href: "/management",
+    href: {
+      [UserRole.MANAGER]: APP_ROUTES.MANAGER_MANAGEMENT,
+      [UserRole.ADMIN]: APP_ROUTES.ADMIN_MANAGEMENT,
+    },
     icon: Trees,
-    roles: [UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
+    roles: [UserRole.MANAGER, UserRole.ADMIN],
   },
   {
     key: "users",
     label: "Usuarios",
-    href: "/users",
+    href: {
+      [UserRole.MANAGER]: APP_ROUTES.MANAGER_USERS,
+      [UserRole.ADMIN]: APP_ROUTES.ADMIN_USERS,
+    },
     icon: Users,
     roles: [UserRole.MANAGER, UserRole.ADMIN],
   },
   {
-    key: "records",
-    label: "Registros",
-    href: "/records",
-    icon: ClipboardList,
-    roles: [UserRole.ADMIN],
-  },
-  {
     key: "profile",
     label: "Perfil",
-    href: (role) => `${DASHBOARD_HOME_PATHS[role]}/profile`,
+    href: {
+      [UserRole.CITIZEN]: APP_ROUTES.CITIZEN_PROFILE,
+      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_PROFILE,
+      [UserRole.MANAGER]: APP_ROUTES.MANAGER_PROFILE,
+      [UserRole.ADMIN]: APP_ROUTES.ADMIN_PROFILE,
+    },
     icon: UserCircle,
     roles: [UserRole.CITIZEN, UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
 ];
 
 export function getDashboardNavigation(role: UserRole) {
-  return DASHBOARD_NAVIGATION
-    .filter((item) => item.roles.includes(role))
-    .map((item) => ({
-      ...item,
-      href: typeof item.href === "function" ? item.href(role) : item.href,
-    }));
+  return DASHBOARD_NAVIGATION.flatMap((item) => {
+    const href = item.href[role];
+
+    if (!item.roles.includes(role) || !href) {
+      return [];
+    }
+
+    return [{ ...item, href }];
+  });
 }

@@ -83,11 +83,8 @@ export function ApprovalsScreen({
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]">
           <DashboardCard className="grain">
             <p className="text-[10px] uppercase tracking-[0.2em] text-rosewood/80">
-              Records management
+              Fluxo de revisao
             </p>
-            <h2 className="mt-2 text-[1.45rem] tracking-tight text-burgundy">
-              Fila de revisao de registros
-            </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-rosewood">
               Revise medicoes e submissoes pendentes sem misturar esta rotina com
               o gerenciamento consolidado das arvores do sistema.

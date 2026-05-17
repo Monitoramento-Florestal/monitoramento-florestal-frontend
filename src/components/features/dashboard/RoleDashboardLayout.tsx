@@ -7,15 +7,12 @@ import { usePathname } from "next/navigation";
 import { UserRole } from "@/constants/roles";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { getDashboardNavigation } from "@/utils/dashboard";
-import { DashboardPageHeader } from "./DashboardPageHeader";
 import { DashboardShell } from "./DashboardShell";
 import { DashboardSidebar } from "./DashboardSidebar";
 
 interface RoleDashboardLayoutProps {
   children: ReactNode;
   role: UserRole;
-  subtitle: string;
-  title: string;
 }
 
 const ROLE_FALLBACK_NAMES: Record<UserRole, string> = {
@@ -28,8 +25,6 @@ const ROLE_FALLBACK_NAMES: Record<UserRole, string> = {
 export function RoleDashboardLayout({
   children,
   role,
-  subtitle,
-  title,
 }: RoleDashboardLayoutProps) {
   const pathname = usePathname();
   const { clearAuth, user } = useAuthContext();
@@ -46,7 +41,6 @@ export function RoleDashboardLayout({
           userRole={role}
         />
       }
-      header={<DashboardPageHeader title={title} subtitle={subtitle} />}
     >
       {children}
     </DashboardShell>

@@ -26,7 +26,7 @@ export function DashboardShell({
 
         <div className="min-w-0">
           {header}
-          <main className={cn("p-6", contentClassName)}>
+          <main className={cn("min-w-0", contentClassName)}>
             {children}
           </main>
         </div>

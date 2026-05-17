@@ -8,13 +8,5 @@ export default function ResearcherDashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  return (
-    <RoleDashboardLayout
-      role={UserRole.RESEARCHER}
-      title="Dashboard do pesquisador"
-      subtitle="Base de pesquisa pronta para registro, consulta e acompanhamento do acervo."
-    >
-      {children}
-    </RoleDashboardLayout>
-  );
+  return <RoleDashboardLayout role={UserRole.RESEARCHER}>{children}</RoleDashboardLayout>;
 }

@@ -4,16 +4,18 @@ import type { NextRequest } from 'next/server'
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('forest_token')?.value
   const pathname = request.nextUrl.pathname
+  const isDev = process.env.NODE_ENV === 'development'
 
   const isPublicPath =
     pathname === '/' || pathname === '/login' || pathname.startsWith('/public')
 
   const isProtectedPath =
+    pathname.startsWith('/admin') ||
     pathname.startsWith('/citizen') ||
     pathname.startsWith('/researcher') ||
     pathname.startsWith('/manager')
 
-  if (isProtectedPath && !token) {
+  if (isProtectedPath && !token && !isDev) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -25,5 +27,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/public/:path*', '/citizen/:path*', '/researcher/:path*', '/manager/:path*', '/login'],
+  matcher: ['/public/:path*', '/admin/:path*', '/citizen/:path*', '/researcher/:path*', '/manager/:path*', '/login'],
 }

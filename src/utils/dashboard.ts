@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  ClipboardList,
   LayoutDashboard,
   ListChecks,
   Map,
@@ -19,11 +20,22 @@ export interface DashboardNavigationItem {
   roles: UserRole[];
 }
 
-const DASHBOARD_NAVIGATION: DashboardNavigationItem[] = [
+type DashboardNavigationTemplate = Omit<DashboardNavigationItem, "href"> & {
+  href: string | ((role: UserRole) => string);
+};
+
+const DASHBOARD_HOME_PATHS: Record<UserRole, string> = {
+  [UserRole.CITIZEN]: "/citizen",
+  [UserRole.RESEARCHER]: "/researcher",
+  [UserRole.MANAGER]: "/manager",
+  [UserRole.ADMIN]: "/admin",
+};
+
+const DASHBOARD_NAVIGATION: DashboardNavigationTemplate[] = [
   {
     key: "dashboard",
     label: "Dashboard",
-    href: "/dashboard",
+    href: (role) => DASHBOARD_HOME_PATHS[role],
     icon: LayoutDashboard,
     roles: [UserRole.CITIZEN, UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
@@ -53,7 +65,7 @@ const DASHBOARD_NAVIGATION: DashboardNavigationItem[] = [
     label: "Gerenciamento",
     href: "/management",
     icon: Trees,
-    roles: [UserRole.MANAGER, UserRole.ADMIN],
+    roles: [UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
   {
     key: "users",
@@ -63,14 +75,26 @@ const DASHBOARD_NAVIGATION: DashboardNavigationItem[] = [
     roles: [UserRole.MANAGER, UserRole.ADMIN],
   },
   {
+    key: "records",
+    label: "Registros",
+    href: "/records",
+    icon: ClipboardList,
+    roles: [UserRole.ADMIN],
+  },
+  {
     key: "profile",
     label: "Perfil",
-    href: "/profile",
+    href: (role) => `${DASHBOARD_HOME_PATHS[role]}/profile`,
     icon: UserCircle,
     roles: [UserRole.CITIZEN, UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
 ];
 
 export function getDashboardNavigation(role: UserRole) {
-  return DASHBOARD_NAVIGATION.filter((item) => item.roles.includes(role));
+  return DASHBOARD_NAVIGATION
+    .filter((item) => item.roles.includes(role))
+    .map((item) => ({
+      ...item,
+      href: typeof item.href === "function" ? item.href(role) : item.href,
+    }));
 }

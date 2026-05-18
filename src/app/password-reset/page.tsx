@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
           <Image src="/arbor-logo.png" alt="Arbor Logo" width={72} height={72}
             className="object-contain" priority />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-burgundy">
+        <h1 className="text-2xl font-normal tracking-tight text-burgundy">
           Recuperar senha
         </h1>
         <p className="mt-2 max-w-xs text-sm text-rosewood leading-relaxed">
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
       >
         <div className="mb-6">
           <label htmlFor="email"
-            className="mb-2 block text-xs font-medium uppercase tracking-wider text-burgundy">
+            className="mb-2 block text-xs font-normal uppercase tracking-wider text-burgundy">
             E-mail
           </label>
           <input
@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <Button type="submit" disabled={isSubmitting}
-          className="w-full rounded-xl bg-sage py-3 text-sm font-medium text-cream hover:opacity-90 disabled:opacity-50 transition-all shadow-sm">
+          className="w-full rounded-xl bg-sage py-3 text-sm font-normal text-cream hover:opacity-90 disabled:opacity-50 transition-all shadow-sm">
           {isSubmitting ? 'Enviando…' : 'Enviar código'}
         </Button>
       </form>

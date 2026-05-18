@@ -16,12 +16,11 @@ export default function VerifyCodePage() {
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''))
   const [countdown, setCountdown] = useState(RESEND_SECONDS)
-  const [canResend, setCanResend] = useState(false)
   const [showToast, setShowToast] = useState(true)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
-    if (countdown <= 0) { setCanResend(true); return }
+    if (countdown <= 0) return
     const timer = setTimeout(() => setCountdown((c) => c - 1), 1000)
     return () => clearTimeout(timer)
   }, [countdown])
@@ -57,7 +56,6 @@ export default function VerifyCodePage() {
     if (!canResend) return
     setDigits(Array(CODE_LENGTH).fill(''))
     setCountdown(RESEND_SECONDS)
-    setCanResend(false)
     setShowToast(true)
     inputRefs.current[0]?.focus()
   }
@@ -69,6 +67,7 @@ export default function VerifyCodePage() {
   }
 
   const isComplete = digits.every((d) => d !== '')
+  const canResend = countdown <= 0
   const displayEmail = email || 'seu e‑mail'
 
   return (
@@ -90,10 +89,10 @@ export default function VerifyCodePage() {
           <Image src="/arbor-logo.png" alt="Arbor Logo" width={72} height={72}
             className="object-contain" priority />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-burgundy">Verifique seu e‑mail</h1>
+        <h1 className="text-2xl font-normal tracking-tight text-burgundy">Verifique seu e‑mail</h1>
         <p className="mt-2 max-w-xs text-sm text-rosewood leading-relaxed">
           Enviamos um código de 6 dígitos para{' '}
-          <span className="font-medium text-burgundy">{displayEmail}</span>.
+          <span className="font-normal text-burgundy">{displayEmail}</span>.
         </p>
       </div>
 
@@ -110,7 +109,7 @@ export default function VerifyCodePage() {
             </svg>
           </div>
           <div className="text-center">
-            <p className="text-xs font-medium uppercase tracking-wider text-burgundy">Código de verificação</p>
+            <p className="text-xs font-normal uppercase tracking-wider text-burgundy">Código de verificação</p>
             <p className="mt-1 text-xs text-rosewood/70">Digite os 6 dígitos enviados</p>
           </div>
         </div>
@@ -123,21 +122,21 @@ export default function VerifyCodePage() {
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
               onPaste={handlePaste}
-              className="h-12 w-11 rounded-lg border border-rosewood/35 bg-cream text-center text-lg font-medium text-burgundy outline-none focus:border-sage focus:ring-1 focus:ring-sage transition-all caret-sage"
+              className="h-12 w-11 rounded-lg border border-rosewood/35 bg-cream text-center text-lg font-normal text-burgundy outline-none focus:border-sage focus:ring-1 focus:ring-sage transition-all caret-sage"
               aria-label={`Dígito ${i + 1} do código`}
             />
           ))}
         </div>
 
         <Button type="submit" disabled={!isComplete}
-          className="w-full rounded-xl bg-sage py-3 text-sm font-medium text-cream hover:opacity-90 disabled:opacity-50 transition-all shadow-sm">
+          className="w-full rounded-xl bg-sage py-3 text-sm font-normal text-cream hover:opacity-90 disabled:opacity-50 transition-all shadow-sm">
           Verificar código
         </Button>
 
         <div className="mt-4 text-center">
           {canResend ? (
             <button type="button" onClick={handleResend}
-              className="text-sm text-sage hover:underline font-medium transition-colors">
+              className="text-sm text-sage hover:underline font-normal transition-colors">
               Reenviar código
             </button>
           ) : (
@@ -149,7 +148,7 @@ export default function VerifyCodePage() {
       <div className={`fixed bottom-6 right-6 max-w-xs rounded-xl border border-rosewood/20 bg-[#F9F1EB] p-4 shadow-overlay transition-all duration-500 ${
         showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
       }`} role="status" aria-live="polite">
-        <p className="text-xs font-semibold text-burgundy mb-1">Verifique seu e‑mail</p>
+        <p className="text-xs font-normal text-burgundy mb-1">Verifique seu e‑mail</p>
         <p className="text-xs text-rosewood leading-relaxed">
           Se este e‑mail estiver cadastrado, você receberá um código de verificação em instantes.
         </p>

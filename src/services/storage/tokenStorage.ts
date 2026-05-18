@@ -1,11 +1,11 @@
-const TOKEN_KEY = 'forest_token'
+import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY } from '@/constants/storage'
 
 export function getToken() {
   if (typeof window === 'undefined') {
     return null
   }
 
-  return localStorage.getItem(TOKEN_KEY)
+  return localStorage.getItem(AUTH_TOKEN_KEY)
 }
 
 export function setToken(token: string) {
@@ -13,7 +13,31 @@ export function setToken(token: string) {
     return
   }
 
-  localStorage.setItem(TOKEN_KEY, token)
+  localStorage.setItem(AUTH_TOKEN_KEY, token)
+}
+
+export function getRefreshToken() {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  return localStorage.getItem(REFRESH_TOKEN_KEY)
+}
+
+export function setRefreshToken(token: string) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  localStorage.setItem(REFRESH_TOKEN_KEY, token)
+}
+
+export function setAuthTokens(payload: { token: string; refreshToken?: string | null }) {
+  setToken(payload.token)
+
+  if (payload.refreshToken) {
+    setRefreshToken(payload.refreshToken)
+  }
 }
 
 export function clearToken() {
@@ -21,5 +45,18 @@ export function clearToken() {
     return
   }
 
-  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(AUTH_TOKEN_KEY)
+}
+
+export function clearRefreshToken() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  localStorage.removeItem(REFRESH_TOKEN_KEY)
+}
+
+export function clearAuthTokens() {
+  clearToken()
+  clearRefreshToken()
 }

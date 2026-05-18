@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { ArrowLeft, Plus } from "lucide-react";
 
 import { TREE_STATUS_COLORS } from "@/components/features/map/mapIcons";
+import { TreeDetailPanel } from "@/components/features/map/treeDetail/TreeDetailPanel";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -53,7 +54,6 @@ export default function MapPage() {
       <MapDefaultRender
         trees={mockTrees}
         selectedTreeId={selectedTree?.id ?? null}
-        focusTreeId={selectedTree?.id ?? null}
         onSelect={setSelectedTree}
         className="absolute inset-0"
       />
@@ -85,6 +85,8 @@ export default function MapPage() {
           Registrar árvore
         </Button>
       ) : null}
+
+      <TreeDetailPanel tree={selectedTree} onClose={() => setSelectedTree(null)} />
     </section>
   );
 }

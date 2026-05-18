@@ -6,23 +6,14 @@ import type { DashboardNavigationItem } from "@/utils/dashboard";
 import { cn } from "@/utils/cn";
 
 interface DashboardSidebarItemProps {
-  currentPath: string;
+  active: boolean;
   item: DashboardNavigationItem;
 }
 
-function isActivePath(currentPath: string, href: string) {
-  if (currentPath === href) {
-    return true;
-  }
-
-  return href !== "/" && currentPath.startsWith(`${href}/`);
-}
-
 export function DashboardSidebarItem({
-  currentPath,
+  active,
   item,
 }: DashboardSidebarItemProps) {
-  const active = isActivePath(currentPath, item.href);
   const Icon = item.icon;
 
   return (

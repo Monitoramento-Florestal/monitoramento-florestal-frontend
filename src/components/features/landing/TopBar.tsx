@@ -21,7 +21,7 @@ export function Topbar() {
 
       <div className="flex items-center gap-2 sm:gap-3">
         <Button text="Entrar"          variant="ghost"   size="md" href="/login" />
-        <Button text="Visualizar mapa" variant="primary" size="md" href="/public/mapa" icon={ArrowRight} />
+        <Button text="Visualizar mapa" variant="primary" size="md" href="/map" icon={ArrowRight} />
       </div>
 
     </header>

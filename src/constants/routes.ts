@@ -30,3 +30,43 @@ export const APP_ROUTES = {
   ADMIN_USERS: '/admin/users',
   ADMIN_MAP: '/admin/map',
 } as const
+
+export function getTreeHistoryRoute(role: 'researcher' | 'manager' | 'admin', treeId: string) {
+  if (role === 'researcher') {
+    return `/researcher/trees/${treeId}/history`
+  }
+
+  if (role === 'manager') {
+    return `/manager/management/${treeId}/history`
+  }
+
+  return `/admin/management/${treeId}/history`
+}
+
+export function getTreeRecordCreateRoute(role: 'researcher' | 'manager' | 'admin', treeId: string) {
+  if (role === 'researcher') {
+    return `/researcher/trees/${treeId}/records/new`
+  }
+
+  if (role === 'manager') {
+    return `/manager/management/${treeId}/records/new`
+  }
+
+  return `/admin/management/${treeId}/records/new`
+}
+
+export function getTreeRecordEditRoute(
+  role: 'researcher' | 'manager' | 'admin',
+  treeId: string,
+  recordId: string
+) {
+  if (role === 'researcher') {
+    return `/researcher/trees/${treeId}/history/${recordId}/edit`
+  }
+
+  if (role === 'manager') {
+    return `/manager/management/${treeId}/history/${recordId}/edit`
+  }
+
+  return `/admin/management/${treeId}/history/${recordId}/edit`
+}

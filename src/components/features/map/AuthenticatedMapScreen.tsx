@@ -1,0 +1,75 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import { Plus } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { DashboardCard } from "@/components/features/dashboard";
+import { getTreeHistoryRoute } from "@/constants/routes";
+import { UserRole } from "@/constants/roles";
+import { mockTrees } from "@/types/mockTrees";
+import type { Tree } from "@/types/trees";
+import { TreeDetailPanel } from "./treeDetail/TreeDetailPanel";
+import { TREE_STATUS_COLORS } from "./mapIcons";
+
+const MapView = dynamic(() => import("@/components/features/map/MapView"), {
+  ssr: false,
+  loading: () => <p className="p-6 text-rosewood">Carregando mapa...</p>,
+});
+
+interface AuthenticatedMapScreenProps {
+  registerHref: string;
+  role: UserRole.RESEARCHER | UserRole.MANAGER | UserRole.ADMIN;
+}
+
+export function AuthenticatedMapScreen({
+  registerHref,
+  role,
+}: AuthenticatedMapScreenProps) {
+  const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
+  const historyHref = useMemo(
+    () => (selectedTree ? getTreeHistoryRoute(role, selectedTree.id) : undefined),
+    [role, selectedTree]
+  );
+
+  return (
+    <div className="space-y-4">
+      <DashboardCard className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+        <div className="flex flex-wrap gap-4 text-xs text-burgundy/80">
+          <Legend color={TREE_STATUS_COLORS.saudavel.fill} label="Saudavel" />
+          <Legend color={TREE_STATUS_COLORS.injuria.fill} label="Com injuria" />
+          <Legend color={TREE_STATUS_COLORS.cortada.fill} label="Cortada" />
+        </div>
+
+        <Button href={registerHref} icon={Plus} iconSide="left" variant="outline">
+          Registrar arvore
+        </Button>
+      </DashboardCard>
+
+      <DashboardCard className="relative h-[calc(100dvh-14rem)] overflow-hidden p-0">
+        <MapView
+          trees={mockTrees}
+          selectedTreeId={selectedTree?.id ?? null}
+          onSelect={setSelectedTree}
+          className="absolute inset-0"
+        />
+      </DashboardCard>
+
+      <TreeDetailPanel
+        historyHref={historyHref}
+        tree={selectedTree}
+        onClose={() => setSelectedTree(null)}
+      />
+    </div>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="size-2 rounded-full" style={{ backgroundColor: color }} />
+      <span>{label}</span>
+    </div>
+  );
+}

@@ -6,11 +6,12 @@ import { DashboardCard } from "@/components/features/dashboard";
 import {
   approveRecord,
   filterApprovalRecords,
+  getApprovalRecordName,
   getPendingApprovalRecords,
   rejectRecord,
   type ApprovalSearchField,
 } from "@/utils/approvals";
-import type { Tree } from "@/types/trees";
+import type { TreeApprovalRequest } from "@/types/trees";
 import { ApprovalRecordCard } from "./ApprovalRecordCard";
 import { ApprovalsEmptyState } from "./ApprovalsEmptyState";
 import { ApprovalsFilters } from "./ApprovalsFilters";
@@ -18,7 +19,7 @@ import { ApprovalsLoadingState } from "./ApprovalsLoadingState";
 import { RejectReasonDialog } from "./RejectReasonDialog";
 
 interface ApprovalsScreenProps {
-  initialRecords: Tree[];
+  initialRecords: TreeApprovalRequest[];
   loading?: boolean;
 }
 
@@ -26,7 +27,7 @@ export function ApprovalsScreen({
   initialRecords,
   loading = false,
 }: ApprovalsScreenProps) {
-  const [records, setRecords] = useState<Tree[]>(() =>
+  const [records, setRecords] = useState<TreeApprovalRequest[]>(() =>
     getPendingApprovalRecords(initialRecords)
   );
   const [query, setQuery] = useState("");
@@ -97,7 +98,7 @@ export function ApprovalsScreen({
             {filteredRecords.map((record) => (
               <ApprovalRecordCard
                 key={record.id}
-                tree={record}
+                request={record}
                 onApprove={handleApprove}
                 onReject={handleStartReject}
               />
@@ -108,7 +109,7 @@ export function ApprovalsScreen({
 
       <RejectReasonDialog
         open={Boolean(rejectTarget)}
-        treeName={rejectTarget?.nomeComum}
+        treeName={rejectTarget ? getApprovalRecordName(rejectTarget) : undefined}
         reason={rejectReason}
         errorMessage={rejectError}
         onChangeReason={setRejectReason}

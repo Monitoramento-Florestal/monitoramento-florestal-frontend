@@ -9,8 +9,16 @@ import {
   type ReactNode,
 } from 'react'
 import { setApiUnauthorizedHandler } from '@/services/api/api'
-import { clearAuthTokens, getToken, setAuthTokens } from '@/services/storage/tokenStorage'
-import { clearStoredUser, getStoredUser, setStoredUser } from '@/services/storage/userStorage'
+import {
+  clearAuthTokens,
+  getToken,
+  setAuthTokens,
+} from '@/services/storage/tokenStorage'
+import {
+  clearStoredUser,
+  getStoredUser,
+  setStoredUser,
+} from '@/services/storage/userStorage'
 import type { User } from '@/types/auth'
 
 interface AuthContextValue {
@@ -30,21 +38,8 @@ const AuthContext = createContext<AuthContextValue>({
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-
-  useEffect(() => {
-    const storedToken = getToken()
-    const storedUser = getStoredUser()
-
-    if (storedToken) {
-      setToken(storedToken)
-    }
-
-    if (storedUser) {
-      setUser(storedUser)
-    }
-  }, [])
+  const [token, setToken] = useState<string | null>(() => getToken())
+  const [user, setUser] = useState<User | null>(() => getStoredUser())
 
   useEffect(() => {
     setApiUnauthorizedHandler(() => {

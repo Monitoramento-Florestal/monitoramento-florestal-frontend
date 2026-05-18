@@ -100,7 +100,7 @@ export default function ResearcherDashboardPage() {
           ))}
         </section>
 
-        <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="mt-6 grid gap-4">
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.2em] text-rosewood/70">
               Meus ultimos registros
@@ -128,25 +128,6 @@ export default function ResearcherDashboardPage() {
               ))}
             </div>
           </div>
-
-          <DashboardCard className="bg-white/55 shadow-none">
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-rosewood/70">
-              Atalhos
-            </p>
-            <div className="mt-4 grid gap-2">
-              {QUICK_ACTIONS.map(({ key, label, href, icon: Icon }) => (
-                <Button
-                  key={key}
-                  text={label}
-                  icon={Icon}
-                  iconSide="left"
-                  href={href}
-                  variant="outline"
-                  className="justify-start"
-                />
-              ))}
-            </div>
-          </DashboardCard>
         </section>
 
         <section className="mt-6 flex flex-wrap gap-3">

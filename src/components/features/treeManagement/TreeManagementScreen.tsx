@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 
 import { DashboardCard } from '@/components/features/dashboard'
 import { UserRole } from '@/constants/roles'
+import { getTreeHistoryRoute } from '@/constants/routes'
 import { TreeDetailPanel } from '@/components/features/map/treeDetail/TreeDetailPanel'
 import type { Tree } from '@/types/trees'
 import {
@@ -38,6 +39,10 @@ export function TreeManagementScreen({
   )
   const policy = useMemo(() => getTreeManagementPolicy(role), [role])
   const hasFilters = query.trim().length > 0 || status !== 'all'
+  const historyHref =
+    selectedTree && role !== UserRole.CITIZEN
+      ? getTreeHistoryRoute(role as UserRole.RESEARCHER | UserRole.MANAGER | UserRole.ADMIN, selectedTree.id)
+      : undefined
 
   return (
     <>
@@ -70,6 +75,7 @@ export function TreeManagementScreen({
       </div>
 
       <TreeDetailPanel
+        historyHref={historyHref}
         tree={selectedTree}
         onClose={() => setSelectedTree(null)}
       />

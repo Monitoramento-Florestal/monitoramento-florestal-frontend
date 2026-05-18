@@ -4,29 +4,34 @@ import { Check, Image as ImageIcon, X } from "lucide-react";
 import { DashboardCard } from "@/components/features/dashboard";
 import { Button } from "@/components/ui/button";
 import {
+  getApprovalRecordCode,
   getApprovalRecordImage,
   getApprovalRecordMetrics,
+  getApprovalRecordName,
+  getApprovalRecordSpecies,
   getApprovalRecordStatusLabel,
+  getApprovalRecordTypeLabel,
 } from "@/utils/approvals";
 import { formatDate } from "@/utils/format";
 import { TREE_STATUS_COLORS } from "@/components/features/map/mapIcons";
-import type { Tree } from "@/types/trees";
+import type { TreeApprovalRequest } from "@/types/trees";
 
 interface ApprovalRecordCardProps {
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
-  tree: Tree;
+  request: TreeApprovalRequest;
 }
 
 export function ApprovalRecordCard({
   onApprove,
   onReject,
-  tree,
+  request,
 }: ApprovalRecordCardProps) {
-  const image = getApprovalRecordImage(tree);
-  const metrics = getApprovalRecordMetrics(tree);
-  const statusColor = TREE_STATUS_COLORS[tree.status];
-  const statusLabel = getApprovalRecordStatusLabel(tree);
+  const image = getApprovalRecordImage(request);
+  const metrics = getApprovalRecordMetrics(request);
+  const statusColor = TREE_STATUS_COLORS[request.record.status];
+  const statusLabel = getApprovalRecordStatusLabel(request);
+  const typeLabel = getApprovalRecordTypeLabel(request);
 
   return (
     <DashboardCard className="grain px-5 py-5">
@@ -35,7 +40,7 @@ export function ApprovalRecordCard({
           {image ? (
             <Image
               src={image}
-              alt={`Registro de ${tree.nomeComum}`}
+              alt={`Registro de ${getApprovalRecordName(request)}`}
               fill
               className="object-cover"
             />
@@ -50,26 +55,31 @@ export function ApprovalRecordCard({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-[0.18em] text-rosewood/80">
-                {tree.codigo}
+                {getApprovalRecordCode(request)}
               </p>
               <h3 className="mt-1 text-lg tracking-tight text-burgundy">
-                {tree.nomeComum}
+                {getApprovalRecordName(request)}
               </h3>
               <p className="mt-1 text-sm italic text-rosewood">
-                {tree.especie}
+                {getApprovalRecordSpecies(request)}
               </p>
             </div>
 
-            <span
-              className="inline-flex w-fit rounded-full border px-2.5 py-1 text-xs"
-              style={{
-                borderColor: `${statusColor.stroke}35`,
-                backgroundColor: `${statusColor.fill}18`,
-                color: statusColor.stroke,
-              }}
-            >
-              {statusLabel}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex w-fit rounded-full border border-rosewood/12 bg-card px-2.5 py-1 text-xs text-rosewood">
+                {typeLabel}
+              </span>
+              <span
+                className="inline-flex w-fit rounded-full border px-2.5 py-1 text-xs"
+                style={{
+                  borderColor: `${statusColor.stroke}35`,
+                  backgroundColor: `${statusColor.fill}18`,
+                  color: statusColor.stroke,
+                }}
+              >
+                {statusLabel}
+              </span>
+            </div>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -87,8 +97,8 @@ export function ApprovalRecordCard({
 
           <p className="mt-4 text-sm leading-6 text-rosewood">
             Registrado por{" "}
-            <span className="text-burgundy">{tree.registro.registradoPor}</span>{" "}
-            em {formatDate(tree.registro.registradoEm)}.
+            <span className="text-burgundy">{request.submittedBy}</span>{" "}
+            em {formatDate(request.submittedAt)}.
           </p>
         </div>
 
@@ -98,7 +108,7 @@ export function ApprovalRecordCard({
             icon={Check}
             iconSide="left"
             className="flex-1"
-            onClick={() => onApprove(tree.id)}
+            onClick={() => onApprove(request.id)}
           >
             Aprovar
           </Button>
@@ -108,7 +118,7 @@ export function ApprovalRecordCard({
             icon={X}
             iconSide="left"
             className="flex-1 border-burgundy/30 text-burgundy hover:bg-burgundy/5"
-            onClick={() => onReject(tree.id)}
+            onClick={() => onReject(request.id)}
           >
             Rejeitar
           </Button>

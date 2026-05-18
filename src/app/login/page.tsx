@@ -117,7 +117,7 @@ export default function LoginForm() {
       <div className="mt-8">
         <p className="text-sm text-rosewood">
           Não tem conta?{' '}
-          <a href="#" className="font-normal text-burgundy hover:underline">
+          <a href="/cadastro" className="font-normal text-burgundy hover:underline">
             Cadastre-se
           </a>
         </p>

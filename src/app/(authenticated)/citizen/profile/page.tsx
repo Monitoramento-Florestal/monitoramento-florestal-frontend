@@ -1,20 +1,23 @@
-import { DashboardCard, DashboardPageHeader } from "@/components/features/dashboard";
+import {
+  DashboardCard,
+  DashboardPageHeader,
+} from '@/components/features/dashboard'
 
 export default function CitizenProfilePage() {
   return (
     <>
       <DashboardPageHeader
         title="Perfil"
-        subtitle="Dados da conta do cidadao e futuras acoes de sessao."
+        subtitle="Dados da conta do cidadão e futuras ações de sessão."
       />
       <div className="p-6">
         <DashboardCard>
           <h2 className="text-xl tracking-tight text-burgundy">Perfil</h2>
           <p className="mt-2 text-sm leading-6 text-rosewood">
-            Scaffold reservado para a futura tela de perfil.
+            Scaffold reservado para a futura tela de perfil do cidadão.
           </p>
         </DashboardCard>
       </div>
     </>
-  );
+  )
 }

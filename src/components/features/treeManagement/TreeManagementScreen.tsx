@@ -1,31 +1,26 @@
-"use client";
+'use client'
 
-import { useMemo, useState } from "react";
+import { useMemo, useState } from 'react'
 
-import { DashboardCard } from "@/components/features/dashboard";
-import { UserRole } from "@/constants/roles";
-import { TreeDetailPanel } from "@/components/features/map/treeDetail/TreeDetailPanel";
-import type { Tree } from "@/types/trees";
+import { DashboardCard } from '@/components/features/dashboard'
+import { UserRole } from '@/constants/roles'
+import { TreeDetailPanel } from '@/components/features/map/treeDetail/TreeDetailPanel'
+import type { Tree } from '@/types/trees'
 import {
   filterManagedTrees,
   getTreeManagementPolicy,
   TREE_MANAGEMENT_FILTERS,
   type TreeManagementStatusFilter,
-} from "@/utils/treeManagement";
-import { TreeManagementEmptyState } from "./TreeManagementEmptyState";
-import { TreeManagementFilters } from "./TreeManagementFilters";
-import { TreeManagementLoadingState } from "./TreeManagementLoadingState";
-import { TreeManagementTable } from "./TreeManagementTable";
+} from '@/utils/treeManagement'
+import { TreeManagementEmptyState } from './TreeManagementEmptyState'
+import { TreeManagementFilters } from './TreeManagementFilters'
+import { TreeManagementLoadingState } from './TreeManagementLoadingState'
+import { TreeManagementTable } from './TreeManagementTable'
 
 interface TreeManagementScreenProps {
-  initialTrees: Tree[];
-  loading?: boolean;
-  role: UserRole;
-}
-
-interface TreeManagementFeedback {
-  description: string;
-  title: string;
+  initialTrees: Tree[]
+  loading?: boolean
+  role: UserRole
 }
 
 export function TreeManagementScreen({
@@ -33,17 +28,16 @@ export function TreeManagementScreen({
   loading = false,
   role,
 }: TreeManagementScreenProps) {
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<TreeManagementStatusFilter>("all");
-  const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
-  const [feedback, setFeedback] = useState<TreeManagementFeedback | null>(null);
+  const [query, setQuery] = useState('')
+  const [status, setStatus] = useState<TreeManagementStatusFilter>('all')
+  const [selectedTree, setSelectedTree] = useState<Tree | null>(null)
 
   const filteredTrees = useMemo(
     () => filterManagedTrees(initialTrees, query, status),
     [initialTrees, query, status]
-  );
-  const policy = useMemo(() => getTreeManagementPolicy(role), [role]);
-  const hasFilters = query.trim().length > 0 || status !== "all";
+  )
+  const policy = useMemo(() => getTreeManagementPolicy(role), [role])
+  const hasFilters = query.trim().length > 0 || status !== 'all'
 
   return (
     <>
@@ -80,5 +74,5 @@ export function TreeManagementScreen({
         onClose={() => setSelectedTree(null)}
       />
     </>
-  );
+  )
 }

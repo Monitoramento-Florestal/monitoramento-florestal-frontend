@@ -1,12 +1,22 @@
-import { DashboardCard } from "@/components/features/dashboard";
+import { DashboardPageHeader } from "@/components/features/dashboard";
+import { TreeManagementScreen } from "@/components/features/treeManagement/TreeManagementScreen";
+import { UserRole } from "@/constants/roles";
+import { mockTrees } from "@/types/mockTrees";
+import { getTreeManagementSummary } from "@/utils/treeManagement";
 
 export default function AdminManagementPage() {
   return (
-    <DashboardCard>
-      <h2 className="text-xl tracking-tight text-burgundy">Gerenciamento</h2>
-      <p className="mt-2 text-sm leading-6 text-rosewood">
-        Scaffold reservado para as futuras telas de gerenciamento.
-      </p>
-    </DashboardCard>
+    <>
+      <DashboardPageHeader
+        title="Gerenciamento de arvores"
+        subtitle={getTreeManagementSummary(mockTrees.length, mockTrees.length)}
+      />
+      <div className="p-6">
+        <TreeManagementScreen
+          initialTrees={mockTrees}
+          role={UserRole.ADMIN}
+        />
+      </div>
+    </>
   );
 }

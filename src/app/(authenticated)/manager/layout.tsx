@@ -8,13 +8,5 @@ export default function ManagerDashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  return (
-    <RoleDashboardLayout
-      role={UserRole.MANAGER}
-      title="Dashboard do gestor"
-      subtitle="Base de gestao pronta para aprovacoes, usuarios e gerenciamento."
-    >
-      {children}
-    </RoleDashboardLayout>
-  );
+  return <RoleDashboardLayout role={UserRole.MANAGER}>{children}</RoleDashboardLayout>;
 }

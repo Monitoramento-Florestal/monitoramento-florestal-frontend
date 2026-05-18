@@ -8,13 +8,5 @@ export default function AdminDashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  return (
-    <RoleDashboardLayout
-      role={UserRole.ADMIN}
-      title="Dashboard do administrador"
-      subtitle="Base administrativa pronta para gestao, aprovacoes e manutencao da plataforma."
-    >
-      {children}
-    </RoleDashboardLayout>
-  );
+  return <RoleDashboardLayout role={UserRole.ADMIN}>{children}</RoleDashboardLayout>;
 }

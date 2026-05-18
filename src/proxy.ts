@@ -1,28 +1,33 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY } from '@/constants/storage'
+
 export function proxy(request: NextRequest) {
-  const token = request.cookies.get('forest_token')?.value
+  const token = request.cookies.get(AUTH_TOKEN_KEY)?.value
+  const refreshToken = request.cookies.get(REFRESH_TOKEN_KEY)?.value
+  const hasSession = Boolean(token || refreshToken)
   const pathname = request.nextUrl.pathname
+  const isDev = process.env.NODE_ENV === 'development'
 
   const isPublicPath =
     pathname === '/' || pathname === '/login' || pathname.startsWith('/public')
 
   const isProtectedPath =
+    pathname.startsWith('/admin') ||
     pathname.startsWith('/citizen') ||
     pathname.startsWith('/researcher') ||
-    pathname.startsWith('/manager') ||
-    pathname.startsWith('/admin')
+    pathname.startsWith('/manager')
 
-  if (process.env.NODE_ENV === 'development' && isProtectedPath) {
+  if (isDev && isProtectedPath) {
     return NextResponse.next()
   }
 
-  if (isProtectedPath && !token) {
+  if (isProtectedPath && !hasSession) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (isPublicPath && token && pathname === '/login') {
+  if (isPublicPath && hasSession && pathname === '/login') {
     return NextResponse.redirect(new URL('/citizen', request.url))
   }
 

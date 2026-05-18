@@ -1,13 +1,21 @@
-import { DashboardCard } from "@/components/features/dashboard";
+import { DashboardCard, DashboardPageHeader } from "@/components/features/dashboard";
 
 export default function ResearcherMapPage() {
   return (
-    <DashboardCard>
-      <h2 className="text-xl tracking-tight text-burgundy">Mapa</h2>
-      <p className="mt-2 text-sm leading-6 text-rosewood">
-        Scaffold reservado para a experiencia autenticada de mapa do
-        pesquisador.
-      </p>
-    </DashboardCard>
+    <>
+      <DashboardPageHeader
+        title="Mapa"
+        subtitle="Area autenticada de mapa para consulta e acompanhamento da pesquisa."
+      />
+      <div className="p-6">
+        <DashboardCard>
+          <h2 className="text-xl tracking-tight text-burgundy">Mapa</h2>
+          <p className="mt-2 text-sm leading-6 text-rosewood">
+            Scaffold reservado para a experiencia autenticada de mapa do
+            pesquisador.
+          </p>
+        </DashboardCard>
+      </div>
+    </>
   );
 }

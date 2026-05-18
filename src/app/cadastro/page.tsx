@@ -25,7 +25,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-cream/60 p-4 font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif]">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-cream/60 p-4 font-sans">
       {/* BOTÃO VOLTAR - CANTO SUPERIOR ESQUERDO */}
       <Link
         href="/login"
@@ -45,7 +45,7 @@ export default function RegisterForm() {
           className="object-contain mb-4"
           priority
         />
-        <h1 className="text-[24px] font-semibold leading-8 text-burgundy">
+        <h1 className="text-[24px] font-normal leading-8 text-burgundy">
           Criar conta no Arbor
         </h1>
         <p className="text-rosewood text-sm mt-1 font-normal">
@@ -148,7 +148,7 @@ export default function RegisterForm() {
           Já tem conta?{' '}
           <Link
             href="/login"
-            className="font-semibold text-burgundy hover:underline"
+            className="font-normal text-burgundy hover:underline"
           >
             Entrar
           </Link>

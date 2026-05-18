@@ -4,7 +4,7 @@ import { UserRole } from "@/constants/roles";
 import { mockTrees } from "@/types/mockTrees";
 import { getTreeManagementSummary } from "@/utils/treeManagement";
 
-export default function ManagerManagementPage() {
+export default function ResearcherTreeManagementPage() {
   return (
     <>
       <DashboardPageHeader
@@ -14,7 +14,7 @@ export default function ManagerManagementPage() {
       <div className="p-6">
         <TreeManagementScreen
           initialTrees={mockTrees}
-          role={UserRole.MANAGER}
+          role={UserRole.RESEARCHER}
         />
       </div>
     </>

@@ -1,7 +1,16 @@
 import type { ReactNode } from 'react'
 
-import { CitizenDashboardLayout } from '@/components/features/citizen-dashboard'
+import { RoleDashboardLayout } from '@/components/features/dashboard'
+import { UserRole } from '@/constants/roles'
 
-export default function CitizenLayout({ children }: { children: ReactNode }) {
-  return <CitizenDashboardLayout>{children}</CitizenDashboardLayout>
+export default function CitizenDashboardLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
+  return (
+    <RoleDashboardLayout role={UserRole.CITIZEN}>
+      {children}
+    </RoleDashboardLayout>
+  )
 }

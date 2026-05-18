@@ -1,12 +1,11 @@
-import { DashboardCard } from "@/components/features/dashboard";
+﻿import { DashboardProfilePage } from "@/components/features/dashboard";
 
 export default function AdminProfilePage() {
   return (
-    <DashboardCard>
-      <h2 className="text-xl tracking-tight text-burgundy">Perfil</h2>
-      <p className="mt-2 text-sm leading-6 text-rosewood">
-        Scaffold reservado para a futura tela de perfil administrativo.
-      </p>
-    </DashboardCard>
+    <DashboardProfilePage
+      defaultCpf="987.654.321-00"
+      defaultEmail="helena.cavalcanti@ufrpe.br"
+      defaultName="Dra. Helena Cavalcanti"
+    />
   );
 }

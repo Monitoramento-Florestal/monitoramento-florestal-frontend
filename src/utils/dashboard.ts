@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+﻿import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
   ListChecks,
@@ -72,6 +72,15 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
     },
     icon: ListChecks,
     roles: [UserRole.MANAGER, UserRole.ADMIN],
+  },
+  {
+    key: "tree-management",
+    label: "Gerenciamento de arvores",
+    href: {
+      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_TREES,
+    },
+    icon: Trees,
+    roles: [UserRole.RESEARCHER],
   },
   {
     key: "management",

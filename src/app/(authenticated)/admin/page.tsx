@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
           ))}
         </section>
 
-        <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="mt-6 grid gap-4">
           <DashboardCard className="bg-white/55 shadow-none">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -142,25 +142,6 @@ export default function AdminDashboardPage() {
                 </p>
               </div>
               <Button text="Ver fila" icon={ListChecks} href={APP_ROUTES.ADMIN_APPROVALS} variant="ghost" />
-            </div>
-          </DashboardCard>
-
-          <DashboardCard className="bg-white/55 shadow-none">
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-rosewood/70">
-              Atalhos
-            </p>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              {QUICK_ACTIONS.map(({ key, label, href, icon: Icon }) => (
-                <Button
-                  key={key}
-                  text={label}
-                  icon={Icon}
-                  iconSide="left"
-                  href={href}
-                  variant="outline"
-                  className="justify-start"
-                />
-              ))}
             </div>
           </DashboardCard>
         </section>

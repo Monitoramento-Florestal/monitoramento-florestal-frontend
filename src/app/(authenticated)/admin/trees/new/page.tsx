@@ -7,7 +7,7 @@ export default function AdminTreeRegisterPage() {
   return (
     <>
       <DashboardPageHeader
-        title="Registrar arvore"
+        title="Registrar árvore"
         subtitle={getTreeRecordFormSubtitle(UserRole.ADMIN, "create-tree")}
       />
       <div className="p-6">

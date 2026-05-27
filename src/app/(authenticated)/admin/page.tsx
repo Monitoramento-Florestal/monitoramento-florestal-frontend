@@ -26,13 +26,13 @@ const STATS = [
   },
   {
     key: "healthy",
-    label: "Saudaveis",
+    label: "Saudáveis",
     value: 30,
     icon: Trees,
   },
   {
     key: "injury",
-    label: "Com injuria",
+    label: "Com injúria",
     value: 7,
     icon: TriangleAlert,
   },
@@ -49,21 +49,21 @@ const RECENT_RECORDS = [
     key: "ipe-roxo",
     name: "Ipe-roxo",
     details: "UFRPE-1001 - 15.7m - DAP 24.2cm",
-    status: "Com injuria",
+    status: "Com injúria",
     tone: "warning",
   },
   {
     key: "pau-brasil",
     name: "Pau-brasil",
     details: "UFRPE-1002 - 14.6m - DAP 17.2cm",
-    status: "Saudavel",
+    status: "Saudável",
     tone: "healthy",
   },
   {
     key: "cajueiro",
     name: "Cajueiro",
     details: "UFRPE-1003 - 7.2m - DAP 44.8cm",
-    status: "Saudavel",
+    status: "Saudável",
     tone: "healthy",
   },
   {
@@ -77,7 +77,7 @@ const RECENT_RECORDS = [
     key: "cajueiro-2",
     name: "Cajueiro",
     details: "UFRPE-1005 - 9.7m - DAP 54.5cm",
-    status: "Com injuria",
+    status: "Com injúria",
     tone: "warning",
   },
 ];
@@ -86,7 +86,7 @@ const QUICK_ACTIONS = [
   { key: "map", label: "Mapa", href: APP_ROUTES.ADMIN_MAP, icon: Map },
   { key: "register", label: "Registro", href: APP_ROUTES.ADMIN_TREES_NEW, icon: PlusCircle },
   { key: "management", label: "Gerenciamento", href: APP_ROUTES.ADMIN_MANAGEMENT, icon: Trees },
-  { key: "users", label: "Usuarios", href: APP_ROUTES.ADMIN_USERS, icon: Users },
+  { key: "users", label: "Usuários", href: APP_ROUTES.ADMIN_USERS, icon: Users },
   { key: "records", label: "Registros", href: APP_ROUTES.ADMIN_MANAGEMENT, icon: ClipboardList },
   { key: "profile", label: "Perfil", href: APP_ROUTES.ADMIN_PROFILE, icon: UserCircle },
 ];
@@ -110,8 +110,8 @@ export default function AdminDashboardPage() {
   return (
     <>
       <DashboardPageHeader
-        title="Visao geral"
-        subtitle="42 arvores monitoradas"
+        title="Visão geral"
+        subtitle="42 árvores monitoradas"
       />
       <div className="p-6">
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -131,14 +131,14 @@ export default function AdminDashboardPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-[0.7rem] uppercase tracking-[0.2em] text-rosewood/70">
-                  Pendencias
+                  Pendências
                 </p>
                 <h2 className="mt-3 text-base font-medium text-burgundy">
-                  Aguardando sua revisao
+                  Aguardando sua revisão
                 </h2>
                 <p className="mt-2 text-3xl font-semibold text-burgundy">3</p>
                 <p className="mt-2 text-sm text-rosewood">
-                  Registros precisam de aprovacao ou correcao.
+                  Registros precisam de aprovação ou correção.
                 </p>
               </div>
               <Button text="Ver fila" icon={ListChecks} href={APP_ROUTES.ADMIN_APPROVALS} variant="ghost" />
@@ -168,7 +168,7 @@ export default function AdminDashboardPage() {
 
         <section className="mt-6 flex flex-wrap gap-3">
           <Button text="Abrir mapa" icon={Map} href={APP_ROUTES.ADMIN_MAP} variant="primary" />
-          <Button text="Registrar arvore" icon={PlusCircle} href={APP_ROUTES.ADMIN_TREES_NEW} variant="outline" />
+          <Button text="Registrar árvore" icon={PlusCircle} href={APP_ROUTES.ADMIN_TREES_NEW} variant="outline" />
         </section>
       </div>
     </>

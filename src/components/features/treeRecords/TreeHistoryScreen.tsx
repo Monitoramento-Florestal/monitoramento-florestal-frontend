@@ -61,7 +61,7 @@ export function TreeHistoryScreen({
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
-          <SummaryItem label="Historico aprovado" value={getTreeHistorySummary(tree)} />
+          <SummaryItem label="Histórico aprovado" value={getTreeHistorySummary(tree)} />
           <SummaryItem label="Registro atual" value={`v${latestRecord.version} - ${formatDate(latestRecord.registro.ultimaMedicao)}`} />
           <SummaryItem label="Coordenadas" value={`${tree.lat.toFixed(5)}, ${tree.lng.toFixed(5)}`} />
         </div>
@@ -73,10 +73,10 @@ export function TreeHistoryScreen({
             <Clock3 className="mt-1 text-rosewood" size={18} />
             <div>
               <h3 className="text-base tracking-tight text-burgundy">
-                Solicitacoes pendentes relacionadas a esta arvore
+                Solicitações pendentes relacionadas a esta árvore
               </h3>
               <p className="mt-1 text-sm leading-6 text-rosewood">
-                A fila de aprovacoes ja concentra essas analises, mas deixamos o contexto aqui para facilitar a leitura do historico.
+                A fila de aprovações já concentra essas análises, mas deixamos o contexto aqui para facilitar a leitura do histórico.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {pendingRequests.map((request) => (
@@ -121,7 +121,7 @@ export function TreeHistoryScreen({
 
                   <div className="flex flex-wrap gap-2">
                     <span className="rounded-full border border-rosewood/15 bg-card px-3 py-1 text-xs text-rosewood">
-                      {record.kind === "initial" ? "Registro inicial" : "Medicao"}
+                      {record.kind === "initial" ? "Registro inicial" : "Medição"}
                     </span>
                     <span className="rounded-full border border-sage/20 bg-sage/10 px-3 py-1 text-xs text-burgundy">
                       {TREE_RECORD_STATUS_LABELS[record.status]}
@@ -136,13 +136,13 @@ export function TreeHistoryScreen({
                   <SummaryItem label="DAP" value={`${record.dimensoes.dapCm} cm`} />
                   <SummaryItem label="Copa" value={`${record.dimensoes.copaM} m`} />
                   <SummaryItem label="Vigor" value={record.condicao.vigor} />
-                  <SummaryItem label="Acao" value={record.manejo.acao} />
+                  <SummaryItem label="Ação" value={record.manejo.acao} />
                   <SummaryItem label="Prioridade" value={record.manejo.prioridade} />
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm leading-6 text-rosewood">
-                    {record.observacoes ?? "Sem observacoes adicionais registradas."}
+                    {record.observacoes ?? "Sem observações adicionais registradas."}
                   </p>
 
                   <div className="flex flex-wrap gap-2">
@@ -152,7 +152,7 @@ export function TreeHistoryScreen({
                       iconSide="left"
                       variant="outline"
                     >
-                      {canDirectEdit ? "Editar" : "Solicitar edicao"}
+                      {canDirectEdit ? "Editar" : "Solicitar edição"}
                     </Button>
                     {canDelete ? (
                       <Button
@@ -174,9 +174,9 @@ export function TreeHistoryScreen({
 
       <DashboardCard className="flex items-center justify-between gap-4">
         <div>
-          <h3 className="text-base tracking-tight text-burgundy">Navegacao complementar</h3>
+          <h3 className="text-base tracking-tight text-burgundy">Navegação complementar</h3>
           <p className="mt-1 text-sm text-rosewood">
-            Esta tela e a referencia principal para registros aprovados. O mapa deve encaminhar para ela quando o usuario pedir historico.
+            Esta tela é a referência principal para registros aprovados. O mapa deve encaminhar para ela quando o usuário pedir histórico.
           </p>
         </div>
         <Button
@@ -185,7 +185,7 @@ export function TreeHistoryScreen({
           iconSide="left"
           variant="ghost"
         >
-          Recarregar historico
+          Recarregar histórico
         </Button>
       </DashboardCard>
     </div>

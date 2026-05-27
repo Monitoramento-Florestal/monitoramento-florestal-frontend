@@ -8,8 +8,8 @@ export default function AdminApprovalsPage() {
   return (
     <>
       <DashboardPageHeader
-        title="Fila de aprovacao"
-        subtitle={`${mockApprovalRequests.length} solicitacoes aguardando revisao`}
+        title="Fila de aprovação"
+        subtitle={`${mockApprovalRequests.length} solicitações aguardando revisão`}
       />
       <div className="p-6">
         <ApprovalsScreen initialRecords={mockApprovalRequests} />

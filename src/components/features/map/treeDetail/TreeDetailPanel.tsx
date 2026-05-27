@@ -110,7 +110,7 @@ export function TreeDetailPanel({
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
-          <Section title="Medicoes">
+          <Section title="Medições">
             <Metric icon={Ruler} label="Altura" value={`${tree.dimensoes.alturaM} m`} />
             <Metric icon={Ruler} label="DAP" value={`${tree.dimensoes.dapCm} cm`} />
             <Metric icon={Ruler} label="Copa" value={`${tree.dimensoes.copaM} m`} />
@@ -121,20 +121,20 @@ export function TreeDetailPanel({
             />
           </Section>
 
-          <Section title="Localizacao">
+          <Section title="Localização">
             <Metric icon={MapPin} label="Bairro" value={tree.localizacao.bairro} />
             <Metric icon={MapPin} label="Rua" value={tree.localizacao.rua} />
             {tree.localizacao.numeroResidencia ? (
               <Metric
                 icon={MapPin}
-                label="Numero"
+                label="Número"
                 value={tree.localizacao.numeroResidencia}
               />
             ) : null}
             {tree.localizacao.referencia ? (
               <Metric
                 icon={MapPin}
-                label="Referencia"
+                label="Referência"
                 value={tree.localizacao.referencia}
                 stacked
               />
@@ -152,7 +152,7 @@ export function TreeDetailPanel({
             <Metric icon={UserIcon} label="Equipe" value={tree.localizacao.equipe} />
           </Section>
 
-          <Section title="Condicao da arvore">
+          <Section title="Condição da árvore">
             <Metric
               icon={Sprout}
               label="Estado geral"
@@ -165,7 +165,7 @@ export function TreeDetailPanel({
             />
             <Metric
               icon={TriangleAlert}
-              label="Posicao do problema"
+              label="Posição do problema"
               value={
                 tree.condicao.posicaoProblema
                   ? formatTreeLabel(tree.condicao.posicaoProblema)
@@ -178,7 +178,7 @@ export function TreeDetailPanel({
           <Section title="Estrutura e risco">
             <Metric
               icon={ShieldAlert}
-              label="Inclinacao do tronco"
+              label="Inclinação do tronco"
               value={formatTreeLabel(tree.estruturaRisco.inclinacaoTronco)}
             />
             <Metric
@@ -188,7 +188,7 @@ export function TreeDetailPanel({
             />
             <Metric
               icon={ShieldAlert}
-              label="Fluxo de veiculos"
+              label="Fluxo de veículos"
               value={formatTreeLabel(tree.estruturaRisco.fluxoVeiculos)}
             />
             <Metric
@@ -209,7 +209,7 @@ export function TreeDetailPanel({
               items={tree.estruturaRisco.alvosPotenciais}
             />
             <DetailGroup
-              label="Alvos sensiveis"
+              label="Alvos sensíveis"
               items={tree.estruturaRisco.alvosSensiveis}
             />
           </Section>
@@ -217,28 +217,28 @@ export function TreeDetailPanel({
           <Section title="Conflitos">
             <Metric
               icon={TriangleAlert}
-              label="Fiacao"
+              label="Fiação"
               value={formatTreeLabel(tree.conflitos.fiacao)}
             />
             <Metric
               icon={TriangleAlert}
-              label="Calcada"
+              label="Calçada"
               value={formatTreeLabel(tree.conflitos.calcada)}
             />
             <Metric
               icon={TriangleAlert}
-              label="Iluminacao"
+              label="Iluminação"
               value={formatTreeLabel(tree.conflitos.iluminacao)}
             />
             <Metric
               icon={TriangleAlert}
-              label="Edificacao"
+              label="Edificação"
               value={formatTreeLabel(tree.conflitos.edificacao)}
             />
           </Section>
 
           <Section title="Manejo">
-            <Metric icon={Sprout} label="Acao" value={formatTreeLabel(tree.manejo.acao)} />
+            <Metric icon={Sprout} label="Ação" value={formatTreeLabel(tree.manejo.acao)} />
             <Metric
               icon={Sprout}
               label="Prioridade"
@@ -249,7 +249,7 @@ export function TreeDetailPanel({
           <Section title="Registro atual">
             <Metric
               icon={Calendar}
-              label="Ultima medicao"
+              label="Última medição"
               value={formatTreeDate(tree.registro.ultimaMedicao)}
             />
             <Metric
@@ -269,14 +269,14 @@ export function TreeDetailPanel({
               value={String(tree.registro.fotos.length)}
             />
             {tree.registro.motivoRejeicao ? (
-              <DetailNote title="Motivo da rejeicao">
+              <DetailNote title="Motivo da rejeição">
                 {tree.registro.motivoRejeicao}
               </DetailNote>
             ) : null}
           </Section>
 
           {tree.observacoes ? (
-            <Section title="Observacoes">
+            <Section title="Observações">
               <DetailNote>{tree.observacoes}</DetailNote>
             </Section>
           ) : null}
@@ -292,7 +292,7 @@ export function TreeDetailPanel({
             disabled={!historyHref}
             href={historyHref}
           >
-            {historyHref ? "Ver historico" : "Historico em breve"}
+            {historyHref ? "Ver histórico" : "Histórico em breve"}
           </Button>
         </div>
       </aside>

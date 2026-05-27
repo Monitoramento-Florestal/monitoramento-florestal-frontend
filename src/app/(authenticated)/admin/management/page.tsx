@@ -8,7 +8,7 @@ export default function AdminManagementPage() {
   return (
     <>
       <DashboardPageHeader
-        title="Gerenciamento de arvores"
+        title="Gerenciamento de árvores"
         subtitle={getTreeManagementSummary(mockTrees.length, mockTrees.length)}
       />
       <div className="p-6">

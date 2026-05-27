@@ -84,10 +84,10 @@ export function DashboardSidebar({
 
       <div className="flex-1 px-4 py-5">
         <div className="px-3 pb-3 text-[0.625rem] uppercase tracking-[0.2em] text-rosewood/70">
-          Navegacao
+          Navegação
         </div>
 
-        <nav aria-label="Navegacao do dashboard">
+        <nav aria-label="Navegação do dashboard">
           <ul className="space-y-1">
             {items.map((item) => (
               <DashboardSidebarItem

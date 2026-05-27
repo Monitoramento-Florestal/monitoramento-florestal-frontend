@@ -20,7 +20,7 @@ export default async function ManagerTreeHistoryPage({
   return (
     <>
       <DashboardPageHeader
-        title="Historico da arvore"
+        title="Histórico da árvore"
         subtitle={getTreeHistorySummary(tree)}
       />
       <div className="p-6">

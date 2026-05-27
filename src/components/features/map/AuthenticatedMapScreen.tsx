@@ -37,13 +37,13 @@ export function AuthenticatedMapScreen({
     <div className="space-y-4">
       <DashboardCard className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
         <div className="flex flex-wrap gap-4 text-xs text-burgundy/80">
-          <Legend color={TREE_STATUS_COLORS.saudavel.fill} label="Saudavel" />
-          <Legend color={TREE_STATUS_COLORS.injuria.fill} label="Com injuria" />
+          <Legend color={TREE_STATUS_COLORS.saudavel.fill} label="Saudável" />
+          <Legend color={TREE_STATUS_COLORS.injuria.fill} label="Com injúria" />
           <Legend color={TREE_STATUS_COLORS.cortada.fill} label="Cortada" />
         </div>
 
         <Button href={registerHref} icon={Plus} iconSide="left" variant="outline">
-          Registrar arvore
+          Registrar árvore
         </Button>
       </DashboardCard>
 

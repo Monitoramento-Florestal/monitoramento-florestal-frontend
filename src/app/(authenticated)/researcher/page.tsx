@@ -22,13 +22,13 @@ const STATS = [
   },
   {
     key: "pending",
-    label: "Aguardando aprovacao",
+    label: "Aguardando aprovação",
     value: 1,
     icon: ListChecks,
   },
   {
     key: "healthy",
-    label: "Saudaveis (sistema)",
+    label: "Saudáveis (sistema)",
     value: 30,
     icon: Trees,
   },
@@ -45,31 +45,31 @@ const LAST_RECORDS = [
     key: "pau-brasil-1",
     name: "Pau-brasil",
     details: "UFRPE-1002 - 14.6m - DAP 17.2cm",
-    status: "Saudavel",
+    status: "Saudável",
   },
   {
     key: "oiti-1",
     name: "Oiti",
     details: "UFRPE-1005 - 8.6m - DAP 86.5cm",
-    status: "Saudavel",
+    status: "Saudável",
   },
   {
     key: "caja-1",
     name: "Caja",
     details: "UFRPE-1010 - 4.5m - DAP 73.7cm",
-    status: "Saudavel",
+    status: "Saudável",
   },
   {
     key: "pau-brasil-2",
     name: "Pau-brasil",
     details: "UFRPE-1014 - 4.3m - DAP 65.6cm",
-    status: "Saudavel",
+    status: "Saudável",
   },
   {
     key: "oiti-2",
     name: "Oiti",
     details: "UFRPE-1018 - 11.1m - DAP 18.7cm",
-    status: "Saudavel",
+    status: "Saudável",
   },
 ];
 
@@ -103,7 +103,7 @@ export default function ResearcherDashboardPage() {
         <section className="mt-6 grid gap-4">
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.2em] text-rosewood/70">
-              Meus ultimos registros
+              Meus últimos registros
             </p>
             <div className="mt-3 overflow-hidden rounded-lg border border-rosewood/15 bg-white/55">
               {LAST_RECORDS.map((record) => (
@@ -133,7 +133,7 @@ export default function ResearcherDashboardPage() {
         <section className="mt-6 flex flex-wrap gap-3">
           <Button text="Abrir mapa" icon={Map} href={APP_ROUTES.RESEARCHER_MAP} variant="primary" />
           <Button
-            text="Registrar arvore"
+            text="Registrar árvore"
             icon={PlusCircle}
             href={APP_ROUTES.RESEARCHER_TREES_NEW}
             variant="outline"

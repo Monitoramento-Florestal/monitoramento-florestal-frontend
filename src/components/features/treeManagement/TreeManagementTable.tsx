@@ -32,10 +32,10 @@ export function TreeManagementTable({
         <thead>
           <tr className="text-left text-[10px] uppercase tracking-[0.18em] text-rosewood/75">
             <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              Codigo
+              Código
             </th>
             <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              Especie
+              Espécie
             </th>
             <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
               Altura
@@ -50,10 +50,10 @@ export function TreeManagementTable({
               Status
             </th>
             <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              Ultima medicao
+              Última medição
             </th>
             <th className="border-b border-rosewood/10 px-4 py-4 text-right font-medium">
-              Acoes
+              Ações
             </th>
           </tr>
         </thead>

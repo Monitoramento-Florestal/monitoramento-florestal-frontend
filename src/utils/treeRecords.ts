@@ -48,15 +48,15 @@ export interface TreeRecordFormValues {
 }
 
 export const TREE_RECORD_STATUS_LABELS: Record<TreeStatus, string> = {
-  saudavel: "Saudavel",
-  injuria: "Com injuria",
+  saudavel: "Saudável",
+  injuria: "Com injúria",
   cortada: "Cortada",
 };
 
 export const TREE_REQUEST_TYPE_LABELS: Record<TreeRequestType, string> = {
-  create_tree: "Criacao de arvore",
+  create_tree: "Criação de árvore",
   create_record: "Novo registro",
-  edit_record: "Edicao de registro",
+  edit_record: "Edição de registro",
 };
 
 export function getTreeRecordFormValues(tree?: Tree | null, record?: TreeMeasurementRecord | null): TreeRecordFormValues {
@@ -104,49 +104,49 @@ export function getTreeRecordFormValues(tree?: Tree | null, record?: TreeMeasure
 export function getTreeRecordFormSubtitle(role: UserRole, mode: TreeRecordFormMode) {
   if (mode === "create-tree") {
     return role === UserRole.RESEARCHER
-      ? "Crie uma nova arvore com seu registro tecnico inicial. O envio passara por aprovacao."
-      : "Cadastre uma nova arvore com seu registro tecnico inicial.";
+      ? "Crie uma nova árvore com seu registro técnico inicial. O envio passará por aprovação."
+      : "Cadastre uma nova árvore com seu registro técnico inicial.";
   }
 
   if (mode === "create-record") {
     return role === UserRole.RESEARCHER
-      ? "Adicione uma nova medicao tecnica para esta arvore. O envio passara por aprovacao."
-      : "Adicione uma nova medicao tecnica para esta arvore.";
+      ? "Adicione uma nova medição técnica para esta árvore. O envio passará por aprovação."
+      : "Adicione uma nova medição técnica para esta árvore.";
   }
 
   return role === UserRole.RESEARCHER
-    ? "Proponha alteracoes para este registro tecnico. O registro aprovado atual sera preservado ate a decisao."
-    : "Edite diretamente este registro tecnico.";
+    ? "Proponha alterações para este registro técnico. O registro aprovado atual será preservado até a decisão."
+    : "Edite diretamente este registro técnico.";
 }
 
 export function getTreeRecordSubmitLabel(role: UserRole, mode: TreeRecordFormMode) {
   if (mode === "create-tree") {
-    return role === UserRole.RESEARCHER ? "Enviar para aprovacao" : "Salvar arvore";
+    return role === UserRole.RESEARCHER ? "Enviar para aprovação" : "Salvar árvore";
   }
 
   if (mode === "create-record") {
     return role === UserRole.RESEARCHER ? "Enviar novo registro" : "Salvar registro";
   }
 
-  return role === UserRole.RESEARCHER ? "Enviar solicitacao de edicao" : "Salvar alteracoes";
+  return role === UserRole.RESEARCHER ? "Enviar solicitação de edição" : "Salvar alterações";
 }
 
 export function getTreeRecordFooterHint(role: UserRole, mode: TreeRecordFormMode) {
   if (role !== UserRole.RESEARCHER) {
     return mode === "create-tree"
-      ? "A arvore e o registro inicial serao criados imediatamente no sistema."
-      : "As alteracoes serao aplicadas diretamente ao historico aprovado.";
+      ? "A árvore e o registro inicial serão criados imediatamente no sistema."
+      : "As alterações serão aplicadas diretamente ao histórico aprovado.";
   }
 
   if (mode === "create-tree") {
-    return "Sua solicitacao criara a arvore e o primeiro registro apos aprovacao.";
+    return "Sua solicitação criará a árvore e o primeiro registro após aprovação.";
   }
 
   if (mode === "create-record") {
-    return "O novo registro sera anexado a esta arvore apenas apos aprovacao.";
+    return "O novo registro será anexado a esta árvore apenas após aprovação.";
   }
 
-  return "A edicao criara uma solicitacao separada e o registro atual seguira visivel ate aprovacao.";
+  return "A edição criará uma solicitação separada e o registro atual seguirá visível até a aprovação.";
 }
 
 export function getTreeHistorySummary(tree: Tree) {

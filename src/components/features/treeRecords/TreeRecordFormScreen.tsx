@@ -23,7 +23,7 @@ interface TreeRecordFormScreenProps {
   tree?: Tree | null;
 }
 
-const TREE_PROBLEM_OPTIONS = ["pragas", "fungos", "podridao", "injuria", "nenhum"];
+const TREE_PROBLEM_OPTIONS = ["pragas", "fungos", "podridão", "injúria", "nenhum"];
 const TREE_POSITION_OPTIONS = ["tronco", "raiz", "copa"];
 const TREE_VIGOR_OPTIONS = ["alto", "medio", "baixo"];
 const TREE_CONFLICT_OPTIONS = {
@@ -34,23 +34,23 @@ const TREE_CONFLICT_OPTIONS = {
 };
 const TREE_STRUCTURE_OPTIONS = {
   tronco: ["sem defeitos", "fissuras longitudinais", "cavidades", "apodrecimento", "descascamento"],
-  baseColo: ["normal", "raiz exposta", "solo compactado", "levantamento de calcada", "inclinacao da base"],
+  baseColo: ["normal", "raiz exposta", "solo compactado", "levantamento de calçada", "inclinação da base"],
   copa: ["assimetrica", "excesso de peso lateral", "galhos secos", "galhos codominantes"],
 };
 const TREE_RISK_OPTIONS = {
-  inclinacaoTronco: ["ausente", "leve", "moderada", "critica"],
-  ancoragemRadicular: ["estavel", "parcialmente comprometida", "comprometida"],
-  fluxoVeiculos: ["baixo", "medio", "alto"],
-  fluxoPedestres: ["baixo", "medio", "alto"],
+  inclinacaoTronco: ["ausente", "leve", "moderada", "crítica"],
+  ancoragemRadicular: ["estável", "parcialmente comprometida", "comprometida"],
+  fluxoVeiculos: ["baixo", "médio", "alto"],
+  fluxoPedestres: ["baixo", "médio", "alto"],
   tipoVia: ["residencial", "coletora", "arterial", "comercial/central"],
 };
 const TREE_TARGET_OPTIONS = {
-  alvosPotenciais: ["pedestres", "veiculos", "residencia", "equipamento publico", "sem alvo relevante"],
-  alvosSensiveis: ["escola", "hospital", "parada de onibus", "praca/area de lazer", "nenhum"],
+  alvosPotenciais: ["pedestres", "veículos", "residência", "equipamento público", "sem alvo relevante"],
+  alvosSensiveis: ["escola", "hospital", "parada de ônibus", "praça/área de lazer", "nenhum"],
 };
 const TREE_MANAGEMENT_OPTIONS = {
-  acao: ["nenhuma", "poda leve", "poda conducao", "poda pesada", "controle fitossanitario", "ampliacao canteiro", "substituicao", "supressao"],
-  prioridade: ["baixa", "media", "alta", "emergencial"],
+  acao: ["nenhuma", "poda leve", "poda condução", "poda pesada", "controle fitossanitário", "ampliação canteiro", "substituição", "supressão"],
+  prioridade: ["baixa", "média", "alta", "emergencial"],
 };
 
 export function TreeRecordFormScreen({
@@ -119,7 +119,7 @@ export function TreeRecordFormScreen({
       {submissionState === "success" ? (
         <DashboardCard className="border-sage/20 bg-sage/8">
           <h3 className="text-base tracking-tight text-burgundy">
-            {role === UserRole.RESEARCHER ? "Solicitacao preparada" : "Alteracao preparada"}
+            {role === UserRole.RESEARCHER ? "Solicitação preparada" : "Alteração preparada"}
           </h3>
           <p className="mt-2 text-sm leading-6 text-rosewood">
             {getTreeRecordFooterHint(role, mode)}
@@ -129,15 +129,15 @@ export function TreeRecordFormScreen({
 
       <DashboardCard className="space-y-4">
         <div>
-          <h3 className="text-xl tracking-tight text-burgundy">Identificacao da arvore</h3>
-          <p className="mt-1 text-sm text-rosewood">Dados base da especie e georreferenciamento.</p>
+          <h3 className="text-xl tracking-tight text-burgundy">Identificação da árvore</h3>
+          <p className="mt-1 text-sm text-rosewood">Dados-base da espécie e georreferenciamento.</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <LabeledField label="Nome comum">
             <Input value={values.nomeComum} onChange={(event) => updateValue("nomeComum", event.target.value)} />
           </LabeledField>
-          <LabeledField label="Nome cientifico">
+          <LabeledField label="Nome científico">
             <Input value={values.especie} onChange={(event) => updateValue("especie", event.target.value)} />
           </LabeledField>
           <LabeledField label="Latitude">
@@ -151,8 +151,8 @@ export function TreeRecordFormScreen({
 
       <DashboardCard className="space-y-4">
         <div>
-          <h3 className="text-xl tracking-tight text-burgundy">Localizacao e coleta</h3>
-          <p className="mt-1 text-sm text-rosewood">Contexto urbano e dados do momento da medicao.</p>
+          <h3 className="text-xl tracking-tight text-burgundy">Localização e coleta</h3>
+          <p className="mt-1 text-sm text-rosewood">Contexto urbano e dados do momento da medição.</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -162,10 +162,10 @@ export function TreeRecordFormScreen({
           <LabeledField label="Rua">
             <Input value={values.rua} onChange={(event) => updateValue("rua", event.target.value)} />
           </LabeledField>
-          <LabeledField label="Numero da residencia">
+          <LabeledField label="Número da residência">
             <Input value={values.numeroResidencia} onChange={(event) => updateValue("numeroResidencia", event.target.value)} />
           </LabeledField>
-          <LabeledField label="Referencia">
+          <LabeledField label="Referência">
             <Input value={values.referencia} onChange={(event) => updateValue("referencia", event.target.value)} />
           </LabeledField>
           <LabeledField label="Data da coleta">
@@ -179,8 +179,8 @@ export function TreeRecordFormScreen({
 
       <DashboardCard className="space-y-4">
         <div>
-          <h3 className="text-xl tracking-tight text-burgundy">Dimensoes e condicao</h3>
-          <p className="mt-1 text-sm text-rosewood">Medidas dendrometricas e estado geral do exemplar.</p>
+          <h3 className="text-xl tracking-tight text-burgundy">Dimensões e condição</h3>
+          <p className="mt-1 text-sm text-rosewood">Medidas dendrométricas e estado geral do exemplar.</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -240,13 +240,13 @@ export function TreeRecordFormScreen({
           onToggle={(value) => toggleArrayValue("problemas", value)}
         />
 
-        <LabeledField label="Posicao do problema">
+          <LabeledField label="Posição do problema">
           <select
             className="w-full rounded-md border border-rosewood/30 bg-white px-3 py-2 text-sm"
             value={values.posicaoProblema}
             onChange={(event) => updateValue("posicaoProblema", event.target.value as TreeRecordFormValues["posicaoProblema"])}
           >
-            <option value="">Nao informado</option>
+            <option value="">Não informado</option>
             {TREE_POSITION_OPTIONS.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -259,37 +259,37 @@ export function TreeRecordFormScreen({
       <DashboardCard className="space-y-5">
         <div>
           <h3 className="text-xl tracking-tight text-burgundy">Estrutura, risco e conflitos</h3>
-          <p className="mt-1 text-sm text-rosewood">Leitura tecnica para risco estrutural e conflitos urbanos.</p>
+          <p className="mt-1 text-sm text-rosewood">Leitura técnica para risco estrutural e conflitos urbanos.</p>
         </div>
 
         <OptionGroup items={TREE_STRUCTURE_OPTIONS.tronco} label="Tronco" selectedItems={values.tronco} onToggle={(value) => toggleArrayValue("tronco", value)} />
         <OptionGroup items={TREE_STRUCTURE_OPTIONS.baseColo} label="Base / colo" selectedItems={values.baseColo} onToggle={(value) => toggleArrayValue("baseColo", value)} />
         <OptionGroup items={TREE_STRUCTURE_OPTIONS.copa} label="Copa" selectedItems={values.copa} onToggle={(value) => toggleArrayValue("copa", value)} />
         <OptionGroup items={TREE_TARGET_OPTIONS.alvosPotenciais} label="Alvos potenciais" selectedItems={values.alvosPotenciais} onToggle={(value) => toggleArrayValue("alvosPotenciais", value)} />
-        <OptionGroup items={TREE_TARGET_OPTIONS.alvosSensiveis} label="Alvos sensiveis" selectedItems={values.alvosSensiveis} onToggle={(value) => toggleArrayValue("alvosSensiveis", value)} />
+        <OptionGroup items={TREE_TARGET_OPTIONS.alvosSensiveis} label="Alvos sensíveis" selectedItems={values.alvosSensiveis} onToggle={(value) => toggleArrayValue("alvosSensiveis", value)} />
 
         <div className="grid gap-4 md:grid-cols-2">
-          <SelectField label="Inclinacao do tronco" value={values.inclinacaoTronco} options={TREE_RISK_OPTIONS.inclinacaoTronco} onChange={(value) => updateValue("inclinacaoTronco", value)} />
+          <SelectField label="Inclinação do tronco" value={values.inclinacaoTronco} options={TREE_RISK_OPTIONS.inclinacaoTronco} onChange={(value) => updateValue("inclinacaoTronco", value)} />
           <SelectField label="Ancoragem radicular" value={values.ancoragemRadicular} options={TREE_RISK_OPTIONS.ancoragemRadicular} onChange={(value) => updateValue("ancoragemRadicular", value)} />
-          <SelectField label="Fluxo de veiculos" value={values.fluxoVeiculos} options={TREE_RISK_OPTIONS.fluxoVeiculos} onChange={(value) => updateValue("fluxoVeiculos", value)} />
+          <SelectField label="Fluxo de veículos" value={values.fluxoVeiculos} options={TREE_RISK_OPTIONS.fluxoVeiculos} onChange={(value) => updateValue("fluxoVeiculos", value)} />
           <SelectField label="Fluxo de pedestres" value={values.fluxoPedestres} options={TREE_RISK_OPTIONS.fluxoPedestres} onChange={(value) => updateValue("fluxoPedestres", value)} />
           <SelectField label="Tipo de via" value={values.tipoVia} options={TREE_RISK_OPTIONS.tipoVia} onChange={(value) => updateValue("tipoVia", value)} />
-          <SelectField label="Fiacao" value={values.fiacao} options={TREE_CONFLICT_OPTIONS.fiacao} onChange={(value) => updateValue("fiacao", value)} />
-          <SelectField label="Calcada" value={values.calcada} options={TREE_CONFLICT_OPTIONS.calcada} onChange={(value) => updateValue("calcada", value)} />
-          <SelectField label="Iluminacao" value={values.iluminacao} options={TREE_CONFLICT_OPTIONS.iluminacao} onChange={(value) => updateValue("iluminacao", value)} />
-          <SelectField label="Edificacao" value={values.edificacao} options={TREE_CONFLICT_OPTIONS.edificacao} onChange={(value) => updateValue("edificacao", value)} />
-          <SelectField label="Acao de manejo" value={values.manejoAcao} options={TREE_MANAGEMENT_OPTIONS.acao} onChange={(value) => updateValue("manejoAcao", value)} />
+          <SelectField label="Fiação" value={values.fiacao} options={TREE_CONFLICT_OPTIONS.fiacao} onChange={(value) => updateValue("fiacao", value)} />
+          <SelectField label="Calçada" value={values.calcada} options={TREE_CONFLICT_OPTIONS.calcada} onChange={(value) => updateValue("calcada", value)} />
+          <SelectField label="Iluminação" value={values.iluminacao} options={TREE_CONFLICT_OPTIONS.iluminacao} onChange={(value) => updateValue("iluminacao", value)} />
+          <SelectField label="Edificação" value={values.edificacao} options={TREE_CONFLICT_OPTIONS.edificacao} onChange={(value) => updateValue("edificacao", value)} />
+          <SelectField label="Ação de manejo" value={values.manejoAcao} options={TREE_MANAGEMENT_OPTIONS.acao} onChange={(value) => updateValue("manejoAcao", value)} />
           <SelectField label="Prioridade de manejo" value={values.manejoPrioridade} options={TREE_MANAGEMENT_OPTIONS.prioridade} onChange={(value) => updateValue("manejoPrioridade", value)} />
         </div>
       </DashboardCard>
 
       <DashboardCard className="space-y-4">
         <div>
-          <h3 className="text-xl tracking-tight text-burgundy">Observacoes e fotografias</h3>
-          <p className="mt-1 text-sm text-rosewood">Complementos do laudo tecnico e registro visual opcional.</p>
+          <h3 className="text-xl tracking-tight text-burgundy">Observações e fotografias</h3>
+          <p className="mt-1 text-sm text-rosewood">Complementos do laudo técnico e registro visual opcional.</p>
         </div>
 
-        <LabeledField label="Observacoes">
+        <LabeledField label="Observações">
           <textarea
             className="min-h-32 w-full rounded-md border border-rosewood/30 bg-white px-3 py-2 text-sm outline-none focus:border-sage"
             value={values.observacoes}
@@ -298,7 +298,7 @@ export function TreeRecordFormScreen({
         </LabeledField>
 
         <div className="rounded-xl border border-dashed border-rosewood/25 bg-card/45 px-4 py-10 text-center text-sm text-rosewood">
-          Fotos sao opcionais. O upload sera conectado na etapa de integracao.
+          Fotos são opcionais. O upload será conectado na etapa de integração.
         </div>
       </DashboardCard>
 

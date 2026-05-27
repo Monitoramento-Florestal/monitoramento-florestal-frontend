@@ -7,7 +7,7 @@ export default function ResearcherTreeRegisterPage() {
   return (
     <>
       <DashboardPageHeader
-        title="Registrar arvore"
+        title="Registrar árvore"
         subtitle={getTreeRecordFormSubtitle(UserRole.RESEARCHER, "create-tree")}
       />
       <div className="p-6">

@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   // Allow dev-only HMR and other Next assets when the app is opened through
@@ -10,6 +14,9 @@ const nextConfig: NextConfig = {
     "*.ngrok.io",
     "*.ngrok.app",
   ],
+  turbopack: {
+    root: projectRoot,
+  },
 };
 
 export default nextConfig;

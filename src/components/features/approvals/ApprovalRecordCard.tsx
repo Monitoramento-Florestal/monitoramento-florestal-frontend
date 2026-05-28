@@ -42,6 +42,7 @@ export function ApprovalRecordCard({
               src={image}
               alt={`Registro de ${getApprovalRecordName(request)}`}
               fill
+              sizes="96px"
               className="object-cover"
             />
           ) : (

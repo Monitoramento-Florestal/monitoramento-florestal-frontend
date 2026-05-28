@@ -1,5 +1,5 @@
 import { UserRole } from "@/constants/roles";
-import type { Tree, TreeStatus } from "@/types/trees";
+import type { TreePreview, TreeStatus } from "@/types/trees";
 
 export type TreeManagementStatusFilter = "all" | TreeStatus;
 
@@ -56,7 +56,7 @@ export function getTreeManagementStatusLabel(status: TreeStatus) {
 }
 
 export function filterManagedTrees(
-  trees: Tree[],
+  trees: TreePreview[],
   query: string,
   status: TreeManagementStatusFilter
 ) {
@@ -90,5 +90,3 @@ export function filterManagedTrees(
 export function getTreeManagementSummary(total: number, visible: number) {
   return `${visible} de ${total} registros`;
 }
-
-

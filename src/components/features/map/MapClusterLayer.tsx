@@ -7,7 +7,7 @@ import {
   makeClusterIcon,
   makeTreeImageIcon,
 } from "./mapIcons";
-import type { Tree } from "@/types/trees";
+import type { TreePreview } from "@/types/trees";
 
 type LeafletModule = typeof import("leaflet");
 type LeafletImportModule = LeafletModule & { default?: LeafletModule };
@@ -19,10 +19,10 @@ async function loadLeafletModule(): Promise<LeafletModule> {
 }
 
 export interface MapClusterLayerProps {
-  trees: Tree[];
+  trees: TreePreview[];
   selectedTreeId?: string | null;
   focusTreeId?: string | null;
-  onSelect?: (tree: Tree) => void;
+  onSelect?: (tree: TreePreview) => void;
 }
 
 export function MapClusterLayer({
@@ -35,6 +35,8 @@ export function MapClusterLayer({
   const leafletRef = useRef<LeafletModule | null>(null);
   const clusterGroupRef = useRef<import("leaflet").MarkerClusterGroup | null>(null);
   const markersByTreeIdRef = useRef<Map<string, import("leaflet").Marker>>(new Map());
+  const treesByIdRef = useRef<Map<string, TreePreview>>(new Map());
+  const previousSelectedTreeIdRef = useRef<string | null>(null);
   const [clusterReady, setClusterReady] = useState(false);
 
   useEffect(() => {
@@ -81,7 +83,9 @@ export function MapClusterLayer({
       }
 
       markersByTreeIdRef.current.clear();
+      treesByIdRef.current.clear();
       leafletRef.current = null;
+      previousSelectedTreeIdRef.current = null;
       setClusterReady(false);
     };
   }, [map]);
@@ -95,12 +99,12 @@ export function MapClusterLayer({
     const clusterGroup = clusterGroupRef.current;
     clusterGroup.clearLayers();
     markersByTreeIdRef.current.clear();
+    treesByIdRef.current = new Map(trees.map((tree) => [tree.id, tree]));
+    previousSelectedTreeIdRef.current = null;
 
     trees.forEach((tree) => {
       const marker = leaflet.marker([tree.lat, tree.lng], {
-        icon: makeTreeImageIcon(leaflet, tree.status, {
-          focused: tree.id === selectedTreeId,
-        }),
+        icon: makeTreeImageIcon(leaflet, tree.status, { focused: false }),
       });
 
       if (onSelect) {
@@ -110,7 +114,40 @@ export function MapClusterLayer({
       clusterGroup.addLayer(marker);
       markersByTreeIdRef.current.set(tree.id, marker);
     });
-  }, [clusterReady, onSelect, selectedTreeId, trees]);
+  }, [clusterReady, onSelect, trees]);
+
+  useEffect(() => {
+    if (!clusterReady || !leafletRef.current) {
+      return;
+    }
+
+    const leaflet = leafletRef.current;
+    const previousSelectedTreeId = previousSelectedTreeIdRef.current;
+
+    if (previousSelectedTreeId && previousSelectedTreeId !== selectedTreeId) {
+      const previousTree = treesByIdRef.current.get(previousSelectedTreeId);
+      const previousMarker = markersByTreeIdRef.current.get(previousSelectedTreeId);
+
+      if (previousTree && previousMarker) {
+        previousMarker.setIcon(
+          makeTreeImageIcon(leaflet, previousTree.status, { focused: false })
+        );
+      }
+    }
+
+    if (selectedTreeId) {
+      const selectedTree = treesByIdRef.current.get(selectedTreeId);
+      const selectedMarker = markersByTreeIdRef.current.get(selectedTreeId);
+
+      if (selectedTree && selectedMarker) {
+        selectedMarker.setIcon(
+          makeTreeImageIcon(leaflet, selectedTree.status, { focused: true })
+        );
+      }
+    }
+
+    previousSelectedTreeIdRef.current = selectedTreeId;
+  }, [clusterReady, selectedTreeId, trees]);
 
   useEffect(() => {
     if (!clusterReady || !clusterGroupRef.current || !focusTreeId) {

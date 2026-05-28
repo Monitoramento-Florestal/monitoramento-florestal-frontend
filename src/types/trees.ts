@@ -169,3 +169,16 @@ export interface Tree {
   records: TreeMeasurementRecord[];
   observacoes?: string;
 }
+
+export interface TreePreview {
+  id: string;
+  codigo: string;
+  especie: string;
+  nomeComum: string;
+  status: TreeStatus;
+  lat: number;
+  lng: number;
+  localizacao: Pick<TreeLocation, "bairro" | "rua">;
+  dimensoes: Pick<TreeDimensions, "alturaM" | "dapCm" | "copaM">;
+  registro: Pick<TreeRecord, "aprovacao" | "ultimaMedicao">;
+}

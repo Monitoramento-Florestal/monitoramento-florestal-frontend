@@ -1,6 +1,4 @@
-import {
-  DashboardPageHeader,
-} from "@/components/features/dashboard";
+import { DashboardPageHeader } from "@/components/features/dashboard";
 import { ApprovalsScreen } from "@/components/features/approvals/ApprovalsScreen";
 import { mockApprovalRequests } from "@/types/mockTrees";
 

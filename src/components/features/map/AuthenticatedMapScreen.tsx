@@ -4,12 +4,12 @@ import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/features/dashboard";
 import { getTreeHistoryRoute } from "@/constants/routes";
 import { UserRole } from "@/constants/roles";
-import { mockTrees } from "@/types/mockTrees";
-import type { Tree } from "@/types/trees";
+import { Button } from "@/components/ui/button";
+import { getMockTreeById, mockTreePreviews } from "@/types/mockTrees";
+import type { Tree, TreePreview } from "@/types/trees";
 import { TreeDetailPanel } from "./treeDetail/TreeDetailPanel";
 import { TREE_STATUS_COLORS } from "./mapIcons";
 
@@ -27,7 +27,11 @@ export function AuthenticatedMapScreen({
   registerHref,
   role,
 }: AuthenticatedMapScreenProps) {
-  const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
+  const [selectedTreePreview, setSelectedTreePreview] = useState<TreePreview | null>(null);
+  const selectedTree = useMemo<Tree | null>(
+    () => (selectedTreePreview ? getMockTreeById(selectedTreePreview.id) : null),
+    [selectedTreePreview]
+  );
   const historyHref = useMemo(
     () => (selectedTree ? getTreeHistoryRoute(role, selectedTree.id) : undefined),
     [role, selectedTree]
@@ -49,9 +53,9 @@ export function AuthenticatedMapScreen({
 
       <DashboardCard className="relative h-[calc(100dvh-14rem)] overflow-hidden p-0">
         <MapView
-          trees={mockTrees}
-          selectedTreeId={selectedTree?.id ?? null}
-          onSelect={setSelectedTree}
+          trees={mockTreePreviews}
+          selectedTreeId={selectedTreePreview?.id ?? null}
+          onSelect={setSelectedTreePreview}
           className="absolute inset-0"
         />
       </DashboardCard>
@@ -59,7 +63,7 @@ export function AuthenticatedMapScreen({
       <TreeDetailPanel
         historyHref={historyHref}
         tree={selectedTree}
-        onClose={() => setSelectedTree(null)}
+        onClose={() => setSelectedTreePreview(null)}
       />
     </div>
   );

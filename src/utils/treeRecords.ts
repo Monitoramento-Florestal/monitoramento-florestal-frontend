@@ -59,7 +59,10 @@ export const TREE_REQUEST_TYPE_LABELS: Record<TreeRequestType, string> = {
   edit_record: "Edição de registro",
 };
 
-export function getTreeRecordFormValues(tree?: Tree | null, record?: TreeMeasurementRecord | null): TreeRecordFormValues {
+export function getTreeRecordFormValues(
+  tree?: Tree | null,
+  record?: TreeMeasurementRecord | null
+): TreeRecordFormValues {
   const sourceRecord = record ?? tree?.records[tree.records.length - 1] ?? null;
 
   return {
@@ -77,7 +80,9 @@ export function getTreeRecordFormValues(tree?: Tree | null, record?: TreeMeasure
     alturaM: sourceRecord ? String(sourceRecord.dimensoes.alturaM) : "",
     copaM: sourceRecord ? String(sourceRecord.dimensoes.copaM) : "",
     medidaEstimada: sourceRecord?.dimensoes.medidaEstimada ?? false,
-    estadoGeral: sourceRecord ? String(sourceRecord.condicao.estadoGeral) as TreeRecordFormValues["estadoGeral"] : "3",
+    estadoGeral: sourceRecord
+      ? (String(sourceRecord.condicao.estadoGeral) as TreeRecordFormValues["estadoGeral"])
+      : "3",
     vigor: sourceRecord?.condicao.vigor ?? "medio",
     problemas: sourceRecord?.condicao.problemas ?? [],
     posicaoProblema: sourceRecord?.condicao.posicaoProblema ?? "",

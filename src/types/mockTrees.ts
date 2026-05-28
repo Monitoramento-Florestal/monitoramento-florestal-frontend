@@ -9,6 +9,7 @@ import type {
   TreeManagementPriority,
   TreeMeasurementRecord,
   TreePotentialTarget,
+  TreePreview,
   TreeProblem,
   TreeProblemPosition,
   TreeRootAnchorage,
@@ -20,11 +21,12 @@ import type {
   TreeVigor,
 } from "./trees";
 
+const TREE_COUNT = 24;
 const CENTER = { lat: -8.0175, lng: -34.9447 };
 
 const especies: Array<[string, string]> = [
-  ["Tabebuia aurea", "Ipe-amarelo"],
-  ["Handroanthus impetiginosus", "Ipe-roxo"],
+  ["Tabebuia aurea", "Ipê-amarelo"],
+  ["Handroanthus impetiginosus", "Ipê-roxo"],
   ["Caesalpinia echinata", "Pau-brasil"],
   ["Anacardium occidentale", "Cajueiro"],
   ["Mangifera indica", "Mangueira"],
@@ -33,17 +35,17 @@ const especies: Array<[string, string]> = [
   ["Clitoria fairchildiana", "Sombreiro"],
   ["Ficus benjamina", "Ficus"],
   ["Terminalia catappa", "Castanhola"],
-  ["Spondias mombin", "Caja"],
+  ["Spondias mombin", "Cajá"],
   ["Bauhinia forficata", "Pata-de-vaca"],
 ];
 
-const bairros = ["Dois Irmaos", "Vila Academica", "Cidade Universitaria"];
+const bairros = ["Dois Irmãos", "Vila Acadêmica", "Cidade Universitária"];
 const ruas = [
   "Rua do Horto",
-  "Avenida da Botanica",
+  "Avenida da Botânica",
   "Rua dos Coqueiros",
   "Alameda Central",
-  "Rua do Colegio Agricola",
+  "Rua do Colégio Agrícola",
 ];
 const equipes = ["Equipe Arbor 1", "Equipe Arbor 2", "Equipe Arbor 3"];
 const pesquisadores = [
@@ -139,72 +141,76 @@ function pickSome<T>(values: T[], seed: number, count: number) {
   return Array.from(new Set(items));
 }
 
-function cloneRecord(record: TreeMeasurementRecord): TreeMeasurementRecord {
-  return JSON.parse(JSON.stringify(record)) as TreeMeasurementRecord;
+function getTreeId(index: number) {
+  return `tree-${String(index).padStart(3, "0")}`;
 }
 
-function createRecordHistory(treeId: string, currentRecord: TreeMeasurementRecord, seed: number) {
-  const records: TreeMeasurementRecord[] = [];
-  const totalRecords = 2 + Math.floor(rand(seed * 2.1) * 3);
+function getTreeIndexFromId(treeId: string) {
+  const match = /^tree-(\d{3})$/.exec(treeId);
 
-  for (let index = 0; index < totalRecords; index += 1) {
-    const version = index + 1;
-    const record = cloneRecord(currentRecord);
-    const offsetDays = (totalRecords - version) * 90;
-    const collectedAt = new Date(currentRecord.registro.ultimaMedicao);
-    collectedAt.setDate(collectedAt.getDate() - offsetDays);
-    const submittedAt = new Date(collectedAt);
-    submittedAt.setDate(submittedAt.getDate() + 2);
-    const dimensionVariance = version === totalRecords ? 0 : totalRecords - version;
-
-    record.id = `${treeId}-record-${version}`;
-    record.treeId = treeId;
-    record.kind = version === 1 ? "initial" : "measurement";
-    record.version = version;
-    record.dimensoes.alturaM = Math.max(2, Number((record.dimensoes.alturaM - dimensionVariance * 0.3).toFixed(1)));
-    record.dimensoes.dapCm = Math.max(4, Number((record.dimensoes.dapCm - dimensionVariance * 1.1).toFixed(1)));
-    record.dimensoes.copaM = Math.max(1, Number((record.dimensoes.copaM - dimensionVariance * 0.2).toFixed(1)));
-    record.localizacao.dataColeta = collectedAt.toISOString();
-    record.registro.registradoEm = submittedAt.toISOString();
-    record.registro.ultimaMedicao = collectedAt.toISOString();
-    record.registro.aprovacao = "aprovada";
-    record.registro.aprovadoEm = submittedAt.toISOString();
-    record.registro.registradoPor = pesquisadores[(seed + index) % pesquisadores.length];
-    record.registro.motivoRejeicao = undefined;
-    records.push(record);
+  if (!match) {
+    return null;
   }
 
-  return records;
+  const index = Number(match[1]);
+  return index >= 1 && index <= TREE_COUNT ? index : null;
 }
 
-function buildTreeFromRecord(treeId: string, codigo: string, especie: string, nomeComum: string, lat: number, lng: number, records: TreeMeasurementRecord[]): Tree {
-  const currentRecord = records[records.length - 1];
+function getTreeSeed(index: number) {
+  const r1 = rand(index * 1.7);
+  const r2 = rand(index * 2.3);
+  const r3 = rand(index * 3.1);
+  const especie = especies[index % especies.length];
+  const cluster = index % 5;
+  const offsetLat = (cluster - 2) * 0.0015;
+  const offsetLng = (cluster - 2) * 0.0012;
+  const lat = CENTER.lat + offsetLat + (r1 - 0.5) * 0.006;
+  const lng = CENTER.lng + offsetLng + (r2 - 0.5) * 0.006;
+  const status: TreeStatus = r3 < 0.65 ? "saudavel" : r3 < 0.9 ? "injuria" : "cortada";
 
   return {
-    id: treeId,
-    codigo,
-    especie,
-    nomeComum,
-    status: currentRecord.status,
+    codigo: `UFRPE-${String(1000 + index)}`,
+    especie: especie[0],
     lat,
     lng,
-    localizacao: currentRecord.localizacao,
-    dimensoes: currentRecord.dimensoes,
-    condicao: currentRecord.condicao,
-    estruturaRisco: currentRecord.estruturaRisco,
-    conflitos: currentRecord.conflitos,
-    manejo: currentRecord.manejo,
-    registro: currentRecord.registro,
-    observacoes: currentRecord.observacoes,
-    records,
+    nomeComum: especie[1],
+    status,
+    treeId: getTreeId(index),
   };
 }
 
-function makeCurrentRecord(treeId: string, seed: number, status: TreeStatus, lat: number, lng: number, especie: string, nomeComum: string): TreeMeasurementRecord {
-  const r1 = rand(seed * 1.7);
-  const r2 = rand(seed * 2.3);
-  const r3 = rand(seed * 3.1);
-  const r4 = rand(seed * 4.7);
+function cloneRecord(record: TreeMeasurementRecord): TreeMeasurementRecord {
+  return {
+    ...record,
+    localizacao: { ...record.localizacao },
+    dimensoes: { ...record.dimensoes },
+    condicao: {
+      ...record.condicao,
+      problemas: [...record.condicao.problemas],
+    },
+    estruturaRisco: {
+      ...record.estruturaRisco,
+      tronco: [...record.estruturaRisco.tronco],
+      baseColo: [...record.estruturaRisco.baseColo],
+      copa: [...record.estruturaRisco.copa],
+      alvosPotenciais: [...record.estruturaRisco.alvosPotenciais],
+      alvosSensiveis: [...record.estruturaRisco.alvosSensiveis],
+    },
+    conflitos: { ...record.conflitos },
+    manejo: { ...record.manejo },
+    registro: {
+      ...record.registro,
+      fotos: [...record.registro.fotos],
+    },
+  };
+}
+
+function makeCurrentRecord(index: number): TreeMeasurementRecord {
+  const { treeId, status } = getTreeSeed(index);
+  const r1 = rand(index * 1.7);
+  const r2 = rand(index * 2.3);
+  const r3 = rand(index * 3.1);
+  const r4 = rand(index * 4.7);
   const coleta = new Date();
   coleta.setDate(coleta.getDate() - Math.floor(r1 * 180));
 
@@ -224,12 +230,12 @@ function makeCurrentRecord(treeId: string, seed: number, status: TreeStatus, lat
     version: 1,
     status,
     localizacao: {
-      bairro: pick(bairros, seed * 5.1),
-      rua: pick(ruas, seed * 5.9),
+      bairro: pick(bairros, index * 5.1),
+      rua: pick(ruas, index * 5.9),
       dataColeta: coleta.toISOString(),
-      equipe: pick(equipes, seed * 6.7),
-      numeroResidencia: String(10 + (seed % 80)),
-      referencia: "Proximo ao acesso principal do campus",
+      equipe: pick(equipes, index * 6.7),
+      numeroResidencia: String(10 + (index % 80)),
+      referencia: "Próximo ao acesso principal do campus",
     },
     dimensoes: {
       alturaM: Math.round((4 + r1 * 18) * 10) / 10,
@@ -239,21 +245,21 @@ function makeCurrentRecord(treeId: string, seed: number, status: TreeStatus, lat
     },
     condicao: {
       estadoGeral,
-      vigor: status === "saudavel" ? "alto" : pick(vigores, seed * 7.3),
+      vigor: status === "saudavel" ? "alto" : pick(vigores, index * 7.3),
       problemas,
-      posicaoProblema: semProblema ? null : pick(posicoesProblema, seed * 7.9),
+      posicaoProblema: semProblema ? null : pick(posicoesProblema, index * 7.9),
     },
     estruturaRisco: {
-      tronco: status === "saudavel" ? ["sem defeitos"] : pickSome(troncoIssues, seed * 8.3, 2),
-      baseColo: status === "saudavel" ? ["normal"] : pickSome(baseIssues, seed * 8.9, 2),
-      copa: status === "saudavel" ? ["assimetrica"] : pickSome(copaIssues, seed * 9.7, 2),
-      inclinacaoTronco: status === "cortada" ? "critica" : pick(inclinacoes, seed * 10.1),
-      ancoragemRadicular: status === "cortada" ? "comprometida" : pick(ancoragens, seed * 10.7),
-      alvosPotenciais: pickSome(alvos, seed * 11.3, 2),
-      fluxoVeiculos: pick(fluxos, seed * 11.9),
-      fluxoPedestres: pick(fluxos, seed * 12.7),
-      tipoVia: pick(tiposVia, seed * 13.1),
-      alvosSensiveis: pickSome(alvosSensiveis, seed * 13.9, 2),
+      tronco: status === "saudavel" ? ["sem defeitos"] : pickSome(troncoIssues, index * 8.3, 2),
+      baseColo: status === "saudavel" ? ["normal"] : pickSome(baseIssues, index * 8.9, 2),
+      copa: status === "saudavel" ? ["assimetrica"] : pickSome(copaIssues, index * 9.7, 2),
+      inclinacaoTronco: status === "cortada" ? "critica" : pick(inclinacoes, index * 10.1),
+      ancoragemRadicular: status === "cortada" ? "comprometida" : pick(ancoragens, index * 10.7),
+      alvosPotenciais: pickSome(alvos, index * 11.3, 2),
+      fluxoVeiculos: pick(fluxos, index * 11.9),
+      fluxoPedestres: pick(fluxos, index * 12.7),
+      tipoVia: pick(tiposVia, index * 13.1),
+      alvosSensiveis: pickSome(alvosSensiveis, index * 13.9, 2),
     },
     conflitos: {
       fiacao: status === "cortada" ? "conflito" : r1 > 0.6 ? "potencial" : "ausente",
@@ -266,58 +272,141 @@ function makeCurrentRecord(treeId: string, seed: number, status: TreeStatus, lat
         status === "saudavel"
           ? "nenhuma"
           : status === "injuria"
-          ? pick(acoesManejo.slice(1, 6), seed * 14.3)
-          : pick(acoesManejo.slice(5), seed * 14.9),
+            ? pick(acoesManejo.slice(1, 6), index * 14.3)
+            : pick(acoesManejo.slice(5), index * 14.9),
       prioridade:
         status === "saudavel"
           ? "baixa"
           : status === "injuria"
-          ? pick(prioridades.slice(1, 3), seed * 15.1)
-          : pick(prioridades.slice(2), seed * 15.7),
+            ? pick(prioridades.slice(1, 3), index * 15.1)
+            : pick(prioridades.slice(2), index * 15.7),
     },
     registro: {
       aprovacao: "aprovada",
       fotos,
       registradoEm: registro.toISOString(),
-      registradoPor: pesquisadores[seed % pesquisadores.length],
+      registradoPor: pesquisadores[index % pesquisadores.length],
       ultimaMedicao: coleta.toISOString(),
       aprovadoEm: registro.toISOString(),
     },
     observacoes:
       status === "saudavel"
-        ? "Exemplar estavel, sem necessidade imediata de intervencao."
+        ? "Exemplar estável, sem necessidade imediata de intervenção."
         : status === "injuria"
-        ? "Recomenda-se monitoramento de rotina e avaliacao de poda."
-        : "Arvore classificada para substituicao por risco estrutural.",
+          ? "Recomenda-se monitoramento de rotina e avaliação de poda."
+          : "Árvore classificada para substituição por risco estrutural.",
   };
 }
 
-function makeTree(i: number): Tree {
-  const r1 = rand(i * 1.7);
-  const r2 = rand(i * 2.3);
-  const r3 = rand(i * 3.1);
-  const especie = especies[i % especies.length];
-  const cluster = i % 5;
-  const offsetLat = (cluster - 2) * 0.0015;
-  const offsetLng = (cluster - 2) * 0.0012;
-  const lat = CENTER.lat + offsetLat + (r1 - 0.5) * 0.006;
-  const lng = CENTER.lng + offsetLng + (r2 - 0.5) * 0.006;
-  const status: TreeStatus =
-    r3 < 0.65 ? "saudavel" : r3 < 0.9 ? "injuria" : "cortada";
-  const treeId = `tree-${String(i).padStart(3, "0")}`;
-  const currentRecord = makeCurrentRecord(treeId, i, status, lat, lng, especie[0], especie[1]);
-  const records = createRecordHistory(treeId, currentRecord, i);
+function createRecordHistory(index: number, currentRecord: TreeMeasurementRecord) {
+  const records: TreeMeasurementRecord[] = [];
+  const totalRecords = 2 + Math.floor(rand(index * 2.1) * 3);
 
-  return buildTreeFromRecord(
-    treeId,
-    `UFRPE-${String(1000 + i)}`,
-    especie[0],
-    especie[1],
-    lat,
-    lng,
-    records
-  );
+  for (let version = 1; version <= totalRecords; version += 1) {
+    const record = cloneRecord(currentRecord);
+    const offsetDays = (totalRecords - version) * 90;
+    const collectedAt = new Date(currentRecord.registro.ultimaMedicao);
+    collectedAt.setDate(collectedAt.getDate() - offsetDays);
+    const submittedAt = new Date(collectedAt);
+    submittedAt.setDate(submittedAt.getDate() + 2);
+    const dimensionVariance = version === totalRecords ? 0 : totalRecords - version;
+
+    record.id = `${currentRecord.treeId}-record-${version}`;
+    record.kind = version === 1 ? "initial" : "measurement";
+    record.version = version;
+    record.dimensoes.alturaM = Math.max(2, Number((record.dimensoes.alturaM - dimensionVariance * 0.3).toFixed(1)));
+    record.dimensoes.dapCm = Math.max(4, Number((record.dimensoes.dapCm - dimensionVariance * 1.1).toFixed(1)));
+    record.dimensoes.copaM = Math.max(1, Number((record.dimensoes.copaM - dimensionVariance * 0.2).toFixed(1)));
+    record.localizacao.dataColeta = collectedAt.toISOString();
+    record.registro.registradoEm = submittedAt.toISOString();
+    record.registro.ultimaMedicao = collectedAt.toISOString();
+    record.registro.aprovacao = "aprovada";
+    record.registro.aprovadoEm = submittedAt.toISOString();
+    record.registro.registradoPor = pesquisadores[(index + version - 1) % pesquisadores.length];
+    record.registro.motivoRejeicao = undefined;
+    records.push(record);
+  }
+
+  return records;
 }
+
+function buildTree(index: number): Tree {
+  const seed = getTreeSeed(index);
+  const currentRecord = makeCurrentRecord(index);
+  const records = createRecordHistory(index, currentRecord);
+  const latestRecord = records[records.length - 1];
+
+  return {
+    id: seed.treeId,
+    codigo: seed.codigo,
+    especie: seed.especie,
+    nomeComum: seed.nomeComum,
+    status: latestRecord.status,
+    lat: seed.lat,
+    lng: seed.lng,
+    localizacao: latestRecord.localizacao,
+    dimensoes: latestRecord.dimensoes,
+    condicao: latestRecord.condicao,
+    estruturaRisco: latestRecord.estruturaRisco,
+    conflitos: latestRecord.conflitos,
+    manejo: latestRecord.manejo,
+    registro: latestRecord.registro,
+    observacoes: latestRecord.observacoes,
+    records,
+  };
+}
+
+function buildTreePreview(index: number): TreePreview {
+  const seed = getTreeSeed(index);
+  const currentRecord = makeCurrentRecord(index);
+
+  return {
+    id: seed.treeId,
+    codigo: seed.codigo,
+    especie: seed.especie,
+    nomeComum: seed.nomeComum,
+    status: currentRecord.status,
+    lat: seed.lat,
+    lng: seed.lng,
+    localizacao: {
+      bairro: currentRecord.localizacao.bairro,
+      rua: currentRecord.localizacao.rua,
+    },
+    dimensoes: {
+      alturaM: currentRecord.dimensoes.alturaM,
+      dapCm: currentRecord.dimensoes.dapCm,
+      copaM: currentRecord.dimensoes.copaM,
+    },
+    registro: {
+      aprovacao: currentRecord.registro.aprovacao,
+      ultimaMedicao: currentRecord.registro.ultimaMedicao,
+    },
+  };
+}
+
+export const mockTreePreviews: TreePreview[] = Array.from(
+  { length: TREE_COUNT },
+  (_, index) => buildTreePreview(index + 1)
+);
+
+export function getMockTreeById(treeId: string) {
+  const index = getTreeIndexFromId(treeId);
+  return index ? buildTree(index) : null;
+}
+
+export function getMockTreeRecordById(treeId: string, recordId: string) {
+  const tree = getMockTreeById(treeId);
+
+  if (!tree) {
+    return null;
+  }
+
+  return tree.records.find((record) => record.id === recordId) ?? null;
+}
+
+const previewTreeFive = getMockTreeById("tree-005");
+const previewTreeTwo = getMockTreeById("tree-002");
+const draftTreeRecord = makeCurrentRecord(90);
 
 function makeRequestRecord(tree: Tree, versionOffset: number, submittedBy: string): TreeMeasurementRecord {
   const baseRecord = cloneRecord(tree.records[Math.max(0, tree.records.length - 1 - versionOffset)]);
@@ -332,90 +421,100 @@ function makeRequestRecord(tree: Tree, versionOffset: number, submittedBy: strin
   return baseRecord;
 }
 
-export const mockTrees: Tree[] = Array.from({ length: 24 }, (_, index) =>
-  makeTree(index + 1)
-);
+const createTreeRequest: TreeApprovalRequest = {
+  id: "request-create-tree-001",
+  type: "create_tree",
+  status: "pendente",
+  submittedAt: new Date("2026-05-16T12:20:00.000Z").toISOString(),
+  submittedBy: "Ana Beatriz Lima",
+  treeMeta: {
+    codigo: "UFRPE-PEND-01",
+    especie: "Tabebuia roseoalba",
+    nomeComum: "Ipê-branco",
+    lat: -8.01691,
+    lng: -34.94518,
+  },
+  treeDraft: {
+    codigo: "UFRPE-PEND-01",
+    especie: "Tabebuia roseoalba",
+    nomeComum: "Ipê-branco",
+    lat: -8.01691,
+    lng: -34.94518,
+  },
+  record: {
+    ...draftTreeRecord,
+    id: "draft-tree-001-record-1",
+    kind: "initial",
+    version: 1,
+    registro: {
+      ...draftTreeRecord.registro,
+      aprovacao: "pendente",
+      registradoPor: "Ana Beatriz Lima",
+    },
+  },
+};
 
-export const mockApprovalRequests: TreeApprovalRequest[] = [
-  {
-    id: "request-create-tree-001",
-    type: "create_tree",
-    status: "pendente",
-    submittedAt: new Date("2026-05-16T12:20:00.000Z").toISOString(),
-    submittedBy: "Ana Beatriz Lima",
-    treeMeta: {
-      codigo: "UFRPE-PEND-01",
-      especie: "Tabebuia roseoalba",
-      nomeComum: "Ipe-branco",
-      lat: -8.01691,
-      lng: -34.94518,
-    },
-    treeDraft: {
-      codigo: "UFRPE-PEND-01",
-      especie: "Tabebuia roseoalba",
-      nomeComum: "Ipe-branco",
-      lat: -8.01691,
-      lng: -34.94518,
-    },
-    record: {
-      ...makeCurrentRecord("draft-tree-001", 90, "saudavel", -8.01691, -34.94518, "Tabebuia roseoalba", "Ipe-branco"),
-      kind: "initial",
-      version: 1,
-      registro: {
-        ...makeCurrentRecord("draft-tree-001", 90, "saudavel", -8.01691, -34.94518, "Tabebuia roseoalba", "Ipe-branco").registro,
-        aprovacao: "pendente",
-        registradoPor: "Ana Beatriz Lima",
+const createRecordRequest: TreeApprovalRequest | null = previewTreeFive
+  ? {
+      id: "request-create-record-002",
+      type: "create_record",
+      status: "pendente",
+      submittedAt: new Date("2026-05-15T09:10:00.000Z").toISOString(),
+      submittedBy: "Pedro Soares",
+      treeId: previewTreeFive.id,
+      treeMeta: {
+        codigo: previewTreeFive.codigo,
+        especie: previewTreeFive.especie,
+        nomeComum: previewTreeFive.nomeComum,
+        lat: previewTreeFive.lat,
+        lng: previewTreeFive.lng,
       },
-    },
-  },
-  {
-    id: "request-create-record-002",
-    type: "create_record",
-    status: "pendente",
-    submittedAt: new Date("2026-05-15T09:10:00.000Z").toISOString(),
-    submittedBy: "Pedro Soares",
-    treeId: mockTrees[4].id,
-    treeMeta: {
-      codigo: mockTrees[4].codigo,
-      especie: mockTrees[4].especie,
-      nomeComum: mockTrees[4].nomeComum,
-      lat: mockTrees[4].lat,
-      lng: mockTrees[4].lng,
-    },
-    record: makeRequestRecord(mockTrees[4], 0, "Pedro Soares"),
-  },
-  {
-    id: "request-edit-record-003",
-    type: "edit_record",
-    status: "pendente",
-    submittedAt: new Date("2026-05-14T15:45:00.000Z").toISOString(),
-    submittedBy: "Ana Beatriz Lima",
-    treeId: mockTrees[1].id,
-    targetRecordId: mockTrees[1].records[0].id,
-    treeMeta: {
-      codigo: mockTrees[1].codigo,
-      especie: mockTrees[1].especie,
-      nomeComum: mockTrees[1].nomeComum,
-      lat: mockTrees[1].lat,
-      lng: mockTrees[1].lng,
-    },
-    record: {
-      ...cloneRecord(mockTrees[1].records[0]),
-      id: `${mockTrees[1].records[0].id}-edit-request`,
-      dimensoes: {
-        ...mockTrees[1].records[0].dimensoes,
-        alturaM: Number((mockTrees[1].records[0].dimensoes.alturaM + 0.4).toFixed(1)),
-      },
-      observacoes: "Pesquisadora solicitou correcao da medida de altura apos revisao de campo.",
-      registro: {
-        ...mockTrees[1].records[0].registro,
+      record: makeRequestRecord(previewTreeFive, 0, "Pedro Soares"),
+    }
+  : null;
+
+const editRecordRequest: TreeApprovalRequest | null = previewTreeTwo
+  ? (() => {
+      const editedRecord = cloneRecord(previewTreeTwo.records[0]);
+      editedRecord.id = `${previewTreeTwo.records[0].id}-edit-request`;
+      editedRecord.dimensoes = {
+        ...previewTreeTwo.records[0].dimensoes,
+        alturaM: Number((previewTreeTwo.records[0].dimensoes.alturaM + 0.4).toFixed(1)),
+      };
+      editedRecord.observacoes =
+        "Pesquisadora solicitou correção da medida de altura após revisão de campo.";
+      editedRecord.registro = {
+        ...previewTreeTwo.records[0].registro,
         aprovacao: "pendente",
         registradoPor: "Ana Beatriz Lima",
         registradoEm: new Date("2026-05-14T15:45:00.000Z").toISOString(),
-      },
-    },
-  },
-];
+      };
+
+      return {
+        id: "request-edit-record-003",
+        type: "edit_record",
+        status: "pendente",
+        submittedAt: new Date("2026-05-14T15:45:00.000Z").toISOString(),
+        submittedBy: "Ana Beatriz Lima",
+        treeId: previewTreeTwo.id,
+        targetRecordId: previewTreeTwo.records[0].id,
+        treeMeta: {
+          codigo: previewTreeTwo.codigo,
+          especie: previewTreeTwo.especie,
+          nomeComum: previewTreeTwo.nomeComum,
+          lat: previewTreeTwo.lat,
+          lng: previewTreeTwo.lng,
+        },
+        record: editedRecord,
+      };
+    })()
+  : null;
+
+export const mockApprovalRequests: TreeApprovalRequest[] = [
+  createTreeRequest,
+  createRecordRequest,
+  editRecordRequest,
+].filter((request): request is TreeApprovalRequest => request !== null);
 
 export const mockUsers: User[] = [
   { id: "u1", name: "Visitante", email: "visitante@arbor.local", role: "citizen" },

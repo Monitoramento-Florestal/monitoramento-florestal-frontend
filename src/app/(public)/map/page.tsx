@@ -5,14 +5,14 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ArrowLeft, Plus } from "lucide-react";
 
-import { TREE_STATUS_COLORS } from "@/components/features/map/mapIcons";
+import { UserRole } from "@/constants/roles";
 import { TreeDetailPanel } from "@/components/features/map/treeDetail/TreeDetailPanel";
+import { TREE_STATUS_COLORS } from "@/components/features/map/mapIcons";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { UserRole } from "@/constants/roles";
-import { mockTrees } from "@/types/mockTrees";
-import type { Tree } from "@/types/trees";
+import { getMockTreeById, mockTreePreviews } from "@/types/mockTrees";
+import type { Tree, TreePreview } from "@/types/trees";
 
 const MapDefaultRender = dynamic(() => import("@/components/features/map/MapView"), {
   ssr: false,
@@ -25,13 +25,7 @@ const REGISTER_ROLES = new Set<UserRole>([
   UserRole.ADMIN,
 ]);
 
-function Legend({
-  color,
-  label,
-}: {
-  color: string;
-  label: string;
-}) {
+function Legend({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-2">
       <span className="size-2 rounded-full" style={{ backgroundColor: color }} />
@@ -42,7 +36,11 @@ function Legend({
 
 export default function MapPage() {
   const { user } = useAuthContext();
-  const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
+  const [selectedTreePreview, setSelectedTreePreview] = useState<TreePreview | null>(null);
+  const selectedTree = useMemo<Tree | null>(
+    () => (selectedTreePreview ? getMockTreeById(selectedTreePreview.id) : null),
+    [selectedTreePreview]
+  );
 
   const canRegister = useMemo(
     () => (user ? REGISTER_ROLES.has(user.role as UserRole) : false),
@@ -52,13 +50,13 @@ export default function MapPage() {
   return (
     <section className="relative h-screen w-screen overflow-hidden bg-cream">
       <MapDefaultRender
-        trees={mockTrees}
-        selectedTreeId={selectedTree?.id ?? null}
-        onSelect={setSelectedTree}
+        trees={mockTreePreviews}
+        selectedTreeId={selectedTreePreview?.id ?? null}
+        onSelect={setSelectedTreePreview}
         className="absolute inset-0"
       />
 
-      <div className="pointer-events-none absolute top-4 left-4 right-4 z-[800] flex items-center justify-between gap-3">
+      <div className="pointer-events-none absolute left-4 top-4 right-4 z-[800] flex items-center justify-between gap-3">
         <Link
           href="/"
           className="pointer-events-auto flex items-center gap-2.5 rounded-lg border-hair bg-cream/95 px-3 py-2 backdrop-blur transition-colors hover:bg-cream"
@@ -78,7 +76,7 @@ export default function MapPage() {
         <Button
           type="button"
           size="lg"
-          className="absolute right-4 bottom-6 z-[800] bg-sage px-8 text-cream shadow-md hover:bg-sage/90"
+          className="absolute bottom-6 right-4 z-[800] bg-sage px-8 text-cream shadow-md hover:bg-sage/90"
           icon={Plus}
           iconSide="left"
         >
@@ -86,7 +84,7 @@ export default function MapPage() {
         </Button>
       ) : null}
 
-      <TreeDetailPanel tree={selectedTree} onClose={() => setSelectedTree(null)} />
+      <TreeDetailPanel tree={selectedTree} onClose={() => setSelectedTreePreview(null)} />
     </section>
   );
 }

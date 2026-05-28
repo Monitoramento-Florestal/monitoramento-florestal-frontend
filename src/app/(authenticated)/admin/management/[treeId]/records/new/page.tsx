@@ -1,8 +1,7 @@
 import { DashboardPageHeader } from "@/components/features/dashboard";
 import { TreeRecordFormScreen } from "@/components/features/treeRecords/TreeRecordFormScreen";
 import { UserRole } from "@/constants/roles";
-import { mockTrees } from "@/types/mockTrees";
-import { findTreeById } from "@/utils/treeQueries";
+import { getMockTreeById } from "@/types/mockTrees";
 import { getTreeRecordFormSubtitle } from "@/utils/treeRecords";
 
 export default async function AdminNewRecordPage({
@@ -11,7 +10,7 @@ export default async function AdminNewRecordPage({
   params: Promise<{ treeId: string }>;
 }) {
   const { treeId } = await params;
-  const tree = findTreeById(mockTrees, treeId);
+  const tree = getMockTreeById(treeId);
 
   if (!tree) {
     return null;

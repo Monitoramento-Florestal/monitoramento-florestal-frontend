@@ -1,8 +1,7 @@
 import { DashboardPageHeader } from "@/components/features/dashboard";
 import { TreeHistoryScreen } from "@/components/features/treeRecords/TreeHistoryScreen";
 import { UserRole } from "@/constants/roles";
-import { mockApprovalRequests, mockTrees } from "@/types/mockTrees";
-import { findTreeById } from "@/utils/treeQueries";
+import { getMockTreeById } from "@/types/mockTrees";
 import { getTreeHistorySummary } from "@/utils/treeRecords";
 
 export default async function ResearcherTreeHistoryPage({
@@ -11,7 +10,7 @@ export default async function ResearcherTreeHistoryPage({
   params: Promise<{ treeId: string }>;
 }) {
   const { treeId } = await params;
-  const tree = findTreeById(mockTrees, treeId);
+  const tree = getMockTreeById(treeId);
 
   if (!tree) {
     return null;
@@ -19,16 +18,9 @@ export default async function ResearcherTreeHistoryPage({
 
   return (
     <>
-      <DashboardPageHeader
-        title="Histórico da árvore"
-        subtitle={getTreeHistorySummary(tree)}
-      />
+      <DashboardPageHeader title="Histórico da árvore" subtitle={getTreeHistorySummary(tree)} />
       <div className="p-6">
-        <TreeHistoryScreen
-          approvalRequests={mockApprovalRequests}
-          role={UserRole.RESEARCHER}
-          tree={tree}
-        />
+        <TreeHistoryScreen role={UserRole.RESEARCHER} tree={tree} />
       </div>
     </>
   );

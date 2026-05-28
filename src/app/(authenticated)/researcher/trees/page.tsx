@@ -1,7 +1,7 @@
 import { DashboardPageHeader } from "@/components/features/dashboard";
 import { TreeManagementScreen } from "@/components/features/treeManagement/TreeManagementScreen";
 import { UserRole } from "@/constants/roles";
-import { mockTrees } from "@/types/mockTrees";
+import { mockTreePreviews } from "@/types/mockTrees";
 import { getTreeManagementSummary } from "@/utils/treeManagement";
 
 export default function ResearcherTreeManagementPage() {
@@ -9,13 +9,10 @@ export default function ResearcherTreeManagementPage() {
     <>
       <DashboardPageHeader
         title="Gerenciamento de árvores"
-        subtitle={getTreeManagementSummary(mockTrees.length, mockTrees.length)}
+        subtitle={getTreeManagementSummary(mockTreePreviews.length, mockTreePreviews.length)}
       />
       <div className="p-6">
-        <TreeManagementScreen
-          initialTrees={mockTrees}
-          role={UserRole.RESEARCHER}
-        />
+        <TreeManagementScreen initialTrees={mockTreePreviews} role={UserRole.RESEARCHER} />
       </div>
     </>
   );

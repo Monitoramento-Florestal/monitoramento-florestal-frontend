@@ -1,8 +1,7 @@
 import { DashboardPageHeader } from "@/components/features/dashboard";
 import { TreeRecordFormScreen } from "@/components/features/treeRecords/TreeRecordFormScreen";
 import { UserRole } from "@/constants/roles";
-import { mockTrees } from "@/types/mockTrees";
-import { findTreeById, findTreeRecordById } from "@/utils/treeQueries";
+import { getMockTreeById, getMockTreeRecordById } from "@/types/mockTrees";
 import { getTreeRecordFormSubtitle } from "@/utils/treeRecords";
 
 export default async function ManagerEditRecordPage({
@@ -11,8 +10,8 @@ export default async function ManagerEditRecordPage({
   params: Promise<{ treeId: string; recordId: string }>;
 }) {
   const { treeId, recordId } = await params;
-  const tree = findTreeById(mockTrees, treeId);
-  const record = findTreeRecordById(tree, recordId);
+  const tree = getMockTreeById(treeId);
+  const record = getMockTreeRecordById(treeId, recordId);
 
   if (!tree || !record) {
     return null;
@@ -25,7 +24,12 @@ export default async function ManagerEditRecordPage({
         subtitle={getTreeRecordFormSubtitle(UserRole.MANAGER, "edit-record")}
       />
       <div className="p-6">
-        <TreeRecordFormScreen mode="edit-record" role={UserRole.MANAGER} tree={tree} record={record} />
+        <TreeRecordFormScreen
+          mode="edit-record"
+          role={UserRole.MANAGER}
+          tree={tree}
+          record={record}
+        />
       </div>
     </>
   );

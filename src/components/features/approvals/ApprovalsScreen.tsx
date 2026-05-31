@@ -13,6 +13,7 @@ import {
 } from "@/utils/approvals";
 import type { TreeApprovalRequest } from "@/types/trees";
 import { ApprovalRecordCard } from "./ApprovalRecordCard";
+import { ApprovalRequestDetailDrawer } from "./ApprovalRequestDetailDrawer";
 import { ApprovalsEmptyState } from "./ApprovalsEmptyState";
 import { ApprovalsFilters } from "./ApprovalsFilters";
 import { ApprovalsLoadingState } from "./ApprovalsLoadingState";
@@ -32,6 +33,7 @@ export function ApprovalsScreen({
   );
   const [query, setQuery] = useState("");
   const [searchField, setSearchField] = useState<ApprovalSearchField>("researcher");
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [rejectTargetId, setRejectTargetId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectError, setRejectError] = useState("");
@@ -44,6 +46,10 @@ export function ApprovalsScreen({
     () => records.find((record) => record.id === rejectTargetId) ?? null,
     [records, rejectTargetId]
   );
+  const selectedRequest = useMemo(
+    () => records.find((record) => record.id === selectedRequestId) ?? null,
+    [records, selectedRequestId]
+  );
 
   function handleApprove(id: string) {
     if (!records.some((record) => record.id === id)) {
@@ -51,12 +57,21 @@ export function ApprovalsScreen({
     }
 
     setRecords((current) => approveRecord(current, id));
+    setSelectedRequestId((current) => (current === id ? null : current));
   }
 
   function handleStartReject(id: string) {
     setRejectTargetId(id);
     setRejectReason("");
     setRejectError("");
+  }
+
+  function handleOpenDetails(id: string) {
+    setSelectedRequestId(id);
+  }
+
+  function handleCloseDetails() {
+    setSelectedRequestId(null);
   }
 
   function handleConfirmReject() {
@@ -70,6 +85,7 @@ export function ApprovalsScreen({
     }
 
     setRecords((current) => rejectRecord(current, rejectTarget.id, rejectReason.trim()));
+    setSelectedRequestId((current) => (current === rejectTarget.id ? null : current));
     setRejectTargetId(null);
     setRejectReason("");
     setRejectError("");
@@ -100,6 +116,7 @@ export function ApprovalsScreen({
                 key={record.id}
                 request={record}
                 onApprove={handleApprove}
+                onOpenDetails={handleOpenDetails}
                 onReject={handleStartReject}
               />
             ))}
@@ -119,6 +136,14 @@ export function ApprovalsScreen({
           setRejectError("");
         }}
         onConfirm={handleConfirmReject}
+      />
+
+      <ApprovalRequestDetailDrawer
+        open={Boolean(selectedRequest)}
+        request={selectedRequest}
+        onClose={handleCloseDetails}
+        onApprove={handleApprove}
+        onReject={handleStartReject}
       />
     </>
   );

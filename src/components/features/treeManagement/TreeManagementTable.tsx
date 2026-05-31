@@ -4,26 +4,28 @@ import { Eye, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { TREE_STATUS_COLORS } from "@/components/features/map/mapIcons";
+import { UserRole } from "@/constants/roles";
+import { getTreeHistoryRoute } from "@/constants/routes";
+import type { TreePreview } from "@/types/trees";
 import { formatDate } from "@/utils/format";
 import {
   getTreeManagementStatusLabel,
   type TreeManagementPolicy,
 } from "@/utils/treeManagement";
-import type { Tree } from "@/types/trees";
 
 interface TreeManagementTableProps {
-  onDeleteTree?: (tree: Tree) => void;
-  onEditTree?: (tree: Tree) => void;
-  onSelectTree: (tree: Tree) => void;
+  onDeleteTree?: (tree: TreePreview) => void;
+  onEditTree?: (tree: TreePreview) => void;
   policy: TreeManagementPolicy;
-  trees: Tree[];
+  role: UserRole;
+  trees: TreePreview[];
 }
 
 export function TreeManagementTable({
   onDeleteTree,
   onEditTree,
-  onSelectTree,
   policy,
+  role,
   trees,
 }: TreeManagementTableProps) {
   return (
@@ -31,52 +33,33 @@ export function TreeManagementTable({
       <table className="min-w-full border-separate border-spacing-0">
         <thead>
           <tr className="text-left text-[10px] uppercase tracking-[0.18em] text-rosewood/75">
-            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              Codigo
-            </th>
-            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              Especie
-            </th>
-            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              Altura
-            </th>
-            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              DAP
-            </th>
-            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              Copa
-            </th>
-            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              Status
-            </th>
-            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-              Ultima medicao
-            </th>
-            <th className="border-b border-rosewood/10 px-4 py-4 text-right font-medium">
-              Acoes
-            </th>
+            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">Código</th>
+            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">Espécie</th>
+            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">Altura</th>
+            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">DAP</th>
+            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">Copa</th>
+            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">Status</th>
+            <th className="border-b border-rosewood/10 px-4 py-4 font-medium">Última medição</th>
+            <th className="border-b border-rosewood/10 px-4 py-4 text-right font-medium">Ações</th>
           </tr>
         </thead>
 
         <tbody>
           {trees.map((tree) => {
             const statusColor = TREE_STATUS_COLORS[tree.status];
+            const historyHref = getTreeHistoryRoute(
+              role as UserRole.RESEARCHER | UserRole.MANAGER | UserRole.ADMIN,
+              tree.id
+            );
 
             return (
-              <tr
-                key={tree.id}
-                className="transition-colors hover:bg-secondary/45"
-              >
+              <tr key={tree.id} className="transition-colors hover:bg-secondary/45">
                 <td className="border-b border-rosewood/8 px-4 py-5 text-sm text-rosewood">
                   {tree.codigo}
                 </td>
                 <td className="border-b border-rosewood/8 px-4 py-5">
-                  <div className="text-base tracking-tight text-burgundy">
-                    {tree.nomeComum}
-                  </div>
-                  <div className="mt-1 text-sm text-rosewood">
-                    {tree.especie}
-                  </div>
+                  <div className="text-base tracking-tight text-burgundy">{tree.nomeComum}</div>
+                  <div className="mt-1 text-sm text-rosewood">{tree.especie}</div>
                 </td>
                 <td className="border-b border-rosewood/8 px-4 py-5 text-sm tabular-nums text-burgundy">
                   {tree.dimensoes.alturaM} m
@@ -106,15 +89,14 @@ export function TreeManagementTable({
                   <div className="flex justify-end gap-2">
                     {policy.canOpenDetails ? (
                       <Button
-                        type="button"
+                        href={historyHref}
                         variant="ghost"
                         size="sm"
                         icon={Eye}
                         iconSide="left"
                         className="text-rosewood hover:bg-secondary"
-                        onClick={() => onSelectTree(tree)}
                       >
-                        Ver
+                        Ver histórico
                       </Button>
                     ) : null}
 

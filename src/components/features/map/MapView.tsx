@@ -3,16 +3,16 @@
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 
 import { MapClusterLayer } from "./MapClusterLayer";
-import type { Tree } from "@/types/trees";
+import type { TreePreview } from "@/types/trees";
 
 const UFRPE = { lat: -8.0175, lng: -34.9447 };
 
 export interface MapViewProps {
-  trees: Tree[];
+  trees: TreePreview[];
   selectedTreeId?: string | null;
   focusTreeId?: string | null;
   className?: string;
-  onSelect?: (tree: Tree) => void;
+  onSelect?: (tree: TreePreview) => void;
 }
 
 export default function MapView({

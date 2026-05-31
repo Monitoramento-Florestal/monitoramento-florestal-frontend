@@ -16,12 +16,12 @@ export function TreeManagementEmptyState({
       </div>
 
       <h2 className="mt-5 text-xl tracking-tight text-burgundy">
-        {hasFilters ? "Nenhuma arvore encontrada" : "Nenhuma arvore cadastrada"}
+        {hasFilters ? "Nenhuma árvore encontrada" : "Nenhuma árvore cadastrada"}
       </h2>
       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-rosewood">
         {hasFilters
-          ? "Ajuste a busca ou os filtros para encontrar outro conjunto de arvores."
-          : "Quando novas arvores entrarem no acervo, elas aparecerao aqui."}
+          ? "Ajuste a busca ou os filtros para encontrar outro conjunto de árvores."
+          : "Quando novas árvores entrarem no acervo, elas aparecerão aqui."}
       </p>
     </DashboardCard>
   );

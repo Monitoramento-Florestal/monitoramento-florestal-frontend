@@ -54,7 +54,7 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
   },
   {
     key: "register-tree",
-    label: "Registrar arvore",
+    label: "Registrar árvore",
     href: {
       [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_TREES_NEW,
       [UserRole.MANAGER]: APP_ROUTES.MANAGER_TREES_NEW,
@@ -65,7 +65,7 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
   },
   {
     key: "approvals",
-    label: "Fila de aprovacao",
+    label: "Fila de aprovação",
     href: {
       [UserRole.MANAGER]: APP_ROUTES.MANAGER_APPROVALS,
       [UserRole.ADMIN]: APP_ROUTES.ADMIN_APPROVALS,
@@ -75,7 +75,7 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
   },
   {
     key: "tree-management",
-    label: "Gerenciamento de arvores",
+    label: "Gerenciamento de árvores",
     href: {
       [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_TREES,
     },
@@ -94,7 +94,7 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
   },
   {
     key: "users",
-    label: "Usuarios",
+    label: "Usuários",
     href: {
       [UserRole.MANAGER]: APP_ROUTES.MANAGER_USERS,
       [UserRole.ADMIN]: APP_ROUTES.ADMIN_USERS,

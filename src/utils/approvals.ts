@@ -1,26 +1,15 @@
-import type { Tree } from "@/types/trees";
+import type { TreeApprovalRequest } from "@/types/trees";
 import { formatDate } from "@/utils/format";
+import { TREE_RECORD_STATUS_LABELS, TREE_REQUEST_TYPE_LABELS } from "@/utils/treeRecords";
 
 export type ApprovalSearchField = "researcher" | "species";
 
-export function getApprovalRecordStatusLabel(tree: Tree) {
-  if (tree.status === "saudavel") {
-    return "Saudavel";
-  }
-
-  if (tree.status === "injuria") {
-    return "Com injuria";
-  }
-
-  return "Cortada";
-}
-
-export function getPendingApprovalRecords(trees: Tree[]) {
-  return trees.filter((tree) => tree.registro.aprovacao === "pendente");
+export function getPendingApprovalRecords(requests: TreeApprovalRequest[]) {
+  return requests.filter((request) => request.status === "pendente");
 }
 
 export function filterApprovalRecords(
-  records: Tree[],
+  records: TreeApprovalRequest[],
   query: string,
   field: ApprovalSearchField
 ) {
@@ -32,74 +21,59 @@ export function filterApprovalRecords(
 
   return records.filter((record) => {
     if (field === "researcher") {
-      return record.registro.registradoPor.toLowerCase().includes(normalizedQuery);
+      return record.submittedBy.toLowerCase().includes(normalizedQuery);
     }
 
-    return record.especie.toLowerCase().includes(normalizedQuery);
+    const species = record.treeDraft?.especie ?? getApprovalRecordSpecies(record);
+    return species.toLowerCase().includes(normalizedQuery);
   });
 }
 
-export function approveRecord(records: Tree[], id: string) {
-  const approvedAt = new Date().toISOString();
-
-  return records
-    .map((record) =>
-      record.id === id
-        ? {
-            ...record,
-            registro: {
-              ...record.registro,
-              aprovacao: "aprovada" as const,
-              aprovadoEm: approvedAt,
-            },
-          }
-        : record
-    )
-    .filter((record) => record.registro.aprovacao === "pendente");
+export function approveRecord(records: TreeApprovalRequest[], id: string) {
+  return records.filter((record) => record.id !== id);
 }
 
-export function rejectRecord(records: Tree[], id: string, reason: string) {
-  return records
-    .map((record) =>
-      record.id === id
-        ? {
-            ...record,
-            registro: {
-              ...record.registro,
-              aprovacao: "rejeitada" as const,
-              motivoRejeicao: reason,
-            },
-          }
-        : record
-    )
-    .filter((record) => record.registro.aprovacao === "pendente");
+export function rejectRecord(records: TreeApprovalRequest[], id: string, reason: string) {
+  return records.map((record) =>
+    record.id === id
+      ? {
+          ...record,
+          status: "rejeitada" as const,
+          rejectionReason: reason,
+        }
+      : record
+  ).filter((record) => record.status === "pendente");
 }
 
-export function getApprovalRecordImage(tree: Tree) {
-  return tree.registro.fotos[0] ?? null;
+export function getApprovalRecordCode(record: TreeApprovalRequest) {
+  return record.treeDraft?.codigo ?? record.treeMeta.codigo;
 }
 
-export function getApprovalRecordMetrics(tree: Tree) {
+export function getApprovalRecordName(record: TreeApprovalRequest) {
+  return record.treeDraft?.nomeComum ?? record.treeMeta.nomeComum;
+}
+
+export function getApprovalRecordSpecies(record: TreeApprovalRequest) {
+  return record.treeDraft?.especie ?? record.treeMeta.especie;
+}
+
+export function getApprovalRecordTypeLabel(record: TreeApprovalRequest) {
+  return TREE_REQUEST_TYPE_LABELS[record.type];
+}
+
+export function getApprovalRecordStatusLabel(record: TreeApprovalRequest) {
+  return TREE_RECORD_STATUS_LABELS[record.record.status];
+}
+
+export function getApprovalRecordImage(record: TreeApprovalRequest) {
+  return record.record.registro.fotos[0] ?? null;
+}
+
+export function getApprovalRecordMetrics(record: TreeApprovalRequest) {
   return [
-    { label: "Altura", value: `${tree.dimensoes.alturaM} m` },
-    { label: "DAP", value: `${tree.dimensoes.dapCm} cm` },
-    { label: "Copa", value: `${tree.dimensoes.copaM} m` },
-    { label: "Coleta", value: formatDate(tree.localizacao.dataColeta) },
+    { label: "Altura", value: `${record.record.dimensoes.alturaM} m` },
+    { label: "DAP", value: `${record.record.dimensoes.dapCm} cm` },
+    { label: "Copa", value: `${record.record.dimensoes.copaM} m` },
+    { label: "Coleta", value: formatDate(record.record.localizacao.dataColeta) },
   ];
-}
-
-export function getApprovalFeedbackMessage(kind: "approved" | "rejected", tree: Tree) {
-  if (kind === "approved") {
-    return {
-      title: "Registro aprovado",
-      description: `${tree.nomeComum} saiu da fila e esta pronto para a proxima etapa.`,
-      tone: "success" as const,
-    };
-  }
-
-  return {
-    title: "Registro rejeitado",
-    description: `${tree.nomeComum} foi devolvido para correcao com justificativa registrada.`,
-    tone: "danger" as const,
-  };
 }

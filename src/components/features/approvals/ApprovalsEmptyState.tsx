@@ -21,7 +21,7 @@ export function ApprovalsEmptyState({
       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-rosewood">
         {hasFilters
           ? "Ajuste a busca ou troque o filtro para localizar outros registros pendentes."
-          : "Todos os registros enviados ja foram revisados. Quando novas submissoes entrarem na fila, elas aparecerao aqui."}
+          : "Todos os registros enviados já foram revisados. Quando novas submissões entrarem na fila, elas aparecerão aqui."}
       </p>
     </DashboardCard>
   );

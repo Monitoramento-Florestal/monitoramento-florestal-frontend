@@ -3,18 +3,18 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes } from "react";
 
-export type ButtonVariant = "primary" | "outline" | "ghost";
-export type ButtonSize    = "sm" | "md" | "lg";
+export type ButtonVariant = "primary" | "burgundy" | "outline" | "ghost";
+export type ButtonSize = "sm" | "md" | "lg";
 
 interface BaseProps {
-  text?:      string;
-  icon?:      LucideIcon;
-  iconSide?:  "left" | "right";
-  variant?:   ButtonVariant;
-  size?:      ButtonSize;
+  text?: string;
+  icon?: LucideIcon;
+  iconSide?: "left" | "right";
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   className?: string;
-  href?:      string;
-  external?:  boolean;
+  href?: string;
+  external?: boolean;
 }
 
 type ButtonProps = BaseProps & Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof BaseProps>;
@@ -25,6 +25,13 @@ const variantStyles: Record<ButtonVariant, string> = {
     "hover:bg-sage/90",
     "focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2",
     "disabled:bg-sage/40 disabled:pointer-events-none",
+  ].join(" "),
+
+  burgundy: [
+    "bg-burgundy text-cream",
+    "hover:bg-burgundy/90",
+    "focus-visible:ring-2 focus-visible:ring-burgundy focus-visible:ring-offset-2",
+    "disabled:bg-burgundy/40 disabled:pointer-events-none",
   ].join(" "),
 
   outline: [
@@ -61,15 +68,14 @@ const BASE = [
   "outline-none",
 ].join(" ");
 
-
 export function Button({
   text,
   icon: Icon,
-  iconSide  = "right",
-  variant   = "primary",
-  size      = "md",
+  iconSide = "right",
+  variant = "primary",
+  size = "md",
   href,
-  external  = false,
+  external = false,
   className = "",
   children,
   ...props
@@ -89,7 +95,7 @@ export function Button({
 
   const content = (
     <>
-      {iconSide === "left"  && iconEl}
+      {iconSide === "left" && iconEl}
       {text ?? children}
       {iconSide === "right" && iconEl}
     </>
@@ -116,7 +122,6 @@ export function Button({
     );
   }
 
-  // Button
   return (
     <button className={classes} {...props}>
       {content}

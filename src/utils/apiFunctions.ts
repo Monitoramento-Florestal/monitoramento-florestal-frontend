@@ -45,6 +45,17 @@ export function isRefreshRequest(url: string | undefined) {
   return url.includes(API_ENDPOINTS.AUTH_REFRESH)
 }
 
+function looksLikeHtml(value: string) {
+  const normalized = value.trim().toLowerCase()
+
+  return (
+    normalized.startsWith('<!doctype html') ||
+    normalized.startsWith('<html') ||
+    normalized.includes('<body') ||
+    normalized.includes('</html>')
+  )
+}
+
 export function normalizeApiError(error: unknown) {
   if (!axios.isAxiosError(error)) {
     return {
@@ -54,16 +65,23 @@ export function normalizeApiError(error: unknown) {
   }
 
   const payload = error.response?.data
+  const contentType = error.response?.headers?.['content-type']
   let message = error.message
 
   if (typeof payload === 'string') {
-    message = payload
+    message = looksLikeHtml(payload)
+      ? 'A aplicação recebeu uma resposta inválida do servidor.'
+      : payload
   } else if (payload && typeof payload === 'object') {
     if ('message' in payload && typeof payload.message === 'string') {
       message = payload.message
     } else if ('erro' in payload && typeof payload.erro === 'string') {
       message = payload.erro
     }
+  }
+
+  if (typeof contentType === 'string' && contentType.includes('text/html')) {
+    message = 'A aplicação recebeu uma resposta inválida do servidor.'
   }
 
   return {

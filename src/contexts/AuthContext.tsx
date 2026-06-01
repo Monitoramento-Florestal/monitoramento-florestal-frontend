@@ -80,7 +80,7 @@ function readStoredSession(): AuthSession | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSessionState] = useState<AuthSession | null>(() => readStoredSession())
+  const [session, setSessionState] = useState<AuthSession | null>(null)
   const [isBootstrapping, setIsBootstrapping] = useState(true)
 
   const clearAuth = useCallback(() => {

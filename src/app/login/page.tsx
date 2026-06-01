@@ -45,7 +45,13 @@ export default function LoginForm() {
 
       router.replace(getHomeRouteForRole(nextUser.role))
     } catch (error) {
-      setSubmitError(normalizeApiError(error).message)
+      const normalizedError = normalizeApiError(error)
+
+      setSubmitError(
+        normalizedError.status === 401
+          ? 'E-mail ou senha inválidos.'
+          : normalizedError.message,
+      )
     }
   }
 

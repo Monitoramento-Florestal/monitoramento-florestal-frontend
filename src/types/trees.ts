@@ -1,5 +1,7 @@
 export type TreeStatus = "saudavel" | "injuria" | "cortada";
 export type ApprovalStatus = "aprovada" | "pendente" | "rejeitada";
+export type TreeRequestType = "create_tree" | "create_record" | "edit_record";
+export type TreeRecordKind = "initial" | "measurement";
 
 export type TreeVigor = "alto" | "medio" | "baixo";
 export type TreeProblem = "pragas" | "fungos" | "podridao" | "injuria" | "nenhum";
@@ -119,6 +121,36 @@ export interface TreeRecord {
   ultimaMedicao: string;
 }
 
+export interface TreeMeasurementRecord {
+  id: string;
+  treeId: string;
+  kind: TreeRecordKind;
+  version: number;
+  status: TreeStatus;
+  localizacao: TreeLocation;
+  dimensoes: TreeDimensions;
+  condicao: TreeCondition;
+  estruturaRisco: TreeStructureRisk;
+  conflitos: TreeConflicts;
+  manejo: TreeManagement;
+  registro: TreeRecord;
+  observacoes?: string;
+}
+
+export interface TreeApprovalRequest {
+  id: string;
+  record: TreeMeasurementRecord;
+  status: ApprovalStatus;
+  submittedAt: string;
+  submittedBy: string;
+  targetRecordId?: string;
+  treeMeta: Pick<Tree, "codigo" | "especie" | "lat" | "lng" | "nomeComum">;
+  treeDraft?: Pick<Tree, "codigo" | "especie" | "lat" | "lng" | "nomeComum">;
+  treeId?: string;
+  type: TreeRequestType;
+  rejectionReason?: string;
+}
+
 export interface Tree {
   id: string;
   codigo: string;
@@ -134,5 +166,19 @@ export interface Tree {
   conflitos: TreeConflicts;
   manejo: TreeManagement;
   registro: TreeRecord;
+  records: TreeMeasurementRecord[];
   observacoes?: string;
+}
+
+export interface TreePreview {
+  id: string;
+  codigo: string;
+  especie: string;
+  nomeComum: string;
+  status: TreeStatus;
+  lat: number;
+  lng: number;
+  localizacao: Pick<TreeLocation, "bairro" | "rua">;
+  dimensoes: Pick<TreeDimensions, "alturaM" | "dapCm" | "copaM">;
+  registro: Pick<TreeRecord, "aprovacao" | "ultimaMedicao">;
 }

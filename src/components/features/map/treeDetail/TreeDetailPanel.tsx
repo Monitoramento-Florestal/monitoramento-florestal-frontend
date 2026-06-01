@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { TREE_STATUS_COLORS, TREE_STATUS_LABEL } from "../mapIcons";
+import type { Tree } from "@/types/trees";
 import {
   APPROVAL_LABEL,
   APPROVAL_TONE,
@@ -23,20 +23,25 @@ import {
   getTreeCoverPhoto,
   getTreeProblemLabels,
 } from "@/utils/treeDetailPanel";
+import { TREE_STATUS_COLORS, TREE_STATUS_LABEL } from "../mapIcons";
 import { DetailGroup } from "./DetailGroup";
 import { DetailNote } from "./DetailNote";
 import { Metric } from "./Metric";
 import { Section } from "./Section";
 import { StatusPill } from "./StatusPill";
 import { TagList } from "./TagList";
-import type { Tree } from "@/types/trees";
 
 interface TreeDetailPanelProps {
+  historyHref?: string;
   tree: Tree | null;
   onClose: () => void;
 }
 
-export function TreeDetailPanel({ tree, onClose }: TreeDetailPanelProps) {
+export function TreeDetailPanel({
+  historyHref,
+  tree,
+  onClose,
+}: TreeDetailPanelProps) {
   if (!tree) {
     return null;
   }
@@ -241,7 +246,7 @@ export function TreeDetailPanel({ tree, onClose }: TreeDetailPanelProps) {
             />
           </Section>
 
-          <Section title="Registro">
+          <Section title="Registro atual">
             <Metric
               icon={Calendar}
               label="Última medição"
@@ -279,15 +284,15 @@ export function TreeDetailPanel({ tree, onClose }: TreeDetailPanelProps) {
 
         <div className="border-t border-rosewood/14 bg-card/95 px-5 py-4">
           <Button
-            type="button"
             variant="outline"
             size="lg"
             icon={History}
             iconSide="left"
             className="w-full"
-            disabled
+            disabled={!historyHref}
+            href={historyHref}
           >
-            Histórico em breve
+            {historyHref ? "Ver histórico" : "Histórico em breve"}
           </Button>
         </div>
       </aside>

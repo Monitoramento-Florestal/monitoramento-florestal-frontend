@@ -1,16 +1,16 @@
 import { DashboardPageHeader } from "@/components/features/dashboard";
 import { ApprovalsScreen } from "@/components/features/approvals/ApprovalsScreen";
-import { mockTrees } from "@/types/mockTrees";
+import { mockApprovalRequests } from "@/types/mockTrees";
 
 export default function ManagerApprovalsPage() {
   return (
     <>
       <DashboardPageHeader
-        title="Fila de aprovacao"
-        subtitle={`${mockTrees.filter((tree) => tree.registro.aprovacao === "pendente").length} registros aguardando revisao`}
+        title="Fila de aprovação"
+        subtitle={`${mockApprovalRequests.length} solicitações aguardando revisão`}
       />
       <div className="p-6">
-        <ApprovalsScreen initialRecords={mockTrees} />
+        <ApprovalsScreen initialRecords={mockApprovalRequests} />
       </div>
     </>
   );

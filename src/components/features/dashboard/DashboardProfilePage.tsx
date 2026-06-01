@@ -57,7 +57,7 @@ export function DashboardProfilePage({
     <>
       <DashboardPageHeader
         title="Meu perfil"
-        subtitle="Dados pessoais e seguranca"
+        subtitle="Dados pessoais e segurança"
       />
       <div className="p-6">
         <div className="max-w-2xl space-y-6">
@@ -65,7 +65,7 @@ export function DashboardProfilePage({
             <div className="mb-6">
               <h2 className="text-base font-medium text-burgundy">Dados pessoais</h2>
               <p className="mt-1 text-sm text-rosewood">
-                Atualize suas informacoes de contato.
+                Atualize suas informações de contato.
               </p>
             </div>
 

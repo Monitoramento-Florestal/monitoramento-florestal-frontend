@@ -1,26 +1,58 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+
+import { Button } from '@/components/ui/button'
+import { useAuthContext } from '@/contexts/AuthContext'
+import { getHomeRouteForRole } from '@/services/auth/authRoutes'
+import { normalizeApiError } from '@/utils/apiFunctions'
 import {
   loginSchema,
   type LoginFormValues,
-} from '../../utils/validations/schema'
-import Image from 'next/image'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+} from '@/utils/validations/schema'
 
 export default function LoginForm() {
+  const router = useRouter()
+  const { isAuthenticated, isBootstrapping, login, user } = useAuthContext()
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   })
 
-  const onSubmit = (data: LoginFormValues) => {
-    console.log('Dados prontos:', data)
+  useEffect(() => {
+    if (!isBootstrapping && isAuthenticated && user) {
+      router.replace(getHomeRouteForRole(user.role))
+    }
+  }, [isAuthenticated, isBootstrapping, router, user])
+
+  async function onSubmit(data: LoginFormValues) {
+    setSubmitError(null)
+
+    try {
+      const nextUser = await login({
+        email: data.email,
+        senha: data.password,
+      })
+
+      router.replace(getHomeRouteForRole(nextUser.role))
+    } catch (error) {
+      const normalizedError = normalizeApiError(error)
+
+      setSubmitError(
+        normalizedError.status === 401
+          ? 'E-mail ou senha inválidos.'
+          : normalizedError.message,
+      )
+    }
   }
 
   return (
@@ -28,7 +60,7 @@ export default function LoginForm() {
       <div className="absolute left-6 top-6 sm:left-10 sm:top-10">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm text-rosewood hover:text-burgundy transition-colors"
+          className="flex items-center gap-2 text-sm text-rosewood transition-colors hover:text-burgundy"
         >
           <svg
             width="16"
@@ -66,49 +98,57 @@ export default function LoginForm() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-100 rounded-xl border border-rosewood/25 p-8 bg-[#F9F1EB]"
+        className="w-full max-w-100 rounded-xl border border-rosewood/25 bg-[#F9F1EB] p-8"
       >
         <div className="mb-6">
-          <label className="block text-xs font-normal text-burgundy mb-2 uppercase tracking-wider">
+          <label className="mb-2 block text-xs font-normal uppercase tracking-wider text-burgundy">
             E-mail
           </label>
           <input
             {...register('email')}
-            className="w-full p-2.5 border border-rosewood/40 rounded-xl bg-cream focus:ring-1 focus:ring-sage outline-none placeholder:text-[#866969]/40 transition-all"
+            className="w-full rounded-xl border border-rosewood/40 bg-cream p-2.5 outline-none transition-all placeholder:text-[#866969]/40 focus:ring-1 focus:ring-sage"
             placeholder="seu@email.com"
           />
           {errors.email && (
-            <p className="text-[#940028] text-xs mt-1">
-              {errors.email.message}
-            </p>
+            <p className="mt-1 text-xs text-[#940028]">{errors.email.message}</p>
           )}
         </div>
 
-        <div className="mb-8">
-          <label className="block text-xs font-normal text-burgundy mb-2 uppercase tracking-wider">
+        <div className="mb-6">
+          <label className="mb-2 block text-xs font-normal uppercase tracking-wider text-burgundy">
             Senha
           </label>
           <input
             type="password"
             {...register('password')}
-            className="w-full p-2.5 border border-[#866969]/40 rounded-xl bg-cream focus:ring-1 focus:ring-sage outline-none transition-all"
+            className="w-full rounded-xl border border-rosewood/40 bg-cream p-2.5 outline-none transition-all focus:ring-1 focus:ring-sage"
           />
           {errors.password && (
-            <p className="text-[#940028] text-xs mt-1">
+            <p className="mt-1 text-xs text-[#940028]">
               {errors.password.message}
             </p>
           )}
         </div>
 
+        {submitError && (
+          <p className="mb-6 rounded-xl border border-[#940028]/20 bg-[#940028]/5 px-3 py-2 text-sm text-[#940028]">
+            {submitError}
+          </p>
+        )}
+
         <Button
           type="submit"
-          className="w-full py-3 bg-sage text-white rounded-xl font-normal hover:bg-sage transition-all shadow-sm mb-6"
+          disabled={isSubmitting || isBootstrapping}
+          className="mb-6 w-full rounded-xl bg-sage py-3 text-white shadow-sm transition-all hover:bg-sage"
         >
-          Entrar
+          {isSubmitting ? 'Entrando...' : 'Entrar'}
         </Button>
 
         <div className="text-center">
-          <Link href="/password-reset" className="text-sm text-rosewood hover:underline">
+          <Link
+            href="/password-reset"
+            className="text-sm text-rosewood hover:underline"
+          >
             Esqueci minha senha
           </Link>
         </div>
@@ -117,9 +157,9 @@ export default function LoginForm() {
       <div className="mt-8">
         <p className="text-sm text-rosewood">
           Não tem conta?{' '}
-          <a href="/cadastro" className="font-normal text-burgundy hover:underline">
+          <Link href="/cadastro" className="font-normal text-burgundy hover:underline">
             Cadastre-se
-          </a>
+          </Link>
         </p>
       </div>
     </div>

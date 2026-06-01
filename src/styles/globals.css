@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500&display=swap');
-@import "tailwindcss";
+@import "../../node_modules/tailwindcss/index.css";
 
 @theme {
   --color-cream:     #f9ebe0;   /* dominant background — breathing room  */

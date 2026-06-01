@@ -5,7 +5,7 @@ export default function ManagerProfilePage() {
     <>
       <DashboardPageHeader
         title="Perfil"
-        subtitle="Dados da conta do gestor e futuras acoes de sessao."
+        subtitle="Dados da conta do gestor e futuras ações de sessão."
       />
       <div className="p-6">
         <DashboardCard>

@@ -1,5 +1,5 @@
 import { UserRole } from "@/constants/roles";
-import type { Tree, TreeStatus } from "@/types/trees";
+import type { TreePreview, TreeStatus } from "@/types/trees";
 
 export type TreeManagementStatusFilter = "all" | TreeStatus;
 
@@ -22,14 +22,14 @@ export interface TreeManagementFilterOption {
 
 export const TREE_MANAGEMENT_FILTERS: TreeManagementFilterOption[] = [
   { label: "Todos", value: "all" },
-  { label: "Saudaveis", value: "saudavel" },
-  { label: "Com injuria", value: "injuria" },
+  { label: "Saudáveis", value: "saudavel" },
+  { label: "Com injúria", value: "injuria" },
   { label: "Cortadas", value: "cortada" },
 ];
 
 const TREE_STATUS_LABELS: Record<TreeStatus, string> = {
-  saudavel: "Saudavel",
-  injuria: "Com injuria",
+  saudavel: "Saudável",
+  injuria: "Com injúria",
   cortada: "Cortada",
 };
 
@@ -56,7 +56,7 @@ export function getTreeManagementStatusLabel(status: TreeStatus) {
 }
 
 export function filterManagedTrees(
-  trees: Tree[],
+  trees: TreePreview[],
   query: string,
   status: TreeManagementStatusFilter
 ) {
@@ -90,5 +90,3 @@ export function filterManagedTrees(
 export function getTreeManagementSummary(total: number, visible: number) {
   return `${visible} de ${total} registros`;
 }
-
-

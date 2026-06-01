@@ -1,22 +1,17 @@
-import { DashboardCard, DashboardPageHeader } from "@/components/features/dashboard";
+import { DashboardPageHeader } from "@/components/features/dashboard";
+import { TreeRecordFormScreen } from "@/components/features/treeRecords/TreeRecordFormScreen";
+import { UserRole } from "@/constants/roles";
+import { getTreeRecordFormSubtitle } from "@/utils/treeRecords";
 
 export default function AdminTreeRegisterPage() {
   return (
     <>
       <DashboardPageHeader
-        title="Registrar arvore"
-        subtitle="Fluxo administrativo de cadastro direto de arvores e medicoes."
+        title="Registrar árvore"
+        subtitle={getTreeRecordFormSubtitle(UserRole.ADMIN, "create-tree")}
       />
       <div className="p-6">
-        <DashboardCard>
-          <h2 className="text-xl tracking-tight text-burgundy">
-            Registrar arvore
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-rosewood">
-            Scaffold reservado para o futuro fluxo administrativo de registro de
-            arvores.
-          </p>
-        </DashboardCard>
+        <TreeRecordFormScreen mode="create-tree" role={UserRole.ADMIN} />
       </div>
     </>
   );

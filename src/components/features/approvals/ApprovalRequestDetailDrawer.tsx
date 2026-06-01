@@ -1,0 +1,145 @@
+"use client";
+
+import { Check, X, X as CloseIcon } from "lucide-react";
+
+import { DashboardCard } from "@/components/features/dashboard";
+import { Button } from "@/components/ui/button";
+import type { TreeApprovalRequest } from "@/types/trees";
+import {
+  getApprovalRecordCode,
+  getApprovalRecordName,
+  getApprovalRecordStatusLabel,
+  getApprovalRecordTypeLabel,
+} from "@/utils/approvals";
+import { formatDate } from "@/utils/format";
+import { TREE_STATUS_COLORS } from "@/components/features/map/mapIcons";
+import { ApprovalRequestContextSummary } from "./ApprovalRequestContextSummary";
+import { ApprovalRequestRecordDetails } from "./ApprovalRequestRecordDetails";
+
+interface ApprovalRequestDetailDrawerProps {
+  onApprove: (id: string) => void;
+  onClose: () => void;
+  onReject: (id: string) => void;
+  open: boolean;
+  request: TreeApprovalRequest | null;
+}
+
+export function ApprovalRequestDetailDrawer({
+  onApprove,
+  onClose,
+  onReject,
+  open,
+  request,
+}: ApprovalRequestDetailDrawerProps) {
+  if (!open || !request) {
+    return null;
+  }
+
+  const statusColor = TREE_STATUS_COLORS[request.record.status];
+
+  return (
+    <div className="fixed inset-0 z-[930] bg-forest/30 backdrop-blur-[2px]">
+      <button
+        type="button"
+        aria-label="Fechar detalhes"
+        className="absolute inset-0"
+        onClick={onClose}
+      />
+
+      <aside className="absolute inset-y-0 right-0 w-full max-w-4xl overflow-y-auto border-l border-rosewood/12 bg-cream shadow-[0_24px_64px_rgb(9_30_5_/_0.16)]">
+        <div className="flex min-h-full flex-col">
+          <div className="sticky top-0 z-10 border-b border-rosewood/10 bg-cream/95 px-5 py-5 backdrop-blur sm:px-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-rosewood/80">
+                  {getApprovalRecordCode(request)}
+                </p>
+                <h2 className="mt-1 text-2xl tracking-tight text-burgundy">
+                  {getApprovalRecordName(request)}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-rosewood">
+                  Solicitação enviada por <span className="text-burgundy">{request.submittedBy}</span>{" "}
+                  em {formatDate(request.submittedAt)}.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                icon={CloseIcon}
+                onClick={onClose}
+                className="shrink-0"
+              >
+                Fechar
+              </Button>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="inline-flex rounded-full border border-rosewood/12 bg-card px-2.5 py-1 text-xs text-rosewood">
+                {getApprovalRecordTypeLabel(request)}
+              </span>
+              <span
+                className="inline-flex rounded-full border px-2.5 py-1 text-xs"
+                style={{
+                  borderColor: `${statusColor.stroke}35`,
+                  backgroundColor: `${statusColor.fill}18`,
+                  color: statusColor.stroke,
+                }}
+              >
+                {getApprovalRecordStatusLabel(request)}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex-1 space-y-5 px-5 py-5 sm:px-6">
+            <DashboardCard className="space-y-4">
+              <div>
+                <h3 className="text-base tracking-tight text-burgundy">Contexto da solicitação</h3>
+                <p className="mt-1 text-sm text-rosewood">
+                  Use este bloco para entender se você está aprovando uma criação de árvore, um
+                  novo registro ou uma edição de registro existente.
+                </p>
+              </div>
+              <ApprovalRequestContextSummary request={request} />
+            </DashboardCard>
+
+            <DashboardCard className="space-y-4">
+              <div>
+                <h3 className="text-base tracking-tight text-burgundy">Registro submetido</h3>
+                <p className="mt-1 text-sm text-rosewood">
+                  Revise todos os campos técnicos antes de aprovar ou rejeitar esta solicitação.
+                </p>
+              </div>
+              <ApprovalRequestRecordDetails request={request} />
+            </DashboardCard>
+          </div>
+
+          <div className="sticky bottom-0 z-10 border-t border-rosewood/10 bg-cream/95 px-5 py-4 backdrop-blur sm:px-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                icon={X}
+                iconSide="left"
+                className="border-burgundy/30 text-burgundy hover:bg-burgundy/5 py-5 px-8"
+                onClick={() => onReject(request.id)}
+              >
+                Rejeitar
+              </Button>
+              <Button
+                type="button"
+                icon={Check}
+                iconSide="left"
+                className="py-5 px-8"
+                onClick={() => onApprove(request.id)}
+              >
+                Aprovar
+              </Button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  );
+}

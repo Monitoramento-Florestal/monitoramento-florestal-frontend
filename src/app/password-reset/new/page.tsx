@@ -1,14 +1,19 @@
 'use client'
 
 import { Suspense, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Button } from '@/components/ui/button'
-import { resetPasswordSchema, type ResetPasswordFormValues } from '@/utils/validations/schema'
+import { resetPassword } from '@/services/auth/authService'
+import { normalizeApiError } from '@/utils/apiFunctions'
+import {
+  resetPasswordSchema,
+  type ResetPasswordFormValues,
+} from '@/utils/validations/schema'
 
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
@@ -44,14 +49,15 @@ function EyeIcon({ open }: { open: boolean }) {
   )
 }
 
-function NewPasswordContent() {
+function NewPasswordScreen() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams.get('email') ?? ''
+  const code = searchParams.get('code') ?? ''
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
@@ -60,8 +66,25 @@ function NewPasswordContent() {
     resolver: zodResolver(resetPasswordSchema),
   })
 
-  const onSubmit = (_data: ResetPasswordFormValues) => {
-    router.push(`/password-reset/success?email=${encodeURIComponent(email)}`)
+  async function onSubmit(data: ResetPasswordFormValues) {
+    if (!email || !code) {
+      setSubmitError('Código de recuperação inválido. Solicite um novo código.')
+      return
+    }
+
+    setSubmitError(null)
+
+    try {
+      await resetPassword({
+        email,
+        codigo: code,
+        novaSenha: data.password,
+        confirmarSenha: data.confirmPassword,
+      })
+      router.push(`/password-reset/success?email=${encodeURIComponent(email)}`)
+    } catch (error) {
+      setSubmitError(normalizeApiError(error).message)
+    }
   }
 
   return (
@@ -84,11 +107,11 @@ function NewPasswordContent() {
             <path d="M19 12H5" />
             <path d="M12 19l-7-7 7-7" />
           </svg>
-          Voltar para entrar
+          Voltar para verificar código
         </Link>
       </div>
 
-      <div className="mb-8 flex animate-fade-up flex-col items-center text-center">
+      <div className="mb-8 flex flex-col items-center text-center">
         <div className="mb-5 flex justify-center">
           <Image
             src="/arbor-logo.png"
@@ -99,7 +122,9 @@ function NewPasswordContent() {
             priority
           />
         </div>
-        <h1 className="text-2xl font-normal tracking-tight text-burgundy">Crie uma nova senha</h1>
+        <h1 className="text-2xl font-normal tracking-tight text-burgundy">
+          Crie uma nova senha
+        </h1>
         <p className="mt-2 max-w-xs text-sm leading-relaxed text-rosewood">
           A senha deve ter pelo menos 6 caracteres.
         </p>
@@ -107,7 +132,7 @@ function NewPasswordContent() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-sm animate-fade-up rounded-xl border border-rosewood/25 bg-[#F9F1EB] p-8 [animation-delay:100ms]"
+        className="w-full max-w-sm rounded-xl border border-rosewood/25 bg-[#F9F1EB] p-8"
       >
         <div className="mb-5">
           <label
@@ -138,7 +163,7 @@ function NewPasswordContent() {
           )}
         </div>
 
-        <div className="mb-7">
+        <div className="mb-6">
           <label
             htmlFor="confirmPassword"
             className="mb-2 block text-xs font-normal uppercase tracking-wider text-burgundy"
@@ -163,9 +188,17 @@ function NewPasswordContent() {
             </button>
           </div>
           {errors.confirmPassword && (
-            <p className="mt-1 text-xs text-[#940028]">{errors.confirmPassword.message}</p>
+            <p className="mt-1 text-xs text-[#940028]">
+              {errors.confirmPassword.message}
+            </p>
           )}
         </div>
+
+        {submitError && (
+          <p className="mb-6 rounded-xl border border-[#940028]/20 bg-[#940028]/5 px-3 py-2 text-sm text-[#940028]">
+            {submitError}
+          </p>
+        )}
 
         <Button
           type="submit"
@@ -182,7 +215,7 @@ function NewPasswordContent() {
 export default function NewPasswordPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-cream" />}>
-      <NewPasswordContent />
+      <NewPasswordScreen />
     </Suspense>
   )
 }

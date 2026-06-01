@@ -1,16 +1,29 @@
 'use client'
 
-import { Suspense, useEffect, useRef, useState } from 'react'
+import {
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type ClipboardEvent,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
+import {
+  requestPasswordReset,
+  verifyPasswordResetCode,
+} from '@/services/auth/authService'
+import { normalizeApiError } from '@/utils/apiFunctions'
 
 const CODE_LENGTH = 6
 const RESEND_SECONDS = 30
 
-function VerifyCodeContent() {
+function VerifyCodeScreen() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams.get('email') ?? ''
@@ -18,11 +31,17 @@ function VerifyCodeContent() {
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''))
   const [countdown, setCountdown] = useState(RESEND_SECONDS)
   const [showToast, setShowToast] = useState(true)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isResending, setIsResending] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
-    if (countdown <= 0) return
-    const timer = setTimeout(() => setCountdown((current) => current - 1), 1000)
+    if (countdown <= 0) {
+      return
+    }
+
+    const timer = setTimeout(() => setCountdown((value) => value - 1), 1000)
     return () => clearTimeout(timer)
   }, [countdown])
 
@@ -33,50 +52,79 @@ function VerifyCodeContent() {
 
   function handleChange(index: number, value: string) {
     const char = value.replace(/\D/g, '').slice(-1)
-    const next = [...digits]
-    next[index] = char
-    setDigits(next)
+    const nextDigits = [...digits]
+    nextDigits[index] = char
+    setDigits(nextDigits)
 
     if (char && index < CODE_LENGTH - 1) {
       inputRefs.current[index + 1]?.focus()
     }
   }
 
-  function handleKeyDown(index: number, event: React.KeyboardEvent<HTMLInputElement>) {
+  function handleKeyDown(index: number, event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'Backspace' && !digits[index] && index > 0) {
       inputRefs.current[index - 1]?.focus()
     }
   }
 
-  function handlePaste(event: React.ClipboardEvent<HTMLInputElement>) {
+  function handlePaste(event: ClipboardEvent<HTMLInputElement>) {
     event.preventDefault()
-    const pasted = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, CODE_LENGTH)
-    const next = [...digits]
+    const pasted = event.clipboardData
+      .getData('text')
+      .replace(/\D/g, '')
+      .slice(0, CODE_LENGTH)
 
+    const nextDigits = [...digits]
     pasted.split('').forEach((char, index) => {
-      next[index] = char
+      nextDigits[index] = char
     })
 
-    setDigits(next)
+    setDigits(nextDigits)
     inputRefs.current[Math.min(pasted.length, CODE_LENGTH - 1)]?.focus()
   }
 
-  function handleResend() {
-    if (!canResend) return
-    setDigits(Array(CODE_LENGTH).fill(''))
-    setCountdown(RESEND_SECONDS)
-    setShowToast(true)
-    inputRefs.current[0]?.focus()
-  }
-
-  function handleSubmit(event: React.FormEvent) {
-    event.preventDefault()
-
-    if (digits.join('').length < CODE_LENGTH) {
+  async function handleResend() {
+    if (!canResend || !email) {
       return
     }
 
-    router.push(`/password-reset/new?email=${encodeURIComponent(email)}`)
+    setSubmitError(null)
+    setIsResending(true)
+
+    try {
+      await requestPasswordReset({ email })
+      setDigits(Array(CODE_LENGTH).fill(''))
+      setCountdown(RESEND_SECONDS)
+      setShowToast(true)
+      inputRefs.current[0]?.focus()
+    } catch (error) {
+      setSubmitError(normalizeApiError(error).message)
+    } finally {
+      setIsResending(false)
+    }
+  }
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+
+    const codigo = digits.join('')
+    if (codigo.length < CODE_LENGTH || !email) {
+      return
+    }
+
+    setSubmitError(null)
+    setIsSubmitting(true)
+
+    try {
+      await verifyPasswordResetCode({ email, codigo })
+      router.push(
+        `/password-reset/new?email=${encodeURIComponent(email)}&code=${encodeURIComponent(codigo)}`,
+      )
+    } catch (error) {
+      setSubmitError(normalizeApiError(error).message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isComplete = digits.every((digit) => digit !== '')
@@ -103,11 +151,11 @@ function VerifyCodeContent() {
             <path d="M19 12H5" />
             <path d="M12 19l-7-7 7-7" />
           </svg>
-          Voltar para entrar
+          Voltar para recuperar senha
         </Link>
       </div>
 
-      <div className="mb-8 flex animate-fade-up flex-col items-center text-center">
+      <div className="mb-8 flex flex-col items-center text-center">
         <div className="mb-5 flex justify-center">
           <Image
             src="/arbor-logo.png"
@@ -118,7 +166,9 @@ function VerifyCodeContent() {
             priority
           />
         </div>
-        <h1 className="text-2xl font-normal tracking-tight text-burgundy">Verifique seu e-mail</h1>
+        <h1 className="text-2xl font-normal tracking-tight text-burgundy">
+          Verifique seu e-mail
+        </h1>
         <p className="mt-2 max-w-xs text-sm leading-relaxed text-rosewood">
           Enviamos um código de 6 dígitos para{' '}
           <span className="font-normal text-burgundy">{displayEmail}</span>.
@@ -127,7 +177,7 @@ function VerifyCodeContent() {
 
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm animate-fade-up rounded-xl border border-rosewood/25 bg-[#F9F1EB] p-8 [animation-delay:100ms]"
+        className="w-full max-w-sm rounded-xl border border-rosewood/25 bg-[#F9F1EB] p-8"
       >
         <div className="mb-6 flex flex-col items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sage/15">
@@ -150,7 +200,9 @@ function VerifyCodeContent() {
             <p className="text-xs font-normal uppercase tracking-wider text-burgundy">
               Código de verificação
             </p>
-            <p className="mt-1 text-xs text-rosewood/70">Digite os 6 dígitos enviados</p>
+            <p className="mt-1 text-xs text-rosewood/70">
+              Digite os 6 dígitos enviados
+            </p>
           </div>
         </div>
 
@@ -175,12 +227,18 @@ function VerifyCodeContent() {
           ))}
         </div>
 
+        {submitError && (
+          <p className="mb-6 rounded-xl border border-[#940028]/20 bg-[#940028]/5 px-3 py-2 text-sm text-[#940028]">
+            {submitError}
+          </p>
+        )}
+
         <Button
           type="submit"
-          disabled={!isComplete}
+          disabled={!isComplete || isSubmitting || !email}
           className="w-full rounded-xl bg-sage py-3 text-sm font-normal text-cream shadow-sm transition-all hover:opacity-90 disabled:opacity-50"
         >
-          Verificar código
+          {isSubmitting ? 'Verificando...' : 'Verificar código'}
         </Button>
 
         <div className="mt-4 text-center">
@@ -188,9 +246,10 @@ function VerifyCodeContent() {
             <button
               type="button"
               onClick={handleResend}
-              className="text-sm font-normal text-sage transition-colors hover:underline"
+              disabled={isResending}
+              className="text-sm font-normal text-sage transition-colors hover:underline disabled:opacity-50"
             >
-              Reenviar código
+              {isResending ? 'Reenviando...' : 'Reenviar código'}
             </button>
           ) : (
             <p className="text-sm text-rosewood/60">Reenviar código em {countdown}s</p>
@@ -200,7 +259,9 @@ function VerifyCodeContent() {
 
       <div
         className={`fixed bottom-6 right-6 max-w-xs rounded-xl border border-rosewood/20 bg-[#F9F1EB] p-4 shadow-overlay transition-all duration-500 ${
-          showToast ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
+          showToast
+            ? 'translate-y-0 opacity-100'
+            : 'pointer-events-none translate-y-4 opacity-0'
         }`}
         role="status"
         aria-live="polite"
@@ -218,7 +279,7 @@ function VerifyCodeContent() {
 export default function VerifyCodePage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-cream" />}>
-      <VerifyCodeContent />
+      <VerifyCodeScreen />
     </Suspense>
   )
 }

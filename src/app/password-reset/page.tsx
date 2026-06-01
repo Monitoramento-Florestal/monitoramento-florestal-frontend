@@ -1,12 +1,15 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Button } from '@/components/ui/button'
+import { requestPasswordReset } from '@/services/auth/authService'
+import { normalizeApiError } from '@/utils/apiFunctions'
 import {
   forgotPasswordSchema,
   type ForgotPasswordFormValues,
@@ -14,6 +17,7 @@ import {
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
@@ -22,8 +26,15 @@ export default function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   })
 
-  const onSubmit = (data: ForgotPasswordFormValues) => {
-    router.push(`/password-reset/verify?email=${encodeURIComponent(data.email)}`)
+  async function onSubmit(data: ForgotPasswordFormValues) {
+    setSubmitError(null)
+
+    try {
+      await requestPasswordReset({ email: data.email })
+      router.push(`/password-reset/verify?email=${encodeURIComponent(data.email)}`)
+    } catch (error) {
+      setSubmitError(normalizeApiError(error).message)
+    }
   }
 
   return (
@@ -61,7 +72,9 @@ export default function ForgotPasswordPage() {
             priority
           />
         </div>
-        <h1 className="text-2xl font-normal tracking-tight text-burgundy">Recuperar senha</h1>
+        <h1 className="text-2xl font-normal tracking-tight text-burgundy">
+          Recuperar senha
+        </h1>
         <p className="mt-2 max-w-xs text-sm leading-relaxed text-rosewood">
           Informe seu e-mail para receber um código de verificação.
         </p>
@@ -85,8 +98,16 @@ export default function ForgotPasswordPage() {
             placeholder="seu.nome@exemplo.com"
             className="w-full rounded-xl border border-rosewood/40 bg-cream p-2.5 text-sm outline-none transition-all placeholder:text-rosewood/40 focus:ring-1 focus:ring-sage"
           />
-          {errors.email && <p className="mt-1 text-xs text-[#940028]">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="mt-1 text-xs text-[#940028]">{errors.email.message}</p>
+          )}
         </div>
+
+        {submitError && (
+          <p className="mb-6 rounded-xl border border-[#940028]/20 bg-[#940028]/5 px-3 py-2 text-sm text-[#940028]">
+            {submitError}
+          </p>
+        )}
 
         <Button
           type="submit"

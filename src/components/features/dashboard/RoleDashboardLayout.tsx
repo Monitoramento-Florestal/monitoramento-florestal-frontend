@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { UserRole } from "@/constants/roles";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -26,9 +26,15 @@ export function RoleDashboardLayout({
   children,
   role,
 }: RoleDashboardLayoutProps) {
+  const router = useRouter();
   const pathname = usePathname();
   const { clearAuth, user } = useAuthContext();
   const items = useMemo(() => getDashboardNavigation(role), [role]);
+
+  function handleLogout() {
+    clearAuth();
+    router.push("/login");
+  }
 
   return (
     <DashboardShell
@@ -36,7 +42,7 @@ export function RoleDashboardLayout({
         <DashboardSidebar
           currentPath={pathname}
           items={items}
-          onLogout={clearAuth}
+          onLogout={handleLogout}
           userName={user?.name ?? ROLE_FALLBACK_NAMES[role]}
           userRole={role}
         />

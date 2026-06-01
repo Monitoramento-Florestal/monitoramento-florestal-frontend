@@ -1,3 +1,4 @@
+import { UserRole } from "@/constants/roles";
 import type { User } from "./auth";
 import type {
   Tree,
@@ -517,9 +518,54 @@ export const mockApprovalRequests: TreeApprovalRequest[] = [
 ].filter((request): request is TreeApprovalRequest => request !== null);
 
 export const mockUsers: User[] = [
-  { id: "u1", name: "Visitante", email: "visitante@arbor.local", role: "citizen" },
-  { id: "u2", name: "Marina Silva", email: "marina@email.com", role: "citizen" },
-  { id: "u3", name: "Ana Beatriz Lima", email: "ana.lima@ufrpe.br", role: "researcher" },
-  { id: "u4", name: "Prof. Ricardo Mendes", email: "ricardo.mendes@ufrpe.br", role: "manager" },
-  { id: "u5", name: "Dra. Helena Cavalcanti", email: "helena.cavalcanti@ufrpe.br", role: "admin" },
+  {
+    id: "u1",
+    nome: "Visitante",
+    name: "Visitante",
+    email: "visitante@arbor.local",
+    perfilAcesso: "PUBLICO_GERAL",
+    role: UserRole.CITIZEN,
+    ativo: true,
+    matricula: null,
+  },
+  {
+    id: "u2",
+    nome: "Marina Silva",
+    name: "Marina Silva",
+    email: "marina@email.com",
+    perfilAcesso: "PUBLICO_GERAL",
+    role: UserRole.CITIZEN,
+    ativo: true,
+    matricula: null,
+  },
+  {
+    id: "u3",
+    nome: "Ana Beatriz Lima",
+    name: "Ana Beatriz Lima",
+    email: "ana.lima@ufrpe.br",
+    perfilAcesso: "PESQUISADOR",
+    role: UserRole.RESEARCHER,
+    ativo: true,
+    matricula: "2024001",
+  },
+  {
+    id: "u4",
+    nome: "Prof. Ricardo Mendes",
+    name: "Prof. Ricardo Mendes",
+    email: "ricardo.mendes@ufrpe.br",
+    perfilAcesso: "GESTOR",
+    role: UserRole.MANAGER,
+    ativo: true,
+    matricula: "GEST001",
+  },
+  {
+    id: "u5",
+    nome: "Dra. Helena Cavalcanti",
+    name: "Dra. Helena Cavalcanti",
+    email: "helena.cavalcanti@ufrpe.br",
+    perfilAcesso: "ADMINISTRADOR",
+    role: UserRole.ADMIN,
+    ativo: true,
+    matricula: "ADM001",
+  },
 ];

@@ -1,13 +1,13 @@
 'use client'
 
 import { useAuthContext } from '@/contexts/AuthContext'
-import type { User } from '@/types/auth'
+import type { AuthSession } from '@/types/auth'
 
 export function useAuthSession() {
-  const { clearAuth, isAuthenticated, setAuth, token, user } = useAuthContext()
+  const { clearAuth, isAuthenticated, setSession, session, token, user } = useAuthContext()
 
-  function openSession(payload: { token: string; user: User }) {
-    setAuth(payload.token, payload.user)
+  function openSession(payload: AuthSession) {
+    setSession(payload)
   }
 
   function closeSession() {
@@ -15,6 +15,7 @@ export function useAuthSession() {
   }
 
   return {
+    session,
     token,
     user,
     isAuthenticated,

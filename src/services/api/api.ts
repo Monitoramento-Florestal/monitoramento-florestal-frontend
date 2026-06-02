@@ -24,6 +24,13 @@ type PendingRequest = {
 let isRefreshing = false
 let pendingRequests: PendingRequest[] = []
 let unauthorizedHandler: (() => void) | null = null
+let sessionRefreshHandler:
+  | ((payload: {
+      accessToken: string
+      refreshToken: string | null
+      user?: RefreshResponse
+    }) => void)
+  | null = null
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
@@ -48,9 +55,17 @@ async function refreshAccessToken() {
     throw new Error('Resposta de refresh sem access token.')
   }
 
+  const nextRefreshToken = data.refreshToken ?? refreshToken
+
   setAuthTokens({
     token: nextToken,
-    refreshToken: data.refreshToken ?? refreshToken,
+    refreshToken: nextRefreshToken,
+  })
+
+  sessionRefreshHandler?.({
+    accessToken: nextToken,
+    refreshToken: nextRefreshToken,
+    user: data,
   })
 
   return nextToken
@@ -58,6 +73,18 @@ async function refreshAccessToken() {
 
 export function setApiUnauthorizedHandler(handler: (() => void) | null) {
   unauthorizedHandler = handler
+}
+
+export function setApiSessionRefreshHandler(
+  handler:
+    | ((payload: {
+        accessToken: string
+        refreshToken: string | null
+        user?: RefreshResponse
+      }) => void)
+    | null,
+) {
+  sessionRefreshHandler = handler
 }
 
 api.interceptors.request.use((config) => {

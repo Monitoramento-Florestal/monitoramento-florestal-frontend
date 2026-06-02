@@ -30,7 +30,7 @@ export default function PasswordSuccessPage() {
         </Link>
       </div>
 
-      <div className="mb-6 flex justify-center animate-fade-up">
+      <div className="mb-6 flex animate-fade-up justify-center">
         <Image
           src="/arbor-logo.png"
           alt="Arbor Logo"
@@ -58,7 +58,9 @@ export default function PasswordSuccessPage() {
           </svg>
         </div>
 
-        <h1 className="mb-2 text-xl font-normal tracking-tight text-burgundy">Senha redefinida</h1>
+        <h1 className="mb-2 text-xl font-normal tracking-tight text-burgundy">
+          Senha redefinida
+        </h1>
         <p className="mb-6 text-sm leading-relaxed text-rosewood">
           Sua senha foi alterada com sucesso. Já pode entrar com as novas credenciais.
         </p>

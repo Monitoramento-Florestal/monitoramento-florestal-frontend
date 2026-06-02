@@ -27,10 +27,6 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (isPublicPath && hasSession && pathname === '/login') {
-    return NextResponse.redirect(new URL('/citizen', request.url))
-  }
-
   return NextResponse.next()
 }
 

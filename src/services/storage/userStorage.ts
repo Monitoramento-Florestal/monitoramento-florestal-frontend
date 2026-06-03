@@ -1,4 +1,4 @@
-import type { User } from '@/types/auth'
+import type { AuthUser } from '@/types/auth'
 
 const USER_KEY = 'forest_user'
 
@@ -14,13 +14,13 @@ export function getStoredUser() {
   }
 
   try {
-    return JSON.parse(value) as User
+    return JSON.parse(value) as AuthUser
   } catch {
     return null
   }
 }
 
-export function setStoredUser(user: User) {
+export function setStoredUser(user: AuthUser) {
   if (typeof window === 'undefined') {
     return
   }

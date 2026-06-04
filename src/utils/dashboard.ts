@@ -1,4 +1,4 @@
-﻿import type { LucideIcon } from "lucide-react";
+﻿import type { LucideIcon } from 'lucide-react'
 import {
   LayoutDashboard,
   ListChecks,
@@ -7,30 +7,32 @@ import {
   Trees,
   UserCircle,
   Users,
-} from "lucide-react";
+} from 'lucide-react'
 
-import { APP_ROUTES } from "@/constants/routes";
-import { UserRole } from "@/constants/roles";
+import { APP_ROUTES } from '@/constants/routes'
+import { UserRole } from '@/constants/roles'
 
 export interface DashboardNavigationItem {
-  href: string;
-  icon: LucideIcon;
-  key: string;
-  label: string;
-  roles: UserRole[];
+  href: string
+  icon: LucideIcon
+  key: string
+  label: string
+  roles: UserRole[]
 }
 
-type RoleHrefMap = Partial<Record<UserRole, string>>;
+type RoleHrefMap = Partial<Record<UserRole, string>>
 
-interface DashboardNavigationDefinition
-  extends Omit<DashboardNavigationItem, "href"> {
-  href: RoleHrefMap;
+interface DashboardNavigationDefinition extends Omit<
+  DashboardNavigationItem,
+  'href'
+> {
+  href: RoleHrefMap
 }
 
 const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
   {
-    key: "dashboard",
-    label: "Dashboard",
+    key: 'dashboard',
+    label: 'Dashboard',
     href: {
       [UserRole.CITIZEN]: APP_ROUTES.CITIZEN_HOME,
       [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_HOME,
@@ -38,11 +40,16 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
       [UserRole.ADMIN]: APP_ROUTES.ADMIN_HOME,
     },
     icon: LayoutDashboard,
-    roles: [UserRole.CITIZEN, UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
+    roles: [
+      UserRole.CITIZEN,
+      UserRole.RESEARCHER,
+      UserRole.MANAGER,
+      UserRole.ADMIN,
+    ],
   },
   {
-    key: "map",
-    label: "Mapa",
+    key: 'map',
+    label: 'Mapa',
     href: {
       [UserRole.CITIZEN]: APP_ROUTES.CITIZEN_MAP,
       [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_MAP,
@@ -50,11 +57,16 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
       [UserRole.ADMIN]: APP_ROUTES.ADMIN_MAP,
     },
     icon: Map,
-    roles: [UserRole.CITIZEN, UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
+    roles: [
+      UserRole.CITIZEN,
+      UserRole.RESEARCHER,
+      UserRole.MANAGER,
+      UserRole.ADMIN,
+    ],
   },
   {
-    key: "register-tree",
-    label: "Registrar árvore",
+    key: 'register-tree',
+    label: 'Registrar árvore',
     href: {
       [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_TREES_NEW,
       [UserRole.MANAGER]: APP_ROUTES.MANAGER_TREES_NEW,
@@ -64,8 +76,8 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
     roles: [UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
   {
-    key: "approvals",
-    label: "Fila de aprovação",
+    key: 'approvals',
+    label: 'Fila de aprovação',
     href: {
       [UserRole.MANAGER]: APP_ROUTES.MANAGER_APPROVALS,
       [UserRole.ADMIN]: APP_ROUTES.ADMIN_APPROVALS,
@@ -74,8 +86,8 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
     roles: [UserRole.MANAGER, UserRole.ADMIN],
   },
   {
-    key: "tree-management",
-    label: "Gerenciamento de árvores",
+    key: 'tree-management',
+    label: 'Gerenciamento de árvores',
     href: {
       [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_TREES,
     },
@@ -83,8 +95,8 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
     roles: [UserRole.RESEARCHER],
   },
   {
-    key: "management",
-    label: "Gerenciamento",
+    key: 'management',
+    label: 'Gerenciamento',
     href: {
       [UserRole.MANAGER]: APP_ROUTES.MANAGER_MANAGEMENT,
       [UserRole.ADMIN]: APP_ROUTES.ADMIN_MANAGEMENT,
@@ -93,18 +105,19 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
     roles: [UserRole.MANAGER, UserRole.ADMIN],
   },
   {
-    key: "users",
-    label: "Usuários",
+    key: 'users',
+    label: 'Usuários',
     href: {
+      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_USERS,
       [UserRole.MANAGER]: APP_ROUTES.MANAGER_USERS,
       [UserRole.ADMIN]: APP_ROUTES.ADMIN_USERS,
     },
     icon: Users,
-    roles: [UserRole.MANAGER, UserRole.ADMIN],
+    roles: [UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
   {
-    key: "profile",
-    label: "Perfil",
+    key: 'profile',
+    label: 'Perfil',
     href: {
       [UserRole.CITIZEN]: APP_ROUTES.CITIZEN_PROFILE,
       [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_PROFILE,
@@ -112,18 +125,23 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
       [UserRole.ADMIN]: APP_ROUTES.ADMIN_PROFILE,
     },
     icon: UserCircle,
-    roles: [UserRole.CITIZEN, UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
+    roles: [
+      UserRole.CITIZEN,
+      UserRole.RESEARCHER,
+      UserRole.MANAGER,
+      UserRole.ADMIN,
+    ],
   },
-];
+]
 
 export function getDashboardNavigation(role: UserRole) {
   return DASHBOARD_NAVIGATION.flatMap((item) => {
-    const href = item.href[role];
+    const href = item.href[role]
 
     if (!item.roles.includes(role) || !href) {
-      return [];
+      return []
     }
 
-    return [{ ...item, href }];
-  });
+    return [{ ...item, href }]
+  })
 }

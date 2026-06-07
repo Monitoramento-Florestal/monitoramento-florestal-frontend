@@ -7,19 +7,26 @@ import type {
 } from '@/types/auth'
 import type { RefreshResponse } from '@/utils/apiFunctions'
 
-type SessionAuthPayload = Pick<LoginResponse, 'email' | 'nome' | 'role'>
+type SessionAuthPayload = {
+  usuario: {
+    id?: string | null
+    nome: string
+    email: string
+    perfilAcesso: BackendProfile
+  }
+}
 
 function buildUserFromRolePayload(
   payload: SessionAuthPayload,
   currentUser?: AuthUser | null,
 ): AuthUser {
   return {
-    id: currentUser?.id ?? null,
-    nome: payload.nome,
-    name: payload.nome,
-    email: payload.email,
-    perfilAcesso: payload.role,
-    role: mapBackendProfileToRole(payload.role),
+    id: payload.usuario.id ?? currentUser?.id ?? null,
+    nome: payload.usuario.nome,
+    name: payload.usuario.nome,
+    email: payload.usuario.email,
+    perfilAcesso: payload.usuario.perfilAcesso,
+    role: mapBackendProfileToRole(payload.usuario.perfilAcesso),
     ativo: currentUser?.ativo ?? null,
     matricula: currentUser?.matricula ?? null,
   }
@@ -28,7 +35,11 @@ function buildUserFromRolePayload(
 export function hasSessionUserPayload(
   payload: RefreshResponse | null | undefined,
 ): payload is RefreshResponse & SessionAuthPayload {
-  return Boolean(payload?.email && payload?.nome && payload?.role)
+  return Boolean(
+    payload?.usuario?.email &&
+      payload.usuario.nome &&
+      payload.usuario.perfilAcesso,
+  )
 }
 
 export function mapRefreshResponseToAuthUser(

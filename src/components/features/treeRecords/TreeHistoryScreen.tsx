@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { ArrowLeft, Pencil, PlusCircle, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { ArrowLeft, PlusCircle, Trash2 } from 'lucide-react'
 
 import { DashboardCard } from '@/components/features/dashboard'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,8 @@ import {
 } from '@/utils/treeRecords'
 
 interface TreeHistoryScreenProps {
+  deletingRecordId?: string | null
+  onDeleteRecord?: (record: TreeMeasurementRecord) => void | Promise<void>
   role: UserRole.RESEARCHER | UserRole.MANAGER | UserRole.ADMIN
   tree: Tree
 }
@@ -27,9 +29,13 @@ function formatCoordinate(value: number | null) {
     : 'Indisponível'
 }
 
-export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
+export function TreeHistoryScreen({
+  deletingRecordId = null,
+  onDeleteRecord,
+  role,
+  tree,
+}: TreeHistoryScreenProps) {
   const latestRecord = getLatestRecord(tree)
-  const canDirectEdit = role !== UserRole.RESEARCHER
   const canDelete = role !== UserRole.RESEARCHER
   const orderedRecords = useMemo(() => tree.records.slice().reverse(), [tree.records])
   const [selectedRecordId, setSelectedRecordId] = useState(latestRecord.id)
@@ -45,6 +51,12 @@ export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
   function selectRecord(recordId: string) {
     setSelectedRecordId(recordId)
   }
+
+  useEffect(() => {
+    if (!orderedRecords.some((record) => record.id === selectedRecordId)) {
+      setSelectedRecordId(orderedRecords[0]?.id ?? latestRecord.id)
+    }
+  }, [latestRecord.id, orderedRecords, selectedRecordId])
 
   return (
     <div className="space-y-6">
@@ -139,7 +151,7 @@ export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-rosewood/15 bg-card px-3 py-1 text-xs text-rosewood">
                 {selectedRecord.kind === 'initial'
                   ? 'Registro inicial'
@@ -148,6 +160,22 @@ export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
               <span className="rounded-full border border-sage/20 bg-sage/10 px-3 py-1 text-xs text-burgundy">
                 {TREE_RECORD_STATUS_LABELS[selectedRecord.status]}
               </span>
+              {canDelete && onDeleteRecord ? (
+                <Button
+                  type="button"
+                  icon={Trash2}
+                  iconSide="left"
+                  variant="ghost"
+                  size="sm"
+                  className="text-burgundy hover:bg-burgundy/6"
+                  disabled={deletingRecordId === selectedRecord.id}
+                  onClick={() => onDeleteRecord(selectedRecord)}
+                >
+                  {deletingRecordId === selectedRecord.id
+                    ? 'Excluindo...'
+                    : 'Excluir registro'}
+                </Button>
+              ) : null}
             </div>
           </div>
 
@@ -191,30 +219,6 @@ export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
               {selectedRecord.observacoes ??
                 'Sem observações adicionais registradas.'}
             </p>
-
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                icon={Pencil}
-                iconSide="left"
-                variant="outline"
-                disabled
-              >
-                {canDirectEdit ? 'Edição em breve' : 'Solicitação em breve'}
-              </Button>
-              {canDelete ? (
-                <Button
-                  type="button"
-                  icon={Trash2}
-                  iconSide="left"
-                  variant="ghost"
-                  className="text-burgundy hover:bg-burgundy/6"
-                  disabled
-                >
-                  Exclusão em breve
-                </Button>
-              ) : null}
-            </div>
           </div>
 
           <ExpandedRecordDetails record={selectedRecord} tree={tree} />

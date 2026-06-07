@@ -472,3 +472,7 @@ export async function createNewTreeRecord(payload: NewTreeRecordPayload) {
 
   return data;
 }
+
+export async function deleteTreeRecord(recordId: string) {
+  await api.delete(`${API_ENDPOINTS.TREE_RECORDS}/${recordId}`)
+}

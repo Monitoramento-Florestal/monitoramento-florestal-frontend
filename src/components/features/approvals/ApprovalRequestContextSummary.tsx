@@ -1,5 +1,6 @@
 "use client";
 
+import type { TreeApprovalRequest } from "@/types/trees";
 import { formatDate } from "@/utils/format";
 import {
   getApprovalRecordCode,
@@ -7,7 +8,6 @@ import {
   getApprovalRecordSpecies,
   getApprovalRecordTypeLabel,
 } from "@/utils/approvals";
-import type { TreeApprovalRequest } from "@/types/trees";
 
 interface ApprovalRequestContextSummaryProps {
   request: TreeApprovalRequest;
@@ -16,25 +16,21 @@ interface ApprovalRequestContextSummaryProps {
 export function ApprovalRequestContextSummary({
   request,
 }: ApprovalRequestContextSummaryProps) {
-  const targetRecordLabel = request.targetRecordId
-    ? request.targetRecordId.replace(`${request.treeId}-record-`, "v")
-    : null;
-
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-      <SummaryItem label="Tipo da solicitação" value={getApprovalRecordTypeLabel(request)} />
-      <SummaryItem label="Código" value={getApprovalRecordCode(request)} />
-      <SummaryItem label="Espécie" value={getApprovalRecordSpecies(request)} />
+      <SummaryItem label="Tipo da Solicitacao" value={getApprovalRecordTypeLabel(request)} />
+      <SummaryItem label="Codigo" value={getApprovalRecordCode(request)} />
+      <SummaryItem label="Especie" value={getApprovalRecordSpecies(request)} />
       <SummaryItem label="Submetido por" value={request.submittedBy} />
-      <SummaryItem label="Nome comum" value={getApprovalRecordName(request)} />
-      <SummaryItem label="Data da submissão" value={formatDate(request.submittedAt)} />
+      <SummaryItem label="Nome Comum" value={getApprovalRecordName(request)} />
+      <SummaryItem label="Data da Submissao" value={formatDate(request.submittedAt)} />
       <SummaryItem
-        label="Árvore vinculada"
-        value={request.treeId ?? "Nova árvore em análise"}
+        label="Arvore Vinculada"
+        value={request.treeId ?? "Nova arvore em analise"}
       />
       <SummaryItem
-        label="Registro alvo"
-        value={targetRecordLabel ?? "Sem vínculo com registro anterior"}
+        label="Registro Alvo"
+        value={request.type === "create_record" ? "Novo registro pendente" : "Novo cadastro"}
       />
     </div>
   );

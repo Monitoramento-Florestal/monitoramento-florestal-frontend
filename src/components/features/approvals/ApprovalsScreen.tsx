@@ -1,17 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { DashboardCard } from "@/components/features/dashboard";
+import { useToast } from "@/components/ui/toast";
+import type { TreeApprovalRequest } from "@/types/trees";
 import {
-  approveRecord,
   filterApprovalRecords,
   getApprovalRecordName,
   getPendingApprovalRecords,
-  rejectRecord,
   type ApprovalSearchField,
 } from "@/utils/approvals";
-import type { TreeApprovalRequest } from "@/types/trees";
+
 import { ApprovalRecordCard } from "./ApprovalRecordCard";
 import { ApprovalRequestDetailDrawer } from "./ApprovalRequestDetailDrawer";
 import { ApprovalsEmptyState } from "./ApprovalsEmptyState";
@@ -20,16 +20,23 @@ import { ApprovalsLoadingState } from "./ApprovalsLoadingState";
 import { RejectReasonDialog } from "./RejectReasonDialog";
 
 interface ApprovalsScreenProps {
+  canReview?: boolean;
   initialRecords: TreeApprovalRequest[];
   loading?: boolean;
+  onApprove?: (id: string) => Promise<void>;
+  onReject?: (id: string, reason: string) => Promise<void>;
 }
 
 export function ApprovalsScreen({
+  canReview = true,
   initialRecords,
   loading = false,
+  onApprove,
+  onReject,
 }: ApprovalsScreenProps) {
+  const { showToast } = useToast();
   const [records, setRecords] = useState<TreeApprovalRequest[]>(() =>
-    getPendingApprovalRecords(initialRecords)
+    getPendingApprovalRecords(initialRecords),
   );
   const [query, setQuery] = useState("");
   const [searchField, setSearchField] = useState<ApprovalSearchField>("researcher");
@@ -37,27 +44,49 @@ export function ApprovalsScreen({
   const [rejectTargetId, setRejectTargetId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectError, setRejectError] = useState("");
+  const [activeActionId, setActiveActionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRecords(getPendingApprovalRecords(initialRecords));
+  }, [initialRecords]);
+
   const filteredRecords = useMemo(
     () => filterApprovalRecords(records, query, searchField),
-    [records, query, searchField]
+    [records, query, searchField],
   );
 
   const rejectTarget = useMemo(
     () => records.find((record) => record.id === rejectTargetId) ?? null,
-    [records, rejectTargetId]
-  );
-  const selectedRequest = useMemo(
-    () => records.find((record) => record.id === selectedRequestId) ?? null,
-    [records, selectedRequestId]
+    [records, rejectTargetId],
   );
 
-  function handleApprove(id: string) {
+  const selectedRequest = useMemo(
+    () => records.find((record) => record.id === selectedRequestId) ?? null,
+    [records, selectedRequestId],
+  );
+
+  async function handleApprove(id: string) {
     if (!records.some((record) => record.id === id)) {
       return;
     }
 
-    setRecords((current) => approveRecord(current, id));
-    setSelectedRequestId((current) => (current === id ? null : current));
+    if (!canReview || !onApprove) {
+      showToast({
+        title: "Acao indisponivel para este perfil",
+        description: "Seu perfil nao tem permissao para concluir esta acao.",
+        variant: "info",
+      });
+      return;
+    }
+
+    try {
+      setActiveActionId(id);
+      await onApprove(id);
+      setRecords((current) => current.filter((record) => record.id !== id));
+      setSelectedRequestId((current) => (current === id ? null : current));
+    } finally {
+      setActiveActionId(null);
+    }
   }
 
   function handleStartReject(id: string) {
@@ -74,7 +103,7 @@ export function ApprovalsScreen({
     setSelectedRequestId(null);
   }
 
-  function handleConfirmReject() {
+  async function handleConfirmReject() {
     if (!rejectTarget) {
       return;
     }
@@ -84,11 +113,26 @@ export function ApprovalsScreen({
       return;
     }
 
-    setRecords((current) => rejectRecord(current, rejectTarget.id, rejectReason.trim()));
-    setSelectedRequestId((current) => (current === rejectTarget.id ? null : current));
-    setRejectTargetId(null);
-    setRejectReason("");
-    setRejectError("");
+    if (!canReview || !onReject) {
+      showToast({
+        title: "Acao indisponivel para este perfil",
+        description: "Seu perfil nao tem permissao para concluir esta acao.",
+        variant: "info",
+      });
+      return;
+    }
+
+    try {
+      setActiveActionId(rejectTarget.id);
+      await onReject(rejectTarget.id, rejectReason.trim());
+      setRecords((current) => current.filter((record) => record.id !== rejectTarget.id));
+      setSelectedRequestId((current) => (current === rejectTarget.id ? null : current));
+      setRejectTargetId(null);
+      setRejectReason("");
+      setRejectError("");
+    } finally {
+      setActiveActionId(null);
+    }
   }
 
   return (
@@ -115,6 +159,8 @@ export function ApprovalsScreen({
               <ApprovalRecordCard
                 key={record.id}
                 request={record}
+                canReview={canReview}
+                isActing={activeActionId === record.id}
                 onApprove={handleApprove}
                 onOpenDetails={handleOpenDetails}
                 onReject={handleStartReject}
@@ -127,6 +173,7 @@ export function ApprovalsScreen({
       <RejectReasonDialog
         open={Boolean(rejectTarget)}
         treeName={rejectTarget ? getApprovalRecordName(rejectTarget) : undefined}
+        isSubmitting={Boolean(rejectTarget && activeActionId === rejectTarget.id)}
         reason={rejectReason}
         errorMessage={rejectError}
         onChangeReason={setRejectReason}
@@ -141,6 +188,8 @@ export function ApprovalsScreen({
       <ApprovalRequestDetailDrawer
         open={Boolean(selectedRequest)}
         request={selectedRequest}
+        canReview={canReview}
+        isActing={Boolean(selectedRequest && activeActionId === selectedRequest.id)}
         onClose={handleCloseDetails}
         onApprove={handleApprove}
         onReject={handleStartReject}

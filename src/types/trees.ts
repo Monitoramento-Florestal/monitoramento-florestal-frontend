@@ -157,8 +157,8 @@ export interface Tree {
   especie: string;
   nomeComum: string;
   status: TreeStatus;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
   localizacao: TreeLocation;
   dimensoes: TreeDimensions;
   condicao: TreeCondition;
@@ -176,8 +176,8 @@ export interface TreePreview {
   especie: string;
   nomeComum: string;
   status: TreeStatus;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
   localizacao: Pick<TreeLocation, "bairro" | "rua">;
   dimensoes: Pick<TreeDimensions, "alturaM" | "dapCm" | "copaM">;
   registro: Pick<TreeRecord, "aprovacao" | "ultimaMedicao">;

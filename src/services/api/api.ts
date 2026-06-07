@@ -1,9 +1,8 @@
 import axios, { AxiosError, AxiosHeaders } from 'axios'
 
-import { API_ENDPOINTS } from '@/constants/api'
+import { API_ENDPOINTS, AUTH_ROUTE_ENDPOINTS } from '@/constants/api'
 import {
   clearAuthTokens,
-  getRefreshToken,
   getToken,
   setAuthTokens,
 } from '@/services/storage/tokenStorage'
@@ -38,15 +37,9 @@ export const api = axios.create({
 })
 
 async function refreshAccessToken() {
-  const refreshToken = getRefreshToken()
-
-  if (!refreshToken) {
-    throw new Error('Refresh token indisponivel.')
-  }
-
-  const { data } = await api.post<RefreshResponse>(
-    API_ENDPOINTS.AUTH_REFRESH,
-    { refreshToken },
+  const { data } = await axios.post<RefreshResponse>(
+    AUTH_ROUTE_ENDPOINTS.REFRESH,
+    {},
   )
 
   const nextToken = extractAccessToken(data)
@@ -55,16 +48,14 @@ async function refreshAccessToken() {
     throw new Error('Resposta de refresh sem access token.')
   }
 
-  const nextRefreshToken = data.refreshToken ?? refreshToken
-
   setAuthTokens({
     token: nextToken,
-    refreshToken: nextRefreshToken,
+    refreshToken: data.refreshToken ?? null,
   })
 
   sessionRefreshHandler?.({
     accessToken: nextToken,
-    refreshToken: nextRefreshToken,
+    refreshToken: data.refreshToken ?? null,
     user: data,
   })
 

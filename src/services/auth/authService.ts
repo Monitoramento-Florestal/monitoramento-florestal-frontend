@@ -1,4 +1,6 @@
-import { API_ENDPOINTS } from '@/constants/api'
+import axios from 'axios'
+
+import { API_ENDPOINTS, AUTH_ROUTE_ENDPOINTS } from '@/constants/api'
 import { api } from '@/services/api/api'
 import {
   mapLoginResponseToAuthUser,
@@ -15,9 +17,26 @@ import type {
   UserProfileResponse,
 } from '@/types/auth'
 
-export async function login(payload: LoginRequestPayload) {
-  const { data } = await api.post<LoginResponse>(API_ENDPOINTS.AUTH_LOGIN, payload)
+async function postInternalAuth<T>(url: string, payload?: unknown) {
+  const { data } = await axios.post<T>(url, payload)
   return data
+}
+
+async function getInternalAuth<T>(url: string) {
+  const { data } = await axios.get<T>(url)
+  return data
+}
+
+export async function login(payload: LoginRequestPayload) {
+  return postInternalAuth<LoginResponse>(AUTH_ROUTE_ENDPOINTS.LOGIN, payload)
+}
+
+export async function logout() {
+  await postInternalAuth(AUTH_ROUTE_ENDPOINTS.LOGOUT)
+}
+
+export async function getSessionSnapshot() {
+  return getInternalAuth<LoginResponse>(AUTH_ROUTE_ENDPOINTS.SESSION)
 }
 
 export async function registerCitizen(payload: Omit<RegisterCitizenPayload, 'perfilAcesso'>) {

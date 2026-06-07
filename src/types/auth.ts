@@ -13,6 +13,17 @@ export interface LoginRequestPayload {
 
 export interface LoginResponse {
   accessToken: string
+  refreshToken?: string | null
+  usuario: {
+    id?: string | null
+    nome: string
+    email: string
+    perfilAcesso: BackendProfile
+  }
+}
+
+export interface BackendAuthResponse {
+  accessToken: string
   refreshToken: string
   usuario: {
     id?: string | null

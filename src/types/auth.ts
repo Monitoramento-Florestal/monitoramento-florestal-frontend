@@ -14,9 +14,12 @@ export interface LoginRequestPayload {
 export interface LoginResponse {
   accessToken: string
   refreshToken: string
-  email: string
-  nome: string
-  role: BackendProfile
+  usuario: {
+    id?: string | null
+    nome: string
+    email: string
+    perfilAcesso: BackendProfile
+  }
 }
 
 export interface RegisterCitizenPayload {

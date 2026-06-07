@@ -11,3 +11,10 @@ export const API_ENDPOINTS = {
   TREE_RECORDS: '/registros',
   TREE_RECORDS_NEW_TREE: '/registros/nova-arvore',
 } as const
+
+export const AUTH_ROUTE_ENDPOINTS = {
+  LOGIN: '/api/auth/login',
+  REFRESH: '/api/auth/refresh',
+  LOGOUT: '/api/auth/logout',
+  SESSION: '/api/auth/session',
+} as const

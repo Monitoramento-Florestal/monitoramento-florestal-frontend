@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY } from '@/constants/storage'
+import {
+  AUTH_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+  USER_SESSION_KEY,
+} from '@/constants/storage'
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get(AUTH_TOKEN_KEY)?.value
   const refreshToken = request.cookies.get(REFRESH_TOKEN_KEY)?.value
-  const hasSession = Boolean(token || refreshToken)
+  const userSession = request.cookies.get(USER_SESSION_KEY)?.value
+  const hasSession = Boolean(refreshToken || (token && userSession))
   const pathname = request.nextUrl.pathname
   const isDev = process.env.NODE_ENV === 'development'
-
-  const isPublicPath =
-    pathname === '/' || pathname === '/login' || pathname.startsWith('/public')
 
   const isProtectedPath =
     pathname.startsWith('/admin') ||

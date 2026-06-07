@@ -1,10 +1,10 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
-import { API_ENDPOINTS } from '@/constants/api'
+import { API_ENDPOINTS, AUTH_ROUTE_ENDPOINTS } from '@/constants/api'
 import type { BackendProfile } from '@/types/auth'
 
 export type RefreshResponse = {
-  refreshToken?: string
+  refreshToken?: string | null
   token?: string
   accessToken?: string
   usuario?: {
@@ -17,11 +17,12 @@ export type RefreshResponse = {
 
 export type RetryableConfig = InternalAxiosRequestConfig & { _retry?: boolean }
 
-export function resolvePendingRequests<T extends { reject: (reason?: unknown) => void; resolve: (token: string) => void }>(
-  pendingRequests: T[],
-  error: unknown,
-  token?: string
-) {
+export function resolvePendingRequests<
+  T extends {
+    reject: (reason?: unknown) => void
+    resolve: (token: string) => void
+  },
+>(pendingRequests: T[], error: unknown, token?: string) {
   pendingRequests.forEach((request) => {
     if (error || !token) {
       request.reject(error)
@@ -45,7 +46,9 @@ export function isRefreshRequest(url: string | undefined) {
     return false
   }
 
-  return url.includes(API_ENDPOINTS.AUTH_REFRESH)
+  return [API_ENDPOINTS.AUTH_REFRESH, AUTH_ROUTE_ENDPOINTS.REFRESH].some(
+    (endpoint) => url.includes(endpoint),
+  )
 }
 
 export function isAuthRequestWithoutSessionRecovery(url: string | undefined) {
@@ -59,6 +62,7 @@ export function isAuthRequestWithoutSessionRecovery(url: string | undefined) {
     API_ENDPOINTS.PASSWORD_RESET_REQUEST,
     API_ENDPOINTS.PASSWORD_RESET_VERIFY,
     API_ENDPOINTS.PASSWORD_RESET_RESET,
+    AUTH_ROUTE_ENDPOINTS.LOGIN,
   ].some((endpoint) => url.includes(endpoint))
 }
 
@@ -77,7 +81,8 @@ export function normalizeApiError(error: unknown) {
   if (!axios.isAxiosError(error)) {
     return {
       status: 500,
-      message: error instanceof Error ? error.message : 'Ocorreu um erro inesperado.',
+      message:
+        error instanceof Error ? error.message : 'Ocorreu um erro inesperado.',
     }
   }
 
@@ -85,7 +90,10 @@ export function normalizeApiError(error: unknown) {
   const contentType = error.response?.headers?.['content-type']
   let message = error.message
 
-  if (error.code === 'ECONNABORTED' || error.message.toLowerCase().includes('timeout')) {
+  if (
+    error.code === 'ECONNABORTED' ||
+    error.message.toLowerCase().includes('timeout')
+  ) {
     message = 'A API demorou mais do que o esperado para responder.'
   }
 
@@ -112,10 +120,15 @@ export function normalizeApiError(error: unknown) {
 }
 
 const SESSION_INVALIDATION_MESSAGES = [
+  'dados inválidos',
+  'dados invalidos',
+  'refresh token indisponível.',
   'refresh token indisponivel.',
   'refresh token inválido.',
   'refresh token invalido.',
   'resposta de refresh sem access token.',
+  'sessão indisponível.',
+  'sessao indisponivel.',
 ]
 
 export function isSessionInvalidationError(error: unknown) {

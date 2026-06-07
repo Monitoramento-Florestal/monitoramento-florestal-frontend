@@ -1,4 +1,7 @@
-import { DashboardCard, DashboardPageHeader } from "@/components/features/dashboard";
+import { DashboardPageHeader } from '@/components/features/dashboard'
+import { UserManagementScreen } from '@/components/features/userManagement/UserManagementScreen'
+import { UserRole } from '@/constants/roles'
+import { mockUsers } from '@/types/mockTrees'
 
 export default function ManagerUsersPage() {
   return (
@@ -8,13 +11,11 @@ export default function ManagerUsersPage() {
         subtitle="Gestão operacional de perfis e acessos da plataforma."
       />
       <div className="p-6">
-        <DashboardCard>
-          <h2 className="text-xl tracking-tight text-burgundy">Usuários</h2>
-          <p className="mt-2 text-sm leading-6 text-rosewood">
-            Scaffold reservado para a futura gestão de usuários.
-          </p>
-        </DashboardCard>
+        <UserManagementScreen
+          currentRole={UserRole.MANAGER}
+          initialUsers={mockUsers}
+        />
       </div>
     </>
-  );
+  )
 }

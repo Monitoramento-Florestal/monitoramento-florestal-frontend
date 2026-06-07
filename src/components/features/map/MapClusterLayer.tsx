@@ -38,6 +38,9 @@ export function MapClusterLayer({
   const treesByIdRef = useRef<Map<string, TreePreview>>(new Map());
   const previousSelectedTreeIdRef = useRef<string | null>(null);
   const [clusterReady, setClusterReady] = useState(false);
+  const renderableTrees = trees.filter(
+    (tree) => Number.isFinite(tree.lat) && Number.isFinite(tree.lng),
+  );
 
   useEffect(() => {
     let active = true;
@@ -99,11 +102,11 @@ export function MapClusterLayer({
     const clusterGroup = clusterGroupRef.current;
     clusterGroup.clearLayers();
     markersByTreeIdRef.current.clear();
-    treesByIdRef.current = new Map(trees.map((tree) => [tree.id, tree]));
+    treesByIdRef.current = new Map(renderableTrees.map((tree) => [tree.id, tree]));
     previousSelectedTreeIdRef.current = null;
 
-    trees.forEach((tree) => {
-      const marker = leaflet.marker([tree.lat, tree.lng], {
+    renderableTrees.forEach((tree) => {
+      const marker = leaflet.marker([tree.lat!, tree.lng!], {
         icon: makeTreeImageIcon(leaflet, tree.status, { focused: false }),
       });
 
@@ -114,7 +117,7 @@ export function MapClusterLayer({
       clusterGroup.addLayer(marker);
       markersByTreeIdRef.current.set(tree.id, marker);
     });
-  }, [clusterReady, onSelect, trees]);
+  }, [clusterReady, onSelect, renderableTrees]);
 
   useEffect(() => {
     if (!clusterReady || !leafletRef.current) {

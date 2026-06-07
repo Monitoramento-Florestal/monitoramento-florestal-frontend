@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   PASSWORD_RESET_RESET: '/recuperar-senha/redefinir',
   PUBLIC_DASHBOARD: '/public/dashboard',
   CITIZEN_PROFILE: '/citizen/profile',
-  TREES: '/trees',
-  MEASUREMENTS: '/measurements',
+  TREES: '/arvores',
+  TREE_RECORDS: '/registros',
+  TREE_RECORDS_NEW_TREE: '/registros/nova-arvore',
 } as const

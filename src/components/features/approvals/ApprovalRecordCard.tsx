@@ -21,9 +21,13 @@ interface ApprovalRecordCardProps {
   onOpenDetails: (id: string) => void;
   onReject: (id: string) => void;
   request: TreeApprovalRequest;
+  canReview?: boolean;
+  isActing?: boolean;
 }
 
 export function ApprovalRecordCard({
+  canReview = true,
+  isActing = false,
   onApprove,
   onOpenDetails,
   onReject,
@@ -132,16 +136,17 @@ export function ApprovalRecordCard({
             className="h-9 flex-1"
             onClick={handleOpenDetails}
           >
-            Ver análise completa
+            Ver analise completa
           </Button>
           <Button
             type="button"
             icon={Check}
             iconSide="left"
             className="h-9 flex-1"
+            disabled={!canReview || isActing}
             onClick={() => onApprove(request.id)}
           >
-            Aprovar
+            {isActing ? "Processando..." : "Aprovar"}
           </Button>
           <Button
             type="button"
@@ -149,6 +154,7 @@ export function ApprovalRecordCard({
             icon={X}
             iconSide="left"
             className="h-9 flex-1 border-burgundy/30 text-burgundy hover:bg-burgundy/5"
+            disabled={!canReview || isActing}
             onClick={() => onReject(request.id)}
           >
             Rejeitar

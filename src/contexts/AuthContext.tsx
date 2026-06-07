@@ -9,7 +9,9 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 
+import { APP_ROUTES } from '@/constants/routes'
 import {
   setApiSessionRefreshHandler,
   setApiUnauthorizedHandler,
@@ -68,7 +70,7 @@ function readStoredSession(): AuthSession | null {
   const refreshToken = getRefreshToken()
   const user = getStoredUser()
 
-  if (!accessToken || !user) {
+  if (!accessToken || !refreshToken || !user) {
     return null
   }
 
@@ -80,8 +82,11 @@ function readStoredSession(): AuthSession | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter()
+  const pathname = usePathname()
   const [session, setSessionState] = useState<AuthSession | null>(null)
   const [isBootstrapping, setIsBootstrapping] = useState(true)
+  const [shouldRedirectToLogin, setShouldRedirectToLogin] = useState(false)
 
   const clearAuth = useCallback(() => {
     clearAuthTokens()
@@ -145,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setApiUnauthorizedHandler(() => {
       clearAuth()
       setIsBootstrapping(false)
+      setShouldRedirectToLogin(true)
     })
 
     return () => {
@@ -156,6 +162,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     hydrateSession()
   }, [hydrateSession])
+
+  useEffect(() => {
+    if (!shouldRedirectToLogin) {
+      return
+    }
+
+    if (pathname === APP_ROUTES.LOGIN) {
+      setShouldRedirectToLogin(false)
+      return
+    }
+
+    router.replace(APP_ROUTES.LOGIN)
+  }, [pathname, router, shouldRedirectToLogin])
 
   const value = useMemo<AuthContextValue>(
     () => ({

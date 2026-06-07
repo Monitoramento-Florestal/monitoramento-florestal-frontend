@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
 
 import { DashboardCard } from "@/components/features/dashboard";
 import { getTreeHistoryRoute } from "@/constants/routes";
 import { UserRole } from "@/constants/roles";
+import { getManagedTree, listManagedTrees } from "@/services/trees/treeService";
 import { Button } from "@/components/ui/button";
-import { getMockTreeById, mockTreePreviews } from "@/types/mockTrees";
 import type { Tree, TreePreview } from "@/types/trees";
+import { isSessionInvalidationError, normalizeApiError } from "@/utils/apiFunctions";
 import { TreeDetailPanel } from "./treeDetail/TreeDetailPanel";
 import { TREE_STATUS_COLORS } from "./mapIcons";
 
@@ -27,11 +28,95 @@ export function AuthenticatedMapScreen({
   registerHref,
   role,
 }: AuthenticatedMapScreenProps) {
+  const [trees, setTrees] = useState<TreePreview[]>([]);
+  const [isLoadingTrees, setIsLoadingTrees] = useState(true);
+  const [mapErrorMessage, setMapErrorMessage] = useState<string | null>(null);
   const [selectedTreePreview, setSelectedTreePreview] = useState<TreePreview | null>(null);
-  const selectedTree = useMemo<Tree | null>(
-    () => (selectedTreePreview ? getMockTreeById(selectedTreePreview.id) : null),
-    [selectedTreePreview]
-  );
+  const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
+  const [isLoadingSelectedTree, setIsLoadingSelectedTree] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadTrees() {
+      try {
+        setIsLoadingTrees(true);
+        setMapErrorMessage(null);
+        const nextTrees = await listManagedTrees();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setTrees(nextTrees);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        if (isSessionInvalidationError(error)) {
+          return;
+        }
+
+        setMapErrorMessage(normalizeApiError(error).message);
+      } finally {
+        if (isMounted) {
+          setIsLoadingTrees(false);
+        }
+      }
+    }
+
+    void loadTrees();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedTreePreview) {
+      setSelectedTree(null);
+      return;
+    }
+
+    let isMounted = true;
+    const currentTreeId = selectedTreePreview.id;
+
+    async function loadSelectedTree() {
+      try {
+        setIsLoadingSelectedTree(true);
+        const nextTree = await getManagedTree(currentTreeId);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setSelectedTree(nextTree);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        if (isSessionInvalidationError(error)) {
+          return;
+        }
+
+        setMapErrorMessage(normalizeApiError(error).message);
+        setSelectedTree(null);
+      } finally {
+        if (isMounted) {
+          setIsLoadingSelectedTree(false);
+        }
+      }
+    }
+
+    void loadSelectedTree();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedTreePreview]);
+
   const historyHref = useMemo(
     () => (selectedTree ? getTreeHistoryRoute(role, selectedTree.id) : undefined),
     [role, selectedTree]
@@ -52,8 +137,20 @@ export function AuthenticatedMapScreen({
       </DashboardCard>
 
       <DashboardCard className="relative h-[calc(100dvh-14rem)] overflow-hidden p-0">
+        {mapErrorMessage ? (
+          <div className="absolute inset-x-4 top-4 z-[700] rounded-xl border border-burgundy/15 bg-cream/95 px-4 py-3 text-sm text-rosewood shadow-sm">
+            {mapErrorMessage}
+          </div>
+        ) : null}
+
+        {isLoadingTrees || isLoadingSelectedTree ? (
+          <div className="absolute inset-x-4 top-4 z-[700] rounded-xl border border-rosewood/12 bg-cream/95 px-4 py-3 text-sm text-rosewood shadow-sm">
+            Carregando dados do mapa...
+          </div>
+        ) : null}
+
         <MapView
-          trees={mockTreePreviews}
+          trees={trees}
           selectedTreeId={selectedTreePreview?.id ?? null}
           onSelect={setSelectedTreePreview}
           className="absolute inset-0"
@@ -63,7 +160,10 @@ export function AuthenticatedMapScreen({
       <TreeDetailPanel
         historyHref={historyHref}
         tree={selectedTree}
-        onClose={() => setSelectedTreePreview(null)}
+        onClose={() => {
+          setSelectedTreePreview(null);
+          setSelectedTree(null);
+        }}
       />
     </div>
   );

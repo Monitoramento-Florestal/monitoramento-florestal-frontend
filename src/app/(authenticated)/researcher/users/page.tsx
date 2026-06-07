@@ -3,16 +3,16 @@ import { UserManagementScreen } from '@/components/features/userManagement/UserM
 import { UserRole } from '@/constants/roles'
 import { mockUsers } from '@/types/mockTrees'
 
-export default function AdminUsersPage() {
+export default function ResearcherUsersPage() {
   return (
     <>
       <DashboardPageHeader
         title="Usuários"
-        subtitle="Gestão administrativa de perfis e acessos da plataforma."
+        subtitle="Consulta de perfis vinculados ao monitoramento."
       />
       <div className="p-6">
         <UserManagementScreen
-          currentRole={UserRole.ADMIN}
+          currentRole={UserRole.RESEARCHER}
           initialUsers={mockUsers}
         />
       </div>

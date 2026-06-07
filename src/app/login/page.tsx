@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Button } from '@/components/ui/button'
+import { APP_ROUTES } from '@/constants/routes'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { getHomeRouteForRole } from '@/services/auth/authRoutes'
 import { normalizeApiError } from '@/utils/apiFunctions'
@@ -20,6 +21,7 @@ export default function LoginForm() {
   const router = useRouter()
   const { isAuthenticated, isBootstrapping, login, user } = useAuthContext()
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [hasMounted, setHasMounted] = useState(false)
   const {
     register,
     handleSubmit,
@@ -29,8 +31,12 @@ export default function LoginForm() {
   })
 
   useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  useEffect(() => {
     if (!isBootstrapping && isAuthenticated && user) {
-      router.replace(getHomeRouteForRole(user.role))
+      router.replace(getHomeRouteForRole(user.role) || APP_ROUTES.CITIZEN_HOME)
     }
   }, [isAuthenticated, isBootstrapping, router, user])
 
@@ -43,7 +49,7 @@ export default function LoginForm() {
         senha: data.password,
       })
 
-      router.replace(getHomeRouteForRole(nextUser.role))
+      router.replace(getHomeRouteForRole(nextUser.role) || APP_ROUTES.CITIZEN_HOME)
     } catch (error) {
       const normalizedError = normalizeApiError(error)
 
@@ -138,7 +144,7 @@ export default function LoginForm() {
 
         <Button
           type="submit"
-          disabled={isSubmitting || isBootstrapping}
+          disabled={isSubmitting || (hasMounted && isBootstrapping)}
           className="mb-6 w-full rounded-xl bg-sage py-3 text-white shadow-sm transition-all hover:bg-sage"
         >
           {isSubmitting ? 'Entrando...' : 'Entrar'}

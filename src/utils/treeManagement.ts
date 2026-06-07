@@ -58,7 +58,7 @@ export function getTreeManagementStatusLabel(status: TreeStatus) {
 export function filterManagedTrees(
   trees: TreePreview[],
   query: string,
-  status: TreeManagementStatusFilter
+  status: TreeManagementStatusFilter,
 ) {
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -88,5 +88,5 @@ export function filterManagedTrees(
 }
 
 export function getTreeManagementSummary(total: number, visible: number) {
-  return `${visible} de ${total} registros`;
+  return `${visible} de ${total} árvores`;
 }

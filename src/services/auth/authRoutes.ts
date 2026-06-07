@@ -9,5 +9,5 @@ const HOME_ROUTE_BY_ROLE: Record<UserRole, string> = {
 }
 
 export function getHomeRouteForRole(role: UserRole) {
-  return HOME_ROUTE_BY_ROLE[role]
+  return HOME_ROUTE_BY_ROLE[role] ?? APP_ROUTES.CITIZEN_HOME
 }

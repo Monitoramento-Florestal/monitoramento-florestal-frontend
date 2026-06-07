@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import {
   Calendar,
@@ -11,10 +11,10 @@ import {
   TriangleAlert,
   User as UserIcon,
   X,
-} from "lucide-react";
+} from 'lucide-react'
 
-import { Button } from "@/components/ui/button";
-import type { Tree } from "@/types/trees";
+import { Button } from '@/components/ui/button'
+import type { Tree } from '@/types/trees'
 import {
   APPROVAL_LABEL,
   APPROVAL_TONE,
@@ -22,19 +22,25 @@ import {
   formatTreeLabel,
   getTreeCoverPhoto,
   getTreeProblemLabels,
-} from "@/utils/treeDetailPanel";
-import { TREE_STATUS_COLORS, TREE_STATUS_LABEL } from "../mapIcons";
-import { DetailGroup } from "./DetailGroup";
-import { DetailNote } from "./DetailNote";
-import { Metric } from "./Metric";
-import { Section } from "./Section";
-import { StatusPill } from "./StatusPill";
-import { TagList } from "./TagList";
+} from '@/utils/treeDetailPanel'
+import { TREE_STATUS_COLORS, TREE_STATUS_LABEL } from '../mapIcons'
+import { DetailGroup } from './DetailGroup'
+import { DetailNote } from './DetailNote'
+import { Metric } from './Metric'
+import { Section } from './Section'
+import { StatusPill } from './StatusPill'
+import { TagList } from './TagList'
 
 interface TreeDetailPanelProps {
-  historyHref?: string;
-  tree: Tree | null;
-  onClose: () => void;
+  historyHref?: string
+  tree: Tree | null
+  onClose: () => void
+}
+
+function formatCoordinate(value: number | null) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value.toFixed(5)
+    : "Indisponível";
 }
 
 export function TreeDetailPanel({
@@ -43,12 +49,12 @@ export function TreeDetailPanel({
   onClose,
 }: TreeDetailPanelProps) {
   if (!tree) {
-    return null;
+    return null
   }
 
-  const statusColor = TREE_STATUS_COLORS[tree.status];
-  const problemas = getTreeProblemLabels(tree);
-  const coverPhoto = getTreeCoverPhoto(tree);
+  const statusColor = TREE_STATUS_COLORS[tree.status]
+  const problemas = getTreeProblemLabels(tree)
+  const coverPhoto = getTreeCoverPhoto(tree)
 
   return (
     <>
@@ -69,7 +75,9 @@ export function TreeDetailPanel({
               <h2 className="text-[1.4rem] leading-tight text-burgundy">
                 {tree.nomeComum}
               </h2>
-              <p className="mt-1 text-sm italic text-rosewood">{tree.especie}</p>
+              <p className="mt-1 text-sm italic text-rosewood">
+                {tree.especie}
+              </p>
             </div>
 
             <button
@@ -111,18 +119,38 @@ export function TreeDetailPanel({
 
         <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
           <Section title="Medições">
-            <Metric icon={Ruler} label="Altura" value={`${tree.dimensoes.alturaM} m`} />
-            <Metric icon={Ruler} label="DAP" value={`${tree.dimensoes.dapCm} cm`} />
-            <Metric icon={Ruler} label="Copa" value={`${tree.dimensoes.copaM} m`} />
+            <Metric
+              icon={Ruler}
+              label="Altura"
+              value={`${tree.dimensoes.alturaM} m`}
+            />
+            <Metric
+              icon={Ruler}
+              label="DAP"
+              value={`${tree.dimensoes.dapCm} cm`}
+            />
+            <Metric
+              icon={Ruler}
+              label="Copa"
+              value={`${tree.dimensoes.copaM} m`}
+            />
             <Metric
               icon={Ruler}
               label="Coleta"
-              value={tree.dimensoes.medidaEstimada ? "Medida estimada" : "Medida aferida"}
+              value={
+                tree.dimensoes.medidaEstimada
+                  ? 'Medida estimada'
+                  : 'Medida aferida'
+              }
             />
           </Section>
 
           <Section title="Localização">
-            <Metric icon={MapPin} label="Bairro" value={tree.localizacao.bairro} />
+            <Metric
+              icon={MapPin}
+              label="Bairro"
+              value={tree.localizacao.bairro}
+            />
             <Metric icon={MapPin} label="Rua" value={tree.localizacao.rua} />
             {tree.localizacao.numeroResidencia ? (
               <Metric
@@ -142,14 +170,18 @@ export function TreeDetailPanel({
             <Metric
               icon={MapPin}
               label="Coordenadas"
-              value={`${tree.lat.toFixed(5)}, ${tree.lng.toFixed(5)}`}
+              value={`${formatCoordinate(tree.lat)}, ${formatCoordinate(tree.lng)}`}
             />
             <Metric
               icon={Calendar}
               label="Data da coleta"
               value={formatTreeDate(tree.localizacao.dataColeta)}
             />
-            <Metric icon={UserIcon} label="Equipe" value={tree.localizacao.equipe} />
+            <Metric
+              icon={UserIcon}
+              label="Equipe"
+              value={tree.localizacao.equipe}
+            />
           </Section>
 
           <Section title="Condição da árvore">
@@ -169,7 +201,7 @@ export function TreeDetailPanel({
               value={
                 tree.condicao.posicaoProblema
                   ? formatTreeLabel(tree.condicao.posicaoProblema)
-                  : "Sem problema informado"
+                  : 'Sem problema informado'
               }
             />
             <TagList items={problemas} />
@@ -202,7 +234,10 @@ export function TreeDetailPanel({
               value={formatTreeLabel(tree.estruturaRisco.tipoVia)}
             />
             <DetailGroup label="Tronco" items={tree.estruturaRisco.tronco} />
-            <DetailGroup label="Base / colo" items={tree.estruturaRisco.baseColo} />
+            <DetailGroup
+              label="Base / colo"
+              items={tree.estruturaRisco.baseColo}
+            />
             <DetailGroup label="Copa" items={tree.estruturaRisco.copa} />
             <DetailGroup
               label="Alvos potenciais"
@@ -238,7 +273,11 @@ export function TreeDetailPanel({
           </Section>
 
           <Section title="Manejo">
-            <Metric icon={Sprout} label="Ação" value={formatTreeLabel(tree.manejo.acao)} />
+            <Metric
+              icon={Sprout}
+              label="Ação"
+              value={formatTreeLabel(tree.manejo.acao)}
+            />
             <Metric
               icon={Sprout}
               label="Prioridade"
@@ -282,20 +321,21 @@ export function TreeDetailPanel({
           ) : null}
         </div>
 
-        <div className="border-t border-rosewood/14 bg-card/95 px-5 py-4">
-          <Button
-            variant="outline"
-            size="lg"
-            icon={History}
-            iconSide="left"
-            className="w-full"
-            disabled={!historyHref}
-            href={historyHref}
-          >
-            {historyHref ? "Ver histórico" : "Histórico em breve"}
-          </Button>
-        </div>
+        {historyHref ? (
+          <div className="border-t border-rosewood/14 bg-card/95 px-5 py-4">
+            <Button
+              variant="outline"
+              size="lg"
+              icon={History}
+              iconSide="left"
+              className="w-full"
+              href={historyHref}
+            >
+              Ver histórico
+            </Button>
+          </div>
+        ) : null}
       </aside>
     </>
-  );
+  )
 }

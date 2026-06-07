@@ -3,6 +3,7 @@
 import { Check, X, X as CloseIcon } from "lucide-react";
 
 import { DashboardCard } from "@/components/features/dashboard";
+import { TREE_STATUS_COLORS } from "@/components/features/map/mapIcons";
 import { Button } from "@/components/ui/button";
 import type { TreeApprovalRequest } from "@/types/trees";
 import {
@@ -12,7 +13,7 @@ import {
   getApprovalRecordTypeLabel,
 } from "@/utils/approvals";
 import { formatDate } from "@/utils/format";
-import { TREE_STATUS_COLORS } from "@/components/features/map/mapIcons";
+
 import { ApprovalRequestContextSummary } from "./ApprovalRequestContextSummary";
 import { ApprovalRequestRecordDetails } from "./ApprovalRequestRecordDetails";
 
@@ -22,9 +23,13 @@ interface ApprovalRequestDetailDrawerProps {
   onReject: (id: string) => void;
   open: boolean;
   request: TreeApprovalRequest | null;
+  canReview?: boolean;
+  isActing?: boolean;
 }
 
 export function ApprovalRequestDetailDrawer({
+  canReview = true,
+  isActing = false,
   onApprove,
   onClose,
   onReject,
@@ -58,8 +63,9 @@ export function ApprovalRequestDetailDrawer({
                   {getApprovalRecordName(request)}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-rosewood">
-                  Solicitação enviada por <span className="text-burgundy">{request.submittedBy}</span>{" "}
-                  em {formatDate(request.submittedAt)}.
+                  Solicitacao enviada por{" "}
+                  <span className="text-burgundy">{request.submittedBy}</span> em{" "}
+                  {formatDate(request.submittedAt)}.
                 </p>
               </div>
 
@@ -95,10 +101,10 @@ export function ApprovalRequestDetailDrawer({
           <div className="flex-1 space-y-5 px-5 py-5 sm:px-6">
             <DashboardCard className="space-y-4">
               <div>
-                <h3 className="text-base tracking-tight text-burgundy">Contexto da solicitação</h3>
+                <h3 className="text-base tracking-tight text-burgundy">Contexto da solicitacao</h3>
                 <p className="mt-1 text-sm text-rosewood">
-                  Use este bloco para entender se você está aprovando uma criação de árvore, um
-                  novo registro ou uma edição de registro existente.
+                  Use este bloco para entender se voce esta aprovando uma criacao de arvore ou
+                  um novo registro em uma arvore existente.
                 </p>
               </div>
               <ApprovalRequestContextSummary request={request} />
@@ -108,7 +114,7 @@ export function ApprovalRequestDetailDrawer({
               <div>
                 <h3 className="text-base tracking-tight text-burgundy">Registro submetido</h3>
                 <p className="mt-1 text-sm text-rosewood">
-                  Revise todos os campos técnicos antes de aprovar ou rejeitar esta solicitação.
+                  Revise todos os campos tecnicos antes de aprovar ou rejeitar esta solicitacao.
                 </p>
               </div>
               <ApprovalRequestRecordDetails request={request} />
@@ -122,7 +128,8 @@ export function ApprovalRequestDetailDrawer({
                 variant="outline"
                 icon={X}
                 iconSide="left"
-                className="border-burgundy/30 text-burgundy hover:bg-burgundy/5 py-5 px-8"
+                className="border-burgundy/30 px-8 py-5 text-burgundy hover:bg-burgundy/5"
+                disabled={!canReview || isActing}
                 onClick={() => onReject(request.id)}
               >
                 Rejeitar
@@ -131,10 +138,11 @@ export function ApprovalRequestDetailDrawer({
                 type="button"
                 icon={Check}
                 iconSide="left"
-                className="py-5 px-8"
+                className="px-8 py-5"
+                disabled={!canReview || isActing}
                 onClick={() => onApprove(request.id)}
               >
-                Aprovar
+                {isActing ? "Processando..." : "Aprovar"}
               </Button>
             </div>
           </div>

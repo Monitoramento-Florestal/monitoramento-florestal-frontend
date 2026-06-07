@@ -7,9 +7,12 @@ export type RefreshResponse = {
   refreshToken?: string
   token?: string
   accessToken?: string
-  email?: string
-  nome?: string
-  role?: BackendProfile
+  usuario?: {
+    id?: string | null
+    nome: string
+    email: string
+    perfilAcesso: BackendProfile
+  }
 }
 
 export type RetryableConfig = InternalAxiosRequestConfig & { _retry?: boolean }
@@ -45,6 +48,20 @@ export function isRefreshRequest(url: string | undefined) {
   return url.includes(API_ENDPOINTS.AUTH_REFRESH)
 }
 
+export function isAuthRequestWithoutSessionRecovery(url: string | undefined) {
+  if (!url) {
+    return false
+  }
+
+  return [
+    API_ENDPOINTS.AUTH_LOGIN,
+    API_ENDPOINTS.AUTH_REGISTER,
+    API_ENDPOINTS.PASSWORD_RESET_REQUEST,
+    API_ENDPOINTS.PASSWORD_RESET_VERIFY,
+    API_ENDPOINTS.PASSWORD_RESET_RESET,
+  ].some((endpoint) => url.includes(endpoint))
+}
+
 function looksLikeHtml(value: string) {
   const normalized = value.trim().toLowerCase()
 
@@ -68,6 +85,10 @@ export function normalizeApiError(error: unknown) {
   const contentType = error.response?.headers?.['content-type']
   let message = error.message
 
+  if (error.code === 'ECONNABORTED' || error.message.toLowerCase().includes('timeout')) {
+    message = 'A API demorou mais do que o esperado para responder.'
+  }
+
   if (typeof payload === 'string') {
     message = looksLikeHtml(payload)
       ? 'A aplicação recebeu uma resposta inválida do servidor.'
@@ -88,4 +109,31 @@ export function normalizeApiError(error: unknown) {
     status: error.response?.status ?? 500,
     message,
   }
+}
+
+const SESSION_INVALIDATION_MESSAGES = [
+  'refresh token indisponivel.',
+  'refresh token inválido.',
+  'refresh token invalido.',
+  'resposta de refresh sem access token.',
+]
+
+export function isSessionInvalidationError(error: unknown) {
+  if (axios.isAxiosError(error)) {
+    if (error.response?.status === 401) {
+      return true
+    }
+
+    return SESSION_INVALIDATION_MESSAGES.includes(
+      normalizeApiError(error).message.trim().toLowerCase(),
+    )
+  }
+
+  if (error instanceof Error) {
+    return SESSION_INVALIDATION_MESSAGES.includes(
+      error.message.trim().toLowerCase(),
+    )
+  }
+
+  return false
 }

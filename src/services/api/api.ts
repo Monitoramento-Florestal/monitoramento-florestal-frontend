@@ -9,6 +9,7 @@ import {
 } from '@/services/storage/tokenStorage'
 import {
   extractAccessToken,
+  isAuthRequestWithoutSessionRecovery,
   isRefreshRequest,
   isUnauthorized,
   resolvePendingRequests,
@@ -34,7 +35,6 @@ let sessionRefreshHandler:
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
-  timeout: 10000,
 })
 
 async function refreshAccessToken() {
@@ -107,6 +107,10 @@ api.interceptors.response.use(
     const requestConfig = error.config as RetryableConfig | undefined
 
     if (!requestConfig || !isUnauthorized(error)) {
+      return Promise.reject(error)
+    }
+
+    if (isAuthRequestWithoutSessionRecovery(requestConfig.url)) {
       return Promise.reject(error)
     }
 

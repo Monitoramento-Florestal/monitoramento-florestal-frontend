@@ -9,6 +9,10 @@ import type {
 
 export type TreeRecordFormMode = "create-tree" | "create-record" | "edit-record";
 
+function hasFiniteCoordinate(value: number | null | undefined) {
+  return Number.isFinite(value);
+}
+
 export interface TreeRecordFormValues {
   bairro: string;
   rua: string;
@@ -61,7 +65,7 @@ export const TREE_REQUEST_TYPE_LABELS: Record<TreeRequestType, string> = {
 
 export function getTreeRecordFormValues(
   tree?: Tree | null,
-  record?: TreeMeasurementRecord | null
+  record?: TreeMeasurementRecord | null,
 ): TreeRecordFormValues {
   const sourceRecord = record ?? tree?.records[tree.records.length - 1] ?? null;
 
@@ -72,8 +76,8 @@ export function getTreeRecordFormValues(
     equipe: sourceRecord?.localizacao.equipe ?? "",
     numeroResidencia: sourceRecord?.localizacao.numeroResidencia ?? "",
     referencia: sourceRecord?.localizacao.referencia ?? "",
-    lat: tree ? String(tree.lat) : "",
-    lng: tree ? String(tree.lng) : "",
+    lat: tree && hasFiniteCoordinate(tree.lat) ? String(tree.lat) : "",
+    lng: tree && hasFiniteCoordinate(tree.lng) ? String(tree.lng) : "",
     nomeComum: tree?.nomeComum ?? "",
     especie: tree?.especie ?? "",
     dapCm: sourceRecord ? String(sourceRecord.dimensoes.dapCm) : "",
@@ -106,56 +110,32 @@ export function getTreeRecordFormValues(
   };
 }
 
-export function getTreeRecordFormSubtitle(role: UserRole, mode: TreeRecordFormMode) {
+export function getTreeRecordFormSubtitle(_: UserRole, mode: TreeRecordFormMode) {
   if (mode === "create-tree") {
-    return role === UserRole.RESEARCHER
-      ? "Crie uma nova árvore com seu registro técnico inicial. O envio passará por aprovação."
-      : "Cadastre uma nova árvore com seu registro técnico inicial.";
+    return "Cadastre uma nova árvore com o registro técnico inicial para análise.";
   }
 
   if (mode === "create-record") {
-    return role === UserRole.RESEARCHER
-      ? "Adicione uma nova medição técnica para esta árvore. O envio passará por aprovação."
-      : "Adicione uma nova medição técnica para esta árvore.";
+    return "Adicione uma nova medição técnica para esta árvore.";
   }
 
-  return role === UserRole.RESEARCHER
-    ? "Proponha alterações para este registro técnico. O registro aprovado atual será preservado até a decisão."
-    : "Edite diretamente este registro técnico.";
+  return "Proponha alterações para este registro técnico.";
 }
 
-export function getTreeRecordSubmitLabel(role: UserRole, mode: TreeRecordFormMode) {
+export function getTreeRecordSubmitLabel(_: UserRole, mode: TreeRecordFormMode) {
   if (mode === "create-tree") {
-    return role === UserRole.RESEARCHER ? "Enviar para aprovação" : "Salvar árvore";
+    return "Enviar solicitação";
   }
 
   if (mode === "create-record") {
-    return role === UserRole.RESEARCHER ? "Enviar novo registro" : "Salvar registro";
+    return "Enviar registro";
   }
 
-  return role === UserRole.RESEARCHER ? "Enviar solicitação de edição" : "Salvar alterações";
-}
-
-export function getTreeRecordFooterHint(role: UserRole, mode: TreeRecordFormMode) {
-  if (role !== UserRole.RESEARCHER) {
-    return mode === "create-tree"
-      ? "A árvore e o registro inicial serão criados imediatamente no sistema."
-      : "As alterações serão aplicadas diretamente ao histórico aprovado.";
-  }
-
-  if (mode === "create-tree") {
-    return "Sua solicitação criará a árvore e o primeiro registro após aprovação.";
-  }
-
-  if (mode === "create-record") {
-    return "O novo registro será anexado a esta árvore apenas após aprovação.";
-  }
-
-  return "A edição criará uma solicitação separada e o registro atual seguirá visível até a aprovação.";
+  return "Enviar solicitação de edição";
 }
 
 export function getTreeHistorySummary(tree: Tree) {
-  return `${tree.records.length} registros aprovados`;
+  return `${tree.records.length} registros no histórico`;
 }
 
 export function getLatestRecord(tree: Tree) {

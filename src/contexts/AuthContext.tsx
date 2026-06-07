@@ -17,16 +17,17 @@ import {
   setApiUnauthorizedHandler,
 } from '@/services/api/api'
 import {
+  mapLoginResponseToAuthUser,
   hasSessionUserPayload,
   mapRefreshResponseToAuthUser,
 } from '@/services/auth/authMapper'
 import {
-  buildSessionUserFromLogin,
+  getSessionSnapshot,
   login as loginRequest,
+  logout as logoutRequest,
 } from '@/services/auth/authService'
 import {
   clearAuthTokens,
-  getRefreshToken,
   getToken,
   setAuthTokens,
 } from '@/services/storage/tokenStorage'
@@ -44,9 +45,9 @@ import type {
 
 interface AuthContextValue extends AuthState {
   clearAuth: () => void
-  hydrateSession: () => void
+  hydrateSession: () => Promise<void>
   login: (credentials: LoginRequestPayload) => Promise<AuthUser>
-  logout: () => void
+  logout: () => Promise<void>
   setSession: (session: AuthSession) => void
 }
 
@@ -57,26 +58,25 @@ const AuthContext = createContext<AuthContextValue>({
   isAuthenticated: false,
   isBootstrapping: true,
   clearAuth: () => {},
-  hydrateSession: () => {},
+  hydrateSession: async () => {},
   login: async () => {
     throw new Error('AuthProvider não inicializado.')
   },
-  logout: () => {},
+  logout: async () => {},
   setSession: () => {},
 })
 
 function readStoredSession(): AuthSession | null {
   const accessToken = getToken()
-  const refreshToken = getRefreshToken()
   const user = getStoredUser()
 
-  if (!accessToken || !refreshToken || !user) {
+  if (!accessToken || !user) {
     return null
   }
 
   return {
     accessToken,
-    refreshToken,
+    refreshToken: null,
     user,
   }
 }
@@ -101,21 +101,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
     setStoredUser(nextSession.user)
     setSessionState(nextSession)
+    setShouldRedirectToLogin(false)
   }, [])
 
-  const hydrateSession = useCallback(() => {
-    setSessionState(readStoredSession())
-    setIsBootstrapping(false)
-  }, [])
+  const hydrateSession = useCallback(async () => {
+    const cachedSession = readStoredSession()
+
+    if (cachedSession) {
+      setSessionState(cachedSession)
+    }
+
+    try {
+      const response = await getSessionSnapshot()
+      const user = mapLoginResponseToAuthUser(response, cachedSession?.user)
+
+      setSession({
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken ?? null,
+        user,
+      })
+    } catch {
+      clearAuth()
+    } finally {
+      setIsBootstrapping(false)
+    }
+  }, [clearAuth, setSession])
 
   const login = useCallback(
     async (credentials: LoginRequestPayload) => {
       const response = await loginRequest(credentials)
-      const user = buildSessionUserFromLogin(response)
+      const user = mapLoginResponseToAuthUser(response)
 
       setSession({
         accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
+        refreshToken: response.refreshToken ?? null,
         user,
       })
 
@@ -123,6 +142,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [setSession],
   )
+
+  const logout = useCallback(async () => {
+    try {
+      await logoutRequest()
+    } finally {
+      clearAuth()
+      setIsBootstrapping(false)
+      setShouldRedirectToLogin(true)
+    }
+  }, [clearAuth])
 
   useEffect(() => {
     setApiSessionRefreshHandler((payload) => {
@@ -160,7 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [clearAuth])
 
   useEffect(() => {
-    hydrateSession()
+    void hydrateSession()
   }, [hydrateSession])
 
   useEffect(() => {
@@ -186,10 +215,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAuth,
       hydrateSession,
       login,
-      logout: clearAuth,
+      logout,
       setSession,
     }),
-    [clearAuth, hydrateSession, isBootstrapping, login, session, setSession],
+    [clearAuth, hydrateSession, isBootstrapping, login, logout, session, setSession],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

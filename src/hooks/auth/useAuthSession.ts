@@ -4,14 +4,14 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import type { AuthSession } from '@/types/auth'
 
 export function useAuthSession() {
-  const { clearAuth, isAuthenticated, setSession, session, token, user } = useAuthContext()
+  const { isAuthenticated, logout, setSession, session, token, user } = useAuthContext()
 
   function openSession(payload: AuthSession) {
     setSession(payload)
   }
 
   function closeSession() {
-    clearAuth()
+    void logout()
   }
 
   return {

@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import { LogOut, Save } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -42,15 +41,13 @@ export function DashboardProfilePage({
   defaultEmail,
   defaultName,
 }: DashboardProfilePageProps) {
-  const router = useRouter();
-  const { clearAuth, user } = useAuthContext();
+  const { logout, user } = useAuthContext();
 
   const userName = user?.name ?? defaultName;
   const userEmail = user?.email ?? defaultEmail;
 
   function handleLogout() {
-    clearAuth();
-    router.push("/login");
+    void logout();
   }
 
   return (

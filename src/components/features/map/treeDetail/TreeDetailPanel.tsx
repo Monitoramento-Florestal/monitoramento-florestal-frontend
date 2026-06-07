@@ -37,6 +37,12 @@ interface TreeDetailPanelProps {
   onClose: () => void;
 }
 
+function formatCoordinate(value: number | null) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value.toFixed(5)
+    : "Indisponível";
+}
+
 export function TreeDetailPanel({
   historyHref,
   tree,
@@ -142,7 +148,7 @@ export function TreeDetailPanel({
             <Metric
               icon={MapPin}
               label="Coordenadas"
-              value={`${tree.lat.toFixed(5)}, ${tree.lng.toFixed(5)}`}
+              value={`${formatCoordinate(tree.lat)}, ${formatCoordinate(tree.lng)}`}
             />
             <Metric
               icon={Calendar}

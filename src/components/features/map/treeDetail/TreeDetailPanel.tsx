@@ -33,18 +33,20 @@ import { TagList } from './TagList'
 
 interface TreeDetailPanelProps {
   historyHref?: string
+  mode?: 'default' | 'readOnly'
   tree: Tree | null
   onClose: () => void
 }
 
 function formatCoordinate(value: number | null) {
-  return typeof value === "number" && Number.isFinite(value)
+  return typeof value === 'number' && Number.isFinite(value)
     ? value.toFixed(5)
-    : "Indisponível";
+    : 'Indisponivel'
 }
 
 export function TreeDetailPanel({
   historyHref,
+  mode = 'default',
   tree,
   onClose,
 }: TreeDetailPanelProps) {
@@ -55,6 +57,7 @@ export function TreeDetailPanel({
   const statusColor = TREE_STATUS_COLORS[tree.status]
   const problemas = getTreeProblemLabels(tree)
   const coverPhoto = getTreeCoverPhoto(tree)
+  const isReadOnly = mode === 'readOnly'
 
   return (
     <>
@@ -100,10 +103,12 @@ export function TreeDetailPanel({
                 color: statusColor.stroke,
               }}
             />
-            <StatusPill
-              label={APPROVAL_LABEL[tree.registro.aprovacao]}
-              className={APPROVAL_TONE[tree.registro.aprovacao]}
-            />
+            {!isReadOnly ? (
+              <StatusPill
+                label={APPROVAL_LABEL[tree.registro.aprovacao]}
+                className={APPROVAL_TONE[tree.registro.aprovacao]}
+              />
+            ) : null}
           </div>
 
           {coverPhoto ? (
@@ -118,7 +123,7 @@ export function TreeDetailPanel({
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
-          <Section title="Medições">
+          <Section title="Medicoes">
             <Metric
               icon={Ruler}
               label="Altura"
@@ -145,7 +150,7 @@ export function TreeDetailPanel({
             />
           </Section>
 
-          <Section title="Localização">
+          <Section title="Localizacao">
             <Metric
               icon={MapPin}
               label="Bairro"
@@ -155,14 +160,14 @@ export function TreeDetailPanel({
             {tree.localizacao.numeroResidencia ? (
               <Metric
                 icon={MapPin}
-                label="Número"
+                label="Numero"
                 value={tree.localizacao.numeroResidencia}
               />
             ) : null}
             {tree.localizacao.referencia ? (
               <Metric
                 icon={MapPin}
-                label="Referência"
+                label="Referencia"
                 value={tree.localizacao.referencia}
                 stacked
               />
@@ -184,7 +189,7 @@ export function TreeDetailPanel({
             />
           </Section>
 
-          <Section title="Condição da árvore">
+          <Section title="Condicao da arvore">
             <Metric
               icon={Sprout}
               label="Estado geral"
@@ -197,7 +202,7 @@ export function TreeDetailPanel({
             />
             <Metric
               icon={TriangleAlert}
-              label="Posição do problema"
+              label="Posicao do problema"
               value={
                 tree.condicao.posicaoProblema
                   ? formatTreeLabel(tree.condicao.posicaoProblema)
@@ -210,7 +215,7 @@ export function TreeDetailPanel({
           <Section title="Estrutura e risco">
             <Metric
               icon={ShieldAlert}
-              label="Inclinação do tronco"
+              label="Inclinacao do tronco"
               value={formatTreeLabel(tree.estruturaRisco.inclinacaoTronco)}
             />
             <Metric
@@ -220,7 +225,7 @@ export function TreeDetailPanel({
             />
             <Metric
               icon={ShieldAlert}
-              label="Fluxo de veículos"
+              label="Fluxo de veiculos"
               value={formatTreeLabel(tree.estruturaRisco.fluxoVeiculos)}
             />
             <Metric
@@ -244,7 +249,7 @@ export function TreeDetailPanel({
               items={tree.estruturaRisco.alvosPotenciais}
             />
             <DetailGroup
-              label="Alvos sensíveis"
+              label="Alvos sensiveis"
               items={tree.estruturaRisco.alvosSensiveis}
             />
           </Section>
@@ -252,22 +257,22 @@ export function TreeDetailPanel({
           <Section title="Conflitos">
             <Metric
               icon={TriangleAlert}
-              label="Fiação"
+              label="Fiacao"
               value={formatTreeLabel(tree.conflitos.fiacao)}
             />
             <Metric
               icon={TriangleAlert}
-              label="Calçada"
+              label="Calcada"
               value={formatTreeLabel(tree.conflitos.calcada)}
             />
             <Metric
               icon={TriangleAlert}
-              label="Iluminação"
+              label="Iluminacao"
               value={formatTreeLabel(tree.conflitos.iluminacao)}
             />
             <Metric
               icon={TriangleAlert}
-              label="Edificação"
+              label="Edificacao"
               value={formatTreeLabel(tree.conflitos.edificacao)}
             />
           </Section>
@@ -275,7 +280,7 @@ export function TreeDetailPanel({
           <Section title="Manejo">
             <Metric
               icon={Sprout}
-              label="Ação"
+              label="Acao"
               value={formatTreeLabel(tree.manejo.acao)}
             />
             <Metric
@@ -285,43 +290,47 @@ export function TreeDetailPanel({
             />
           </Section>
 
-          <Section title="Registro atual">
+          <Section title={isReadOnly ? 'Acompanhamento' : 'Registro atual'}>
             <Metric
               icon={Calendar}
-              label="Última medição"
+              label="Ultima medicao"
               value={formatTreeDate(tree.registro.ultimaMedicao)}
             />
-            <Metric
-              icon={Calendar}
-              label="Registrado em"
-              value={formatTreeDate(tree.registro.registradoEm)}
-            />
-            <Metric
-              icon={UserIcon}
-              label="Registrado por"
-              value={tree.registro.registradoPor}
-              stacked
-            />
-            <Metric
-              icon={Camera}
-              label="Fotos anexadas"
-              value={String(tree.registro.fotos.length)}
-            />
-            {tree.registro.motivoRejeicao ? (
-              <DetailNote title="Motivo da rejeição">
-                {tree.registro.motivoRejeicao}
-              </DetailNote>
+            {!isReadOnly ? (
+              <>
+                <Metric
+                  icon={Calendar}
+                  label="Registrado em"
+                  value={formatTreeDate(tree.registro.registradoEm)}
+                />
+                <Metric
+                  icon={UserIcon}
+                  label="Registrado por"
+                  value={tree.registro.registradoPor}
+                  stacked
+                />
+                <Metric
+                  icon={Camera}
+                  label="Fotos anexadas"
+                  value={String(tree.registro.fotos.length)}
+                />
+                {tree.registro.motivoRejeicao ? (
+                  <DetailNote title="Motivo da rejeicao">
+                    {tree.registro.motivoRejeicao}
+                  </DetailNote>
+                ) : null}
+              </>
             ) : null}
           </Section>
 
           {tree.observacoes ? (
-            <Section title="Observações">
+            <Section title="Observacoes">
               <DetailNote>{tree.observacoes}</DetailNote>
             </Section>
           ) : null}
         </div>
 
-        {historyHref ? (
+        {historyHref && !isReadOnly ? (
           <div className="border-t border-rosewood/14 bg-card/95 px-5 py-4">
             <Button
               variant="outline"
@@ -331,7 +340,7 @@ export function TreeDetailPanel({
               className="w-full"
               href={historyHref}
             >
-              Ver histórico
+              Ver historico
             </Button>
           </div>
         ) : null}

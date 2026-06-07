@@ -1,18 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  ChevronDown,
-  ChevronUp,
-  Pencil,
-  PlusCircle,
-  Trash2,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, PlusCircle, Trash2 } from "lucide-react";
 
 import { DashboardCard } from "@/components/features/dashboard";
 import { Button } from "@/components/ui/button";
 import { UserRole } from "@/constants/roles";
-import { getTreeRecordCreateRoute, getTreeRecordEditRoute } from "@/constants/routes";
+import { getTreeRecordCreateRoute } from "@/constants/routes";
 import type { Tree, TreeMeasurementRecord } from "@/types/trees";
 import { formatDate } from "@/utils/format";
 import { formatTreeDate, formatTreeLabel } from "@/utils/treeDetailPanel";
@@ -27,6 +21,12 @@ interface TreeHistoryScreenProps {
   tree: Tree;
 }
 
+function formatCoordinate(value: number | null) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value.toFixed(5)
+    : "Indisponível";
+}
+
 export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
   const latestRecord = getLatestRecord(tree);
   const canDirectEdit = role !== UserRole.RESEARCHER;
@@ -38,7 +38,7 @@ export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
     setExpandedRecordIds((current) =>
       current.includes(recordId)
         ? current.filter((id) => id !== recordId)
-        : [...current, recordId]
+        : [...current, recordId],
     );
   }
 
@@ -72,7 +72,7 @@ export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
           />
           <SummaryItem
             label="Coordenadas"
-            value={`${tree.lat.toFixed(5)}, ${tree.lng.toFixed(5)}`}
+            value={`${formatCoordinate(tree.lat)}, ${formatCoordinate(tree.lng)}`}
           />
         </div>
       </DashboardCard>
@@ -136,13 +136,8 @@ export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
                   >
                     {isExpanded ? "Ocultar detalhes" : "Ver detalhes"}
                   </Button>
-                  <Button
-                    href={getTreeRecordEditRoute(role, tree.id, record.id)}
-                    icon={Pencil}
-                    iconSide="left"
-                    variant="outline"
-                  >
-                    {canDirectEdit ? "Editar" : "Solicitar edição"}
+                  <Button type="button" icon={Pencil} iconSide="left" variant="outline" disabled>
+                    {canDirectEdit ? "Edição em breve" : "Solicitação em breve"}
                   </Button>
                   {canDelete ? (
                     <Button
@@ -151,8 +146,9 @@ export function TreeHistoryScreen({ role, tree }: TreeHistoryScreenProps) {
                       iconSide="left"
                       variant="ghost"
                       className="text-burgundy hover:bg-burgundy/6"
+                      disabled
                     >
-                      Excluir
+                      Exclusão em breve
                     </Button>
                   ) : null}
                 </div>
@@ -185,19 +181,13 @@ function ExpandedRecordDetails({
         <DetailGrid>
           <SummaryItem label="Nome comum" value={tree.nomeComum} />
           <SummaryItem label="Espécie" value={tree.especie} />
-          <SummaryItem label="Latitude" value={tree.lat.toFixed(5)} />
-          <SummaryItem label="Longitude" value={tree.lng.toFixed(5)} />
+          <SummaryItem label="Latitude" value={formatCoordinate(tree.lat)} />
+          <SummaryItem label="Longitude" value={formatCoordinate(tree.lng)} />
           <SummaryItem label="Bairro" value={record.localizacao.bairro} />
           <SummaryItem label="Rua" value={record.localizacao.rua} />
-          <SummaryItem
-            label="Número"
-            value={record.localizacao.numeroResidencia ?? "Não informado"}
-          />
+          <SummaryItem label="Número" value={record.localizacao.numeroResidencia ?? "Não informado"} />
           <SummaryItem label="Equipe" value={record.localizacao.equipe} />
-          <SummaryItem
-            label="Referência"
-            value={record.localizacao.referencia ?? "Não informada"}
-          />
+          <SummaryItem label="Referência" value={record.localizacao.referencia ?? "Não informada"} />
           <SummaryItem label="Data da coleta" value={formatTreeDate(record.localizacao.dataColeta)} />
         </DetailGrid>
       </DetailSection>

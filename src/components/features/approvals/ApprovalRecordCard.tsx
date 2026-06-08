@@ -124,7 +124,7 @@ export function ApprovalRecordCard({
         </div>
 
         <div
-          className="flex w-full flex-col gap-2 sm:w-48 sm:justify-center"
+          className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-48 sm:flex-col sm:justify-center"
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
         >
@@ -133,7 +133,7 @@ export function ApprovalRecordCard({
             variant="burgundy"
             icon={Eye}
             iconSide="left"
-            className="h-9 flex-1"
+            className="col-span-2 h-9 flex-1"
             onClick={handleOpenDetails}
           >
             Ver analise completa

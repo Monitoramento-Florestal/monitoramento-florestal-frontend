@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, PlusCircle, Trash2 } from 'lucide-react'
+import { ArrowLeft, ChevronDown, PlusCircle, Trash2 } from 'lucide-react'
 
 import { DashboardCard } from '@/components/features/dashboard'
 import { Button } from '@/components/ui/button'
@@ -109,7 +109,46 @@ export function TreeHistoryScreen({
       </DashboardCard>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(18rem,24rem)_1fr]">
-        <DashboardCard className="space-y-3 self-start">
+        <details className="group xl:hidden" open>
+          <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl border border-rosewood/10 bg-card px-4 py-4 text-left text-burgundy marker:hidden">
+            <div>
+              <p className="text-sm tracking-tight">Registros aprovados</p>
+              <p className="mt-1 text-xs text-rosewood">
+                {orderedRecords.length} versão(ões) disponível(is)
+              </p>
+            </div>
+            <ChevronDown
+              size={18}
+              className="text-rosewood transition-transform group-open:rotate-180"
+              strokeWidth={1.7}
+            />
+          </summary>
+
+          <DashboardCard className="mt-3 space-y-3 self-start">
+            <div>
+              <h3 className="text-lg tracking-tight text-burgundy">
+                Registros aprovados
+              </h3>
+              <p className="mt-1 text-sm leading-6 text-rosewood">
+                Selecione uma versão para visualizar o registro completo.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              {orderedRecords.map((record, index) => (
+                <RecordListItem
+                  key={record.id}
+                  isCurrent={index === 0}
+                  isSelected={record.id === selectedRecord.id}
+                  record={record}
+                  onSelect={selectRecord}
+                />
+              ))}
+            </div>
+          </DashboardCard>
+        </details>
+
+        <DashboardCard className="hidden space-y-3 self-start xl:block">
           <div>
             <h3 className="text-lg tracking-tight text-burgundy">
               Registros aprovados
@@ -497,12 +536,24 @@ function DetailSection({
   title: string
 }) {
   return (
-    <section className="space-y-3">
-      <h4 className="text-sm font-medium uppercase tracking-[0.18em] text-rosewood/80">
-        {title}
-      </h4>
-      {children}
-    </section>
+    <details className="group rounded-xl border border-rosewood/10 bg-white/40 p-3 md:rounded-none md:border-0 md:bg-transparent md:p-0" open>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 md:hidden">
+        <span className="text-sm font-medium uppercase tracking-[0.18em] text-rosewood/80">
+          {title}
+        </span>
+        <ChevronDown
+          size={16}
+          className="text-rosewood transition-transform group-open:rotate-180"
+          strokeWidth={1.7}
+        />
+      </summary>
+      <section className="mt-3 space-y-3 md:mt-0">
+        <h4 className="hidden text-sm font-medium uppercase tracking-[0.18em] text-rosewood/80 md:block">
+          {title}
+        </h4>
+        {children}
+      </section>
+    </details>
   )
 }
 

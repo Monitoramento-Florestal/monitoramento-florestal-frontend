@@ -56,6 +56,17 @@ export interface PasswordResetConfirmPayload {
   confirmarSenha: string
 }
 
+export interface UpdateMyProfilePayload {
+  nome: string
+  email: string
+}
+
+export interface ChangeMyPasswordPayload {
+  senhaAtual: string
+  novaSenha: string
+  confirmarSenha: string
+}
+
 export interface UserProfileResponse {
   id?: string | null
   nome: string

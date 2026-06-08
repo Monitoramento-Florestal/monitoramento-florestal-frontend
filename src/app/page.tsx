@@ -35,7 +35,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-5 sm:px-10 lg:px-16 pt-12 sm:pt-20 pb-16 sm:pb-24 grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center">
 
           {/* Text column */}
-          <div>
+          <div className="order-2 lg:order-1">
             <div className="eyebrow mb-6">
               UFRPE · Patrimônio arbóreo
             </div>
@@ -53,7 +53,7 @@ export default function LandingPage() {
 
             <div className="mt-9 flex flex-wrap gap-3 animate-fade-up [animation-delay:180ms]">
               <Button text="Visualizar mapa"   icon={ArrowRight} variant="primary" size="lg" href="/map" />
-              <Button text="Entrar no sistema" variant="outline" size="lg" href="/login" />
+              <Button text="Entrar" variant="outline" size="lg" href="/login" />
             </div>
 
             <p className="mt-4 text-sm text-rosewood animate-fade-up [animation-delay:240ms]">
@@ -74,7 +74,7 @@ export default function LandingPage() {
           </div>
 
           {/* Visual column */}
-          <div className="relative animate-scale-in [animation-delay:200ms]">
+          <div className="order-1 lg:order-2 relative animate-scale-in [animation-delay:200ms]">
             <div className="relative aspect-square max-w-[480px] mx-auto">
 
               {/* Decorative rings */}
@@ -82,12 +82,17 @@ export default function LandingPage() {
               <div className="absolute inset-12 rounded-full border border-rosewood/25" />
 
               {/* Central illustration — replace with <Logo> when asset is ready */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center px-6">
+                <div className="sm:hidden">
+                  <Logo size={220} variant="light" />
+                </div>
+                <div className="hidden sm:block">
                   <Logo size={392} variant="light" />
+                </div>
               </div>
 
               {/* Floating card — catalogued count */}
-              <div className="grain-dark absolute bottom-12 -right-2 sm:-right-6 bg-forest text-cream rounded-lg px-4 py-3 shadow-float">
+              <div className="grain-dark absolute right-0 bottom-5 bg-forest text-cream rounded-lg px-4 py-3 shadow-float sm:bottom-12 sm:-right-6">
                 <div className="text-[10px] uppercase tracking-[0.2em] text-cream/60">
                   Catalogadas
                 </div>
@@ -95,7 +100,7 @@ export default function LandingPage() {
               </div>
 
               {/* Floating card — location pin */}
-              <div className="absolute bottom-[120px] right-4 sm:right-8 bg-cream border border-rosewood/30 rounded-lg px-3 py-2 shadow-card">
+              <div className="absolute right-3 bottom-[96px] bg-cream border border-rosewood/30 rounded-lg px-3 py-2 shadow-card sm:right-8 sm:bottom-[120px]">
                 <div className="flex items-center gap-2">
                   <MapPin size={14} strokeWidth={1.6} className="text-sage" />
                   <span className="text-xs text-burgundy">UFRPE</span>

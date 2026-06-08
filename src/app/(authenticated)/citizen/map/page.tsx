@@ -1,23 +1,15 @@
-import {
-  DashboardCard,
-  DashboardPageHeader,
-} from '@/components/features/dashboard'
+import { DashboardPageHeader } from '@/components/features/dashboard'
+import { ReadOnlyMapScreen } from '@/components/features/map/ReadOnlyMapScreen'
 
 export default function CitizenMapPage() {
   return (
     <>
       <DashboardPageHeader
         title="Mapa"
-        subtitle="Área autenticada de mapa para visualização do cidadão."
+        subtitle="Consulta autenticada das arvores monitoradas."
       />
-      <div className="p-6">
-        <DashboardCard>
-          <h2 className="text-xl tracking-tight text-burgundy">Mapa</h2>
-          <p className="mt-2 text-sm leading-6 text-rosewood">
-            Scaffold reservado para a experiência autenticada de mapa do
-            cidadão.
-          </p>
-        </DashboardCard>
+      <div className="p-4 sm:p-6">
+        <ReadOnlyMapScreen mapHeightClassName="h-[min(70dvh,32rem)] sm:h-[calc(100dvh-18rem)]" />
       </div>
     </>
   )

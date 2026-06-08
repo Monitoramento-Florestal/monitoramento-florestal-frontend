@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { LocateFixed } from "lucide-react";
+import { ChevronDown, LocateFixed } from "lucide-react";
 
 import { DashboardCard } from "@/components/features/dashboard";
 import { Button } from "@/components/ui/button";
@@ -602,6 +602,11 @@ export function TreeRecordFormScreen({
         </DashboardCard>
       ) : null}
 
+      <FormSectionCard
+        title="Identificacao da Arvore"
+        description="Dados-base da especie e georreferenciamento."
+        defaultOpen
+      >
       <DashboardCard className="space-y-4">
         <div>
           <h3 className="text-xl tracking-tight text-burgundy">Identificação da Árvore</h3>
@@ -662,7 +667,13 @@ export function TreeRecordFormScreen({
           </Button>
         </div>
       </DashboardCard>
+      </FormSectionCard>
 
+      <FormSectionCard
+        title="Localizacao e Coleta"
+        description="Contexto urbano e dados do momento da medicao."
+        defaultOpen
+      >
       <DashboardCard className="space-y-4">
         <div>
           <h3 className="text-xl tracking-tight text-burgundy">Localização e Coleta</h3>
@@ -727,7 +738,12 @@ export function TreeRecordFormScreen({
           </LabeledField>
         </div>
       </DashboardCard>
+      </FormSectionCard>
 
+      <FormSectionCard
+        title="Dimensoes e Condicao"
+        description="Medidas dendrometricas e estado geral do exemplar."
+      >
       <DashboardCard className="space-y-4">
         <div>
           <h3 className="text-xl tracking-tight text-burgundy">Dimensões e Condição</h3>
@@ -831,7 +847,12 @@ export function TreeRecordFormScreen({
           }
         />
       </DashboardCard>
+      </FormSectionCard>
 
+      <FormSectionCard
+        title="Estrutura, Risco e Conflitos"
+        description="Leitura tecnica para risco estrutural e conflitos urbanos."
+      >
       <DashboardCard className="space-y-5">
         <div>
           <h3 className="text-xl tracking-tight text-burgundy">Estrutura, Risco e Conflitos</h3>
@@ -1013,7 +1034,12 @@ export function TreeRecordFormScreen({
           />
         </div>
       </DashboardCard>
+      </FormSectionCard>
 
+      <FormSectionCard
+        title="Observacoes"
+        description="Informacoes complementares sobre a avaliacao."
+      >
       <DashboardCard className="space-y-4">
         <div>
           <h3 className="text-xl tracking-tight text-burgundy">Observações</h3>
@@ -1030,13 +1056,39 @@ export function TreeRecordFormScreen({
           />
         </LabeledField>
       </DashboardCard>
+      </FormSectionCard>
 
-      <div className="sticky bottom-0 flex justify-end rounded-xl border border-rosewood/10 bg-cream/95 px-5 py-4 backdrop-blur">
-        <Button type="submit" size="lg" disabled={isSubmitting}>
+      <div className="app-safe-bottom sticky bottom-0 flex rounded-xl border border-rosewood/10 bg-cream/95 px-4 py-4 backdrop-blur sm:justify-end sm:px-5">
+        <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={isSubmitting}>
           {isSubmitting ? "Enviando..." : submitLabel}
         </Button>
       </div>
     </form>
+  );
+}
+
+function FormSectionCard({
+  children,
+  defaultOpen = false,
+  description,
+  title,
+}: {
+  children: ReactNode;
+  defaultOpen?: boolean;
+  description?: string;
+  title: string;
+}) {
+  return (
+    <details className="group" open={defaultOpen}>
+      <summary className="mb-3 flex cursor-pointer list-none items-start justify-between gap-4 rounded-2xl border border-rosewood/10 bg-card px-4 py-4 md:hidden">
+        <div>
+          <h3 className="text-base tracking-tight text-burgundy">{title}</h3>
+          {description ? <p className="mt-1 text-sm text-rosewood">{description}</p> : null}
+        </div>
+        <ChevronDown className="mt-0.5 h-5 w-5 shrink-0 text-rosewood transition-transform group-open:rotate-180" />
+      </summary>
+      {children}
+    </details>
   );
 }
 

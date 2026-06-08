@@ -1,6 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500&display=swap');
 @import "../../node_modules/tailwindcss/index.css";
 
+:root {
+  --app-gutter-x: clamp(1rem, 4vw, 1.5rem);
+  --app-gutter-x-wide: clamp(1.25rem, 4vw, 2rem);
+  --app-safe-top: env(safe-area-inset-top, 0px);
+  --app-safe-right: env(safe-area-inset-right, 0px);
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-safe-left: env(safe-area-inset-left, 0px);
+}
+
 @theme {
   --color-cream:     #f9ebe0;   /* dominant background — breathing room  */
   --color-rosewood:  #846a6a;   /* secondary text, borders               */
@@ -89,8 +98,18 @@
     font-family: var(--font-sans);
     font-weight: 400;
     min-height: 100dvh;
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -167,6 +186,24 @@
     border-color: color-mix(in srgb, var(--color-rosewood) 25%, transparent);
   }
 
+  .app-shell-padding {
+    padding-left: max(var(--app-gutter-x), calc(var(--app-safe-left) + 1rem));
+    padding-right: max(var(--app-gutter-x), calc(var(--app-safe-right) + 1rem));
+  }
+
+  .app-shell-padding-wide {
+    padding-left: max(var(--app-gutter-x-wide), calc(var(--app-safe-left) + 1rem));
+    padding-right: max(var(--app-gutter-x-wide), calc(var(--app-safe-right) + 1rem));
+  }
+
+  .app-safe-top {
+    padding-top: max(0.75rem, var(--app-safe-top));
+  }
+
+  .app-safe-bottom {
+    padding-bottom: max(0.75rem, var(--app-safe-bottom));
+  }
+
   /* ── Leaflet map — Arbor tile filter ────────────────────────────────
      Desaturates and warms map tiles to match the cream palette.
      Apply className="leaflet-arbor" to the MapContainer.
@@ -176,6 +213,15 @@
   }
   .leaflet-arbor img {
     max-width: none !important;
+  }
+  .leaflet-arbor .leaflet-top,
+  .leaflet-arbor .leaflet-bottom {
+    z-index: 30;
+  }
+  .dashboard-sidebar-open .leaflet-arbor .leaflet-top,
+  .dashboard-sidebar-open .leaflet-arbor .leaflet-bottom {
+    opacity: 0;
+    pointer-events: none;
   }
   .leaflet-arbor .leaflet-control-zoom {
     margin: 0;

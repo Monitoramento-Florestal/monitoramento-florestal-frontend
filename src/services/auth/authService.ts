@@ -8,12 +8,14 @@ import {
 } from '@/services/auth/authMapper'
 import type {
   AuthUser,
+  ChangeMyPasswordPayload,
   LoginRequestPayload,
   LoginResponse,
   PasswordResetConfirmPayload,
   PasswordResetRequestPayload,
   PasswordResetVerifyPayload,
   RegisterCitizenPayload,
+  UpdateMyProfilePayload,
   UserProfileResponse,
 } from '@/types/auth'
 
@@ -37,6 +39,24 @@ export async function logout() {
 
 export async function getSessionSnapshot() {
   return getInternalAuth<LoginResponse>(AUTH_ROUTE_ENDPOINTS.SESSION)
+}
+
+export async function getMyProfile() {
+  const { data } = await api.get<UserProfileResponse>(API_ENDPOINTS.USER_PROFILE_ME)
+  return data
+}
+
+export async function updateMyProfile(payload: UpdateMyProfilePayload) {
+  const { data } = await api.patch<UserProfileResponse>(
+    API_ENDPOINTS.USER_PROFILE_ME,
+    payload,
+  )
+
+  return data
+}
+
+export async function changeMyPassword(payload: ChangeMyPasswordPayload) {
+  await api.post(API_ENDPOINTS.USER_PROFILE_CHANGE_PASSWORD, payload)
 }
 
 export async function registerCitizen(payload: Omit<RegisterCitizenPayload, 'perfilAcesso'>) {

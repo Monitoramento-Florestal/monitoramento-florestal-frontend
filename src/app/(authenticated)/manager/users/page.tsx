@@ -10,7 +10,7 @@ export default function ManagerUsersPage() {
         title="Usuários"
         subtitle="Gestão operacional de perfis e acessos da plataforma."
       />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <UserManagementScreen
           currentRole={UserRole.MANAGER}
           initialUsers={mockUsers}

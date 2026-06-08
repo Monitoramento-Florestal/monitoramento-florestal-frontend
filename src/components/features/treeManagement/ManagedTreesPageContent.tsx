@@ -71,7 +71,7 @@ export function ManagedTreesPageContent({
             : getTreeManagementSummary(trees.length, trees.length)
         }
       />
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-4 sm:p-6">
         {errorMessage ? (
           <DashboardCard className="border-burgundy/15 bg-burgundy/5 text-rosewood">
             {errorMessage}

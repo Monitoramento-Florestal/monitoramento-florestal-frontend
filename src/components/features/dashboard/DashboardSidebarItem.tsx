@@ -8,11 +8,13 @@ import { cn } from "@/utils/cn";
 interface DashboardSidebarItemProps {
   active: boolean;
   item: DashboardNavigationItem;
+  onSelect?: () => void;
 }
 
 export function DashboardSidebarItem({
   active,
   item,
+  onSelect,
 }: DashboardSidebarItemProps) {
   const Icon = item.icon;
 
@@ -20,6 +22,7 @@ export function DashboardSidebarItem({
     <li>
       <Link
         href={item.href}
+        onClick={onSelect}
         className={cn(
           "relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-cream/75 transition-colors hover:bg-cream/5 hover:text-cream",
           active && "bg-sage/15 text-cream"

@@ -1,38 +1,62 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
 import {
   CheckCircle2,
   CircleSlash,
+  Loader2,
   Mail,
   Pencil,
   Search,
   Shield,
   UserPlus,
   Users,
+  X,
 } from 'lucide-react'
 
 import { DashboardCard } from '@/components/features/dashboard'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/toast'
 import { ROLE_LABELS, UserRole } from '@/constants/roles'
+import {
+  createUser,
+  deactivateUser,
+  listUsers,
+  updateUser,
+} from '@/services/users/userService'
+import { mapRoleToBackendProfile } from '@/services/users/userMapper'
 import type { User } from '@/types/auth'
 import { cn } from '@/utils/cn'
+import {
+  isSessionInvalidationError,
+  normalizeApiError,
+} from '@/utils/apiFunctions'
 
 type UserStatusFilter = 'all' | 'active' | 'inactive'
 type UserRoleFilter = 'all' | UserRole
 
 interface UserManagementScreenProps {
   currentRole: UserRole.ADMIN | UserRole.MANAGER | UserRole.RESEARCHER
-  initialUsers: User[]
 }
 
 interface UserManagementPolicy {
   canCreate: boolean
   canEdit: boolean
+  canListUsers: boolean
   canToggleStatus: boolean
   description: string
   manageableRoles: UserRole[]
 }
+
+interface UserFormState {
+  email: string
+  nome: string
+  role: UserRole
+  senha: string
+}
+
+const PAGE_SIZE = 20
 
 const STATUS_FILTERS: Array<{ label: string; value: UserStatusFilter }> = [
   { label: 'Todos', value: 'all' },
@@ -55,13 +79,21 @@ const ROLE_BADGE_STYLES: Record<UserRole, string> = {
   [UserRole.CITIZEN]: 'border-rosewood/15 bg-card text-rosewood',
 }
 
+const DEFAULT_FORM: UserFormState = {
+  email: '',
+  nome: '',
+  role: UserRole.RESEARCHER,
+  senha: '',
+}
+
 function getUserManagementPolicy(
-  currentRole: UserManagementScreenProps['currentRole']
+  currentRole: UserManagementScreenProps['currentRole'],
 ): UserManagementPolicy {
   if (currentRole === UserRole.ADMIN) {
     return {
       canCreate: true,
       canEdit: true,
+      canListUsers: true,
       canToggleStatus: true,
       description: 'Administra todos os perfis e acessos cadastrados.',
       manageableRoles: [
@@ -77,8 +109,9 @@ function getUserManagementPolicy(
     return {
       canCreate: true,
       canEdit: true,
+      canListUsers: true,
       canToggleStatus: true,
-      description: 'Gerencia perfis operacionais sem alterar administradores.',
+      description: 'Gerencia pesquisadores e usuarios publicos.',
       manageableRoles: [UserRole.RESEARCHER, UserRole.CITIZEN],
     }
   }
@@ -86,58 +119,256 @@ function getUserManagementPolicy(
   return {
     canCreate: false,
     canEdit: false,
+    canListUsers: false,
     canToggleStatus: false,
-    description: 'Consulta perfis vinculados ao monitoramento.',
-    manageableRoles: [UserRole.RESEARCHER, UserRole.CITIZEN],
+    description:
+      'O backend libera gerenciamento de usuarios apenas para gestores e administradores.',
+    manageableRoles: [],
   }
 }
 
 function canManageUser(user: User, policy: UserManagementPolicy) {
-  return policy.manageableRoles.includes(user.role)
+  return Boolean(user.id && policy.manageableRoles.includes(user.role))
+}
+
+function getActiveFilterValue(statusFilter: UserStatusFilter) {
+  if (statusFilter === 'active') {
+    return true
+  }
+
+  if (statusFilter === 'inactive') {
+    return false
+  }
+
+  return undefined
+}
+
+function buildFormFromUser(user: User): UserFormState {
+  return {
+    email: user.email,
+    nome: user.nome,
+    role: user.role,
+    senha: '',
+  }
 }
 
 export function UserManagementScreen({
   currentRole,
-  initialUsers,
 }: UserManagementScreenProps) {
+  const { showToast } = useToast()
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<UserRoleFilter>('all')
   const [statusFilter, setStatusFilter] = useState<UserStatusFilter>('all')
+  const [users, setUsers] = useState<User[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [form, setForm] = useState<UserFormState>(DEFAULT_FORM)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [busyUserId, setBusyUserId] = useState<string | null>(null)
   const policy = useMemo(
     () => getUserManagementPolicy(currentRole),
-    [currentRole]
+    [currentRole],
   )
-  const visibleUsers = useMemo(
-    () =>
-      initialUsers.filter((user) => {
-        const normalizedQuery = query.trim().toLowerCase()
-        const matchesQuery =
-          normalizedQuery.length === 0 ||
-          [user.nome, user.email, user.matricula ?? ''].some((value) =>
-            value.toLowerCase().includes(normalizedQuery)
-          )
-        const matchesRole = roleFilter === 'all' || user.role === roleFilter
-        const matchesStatus =
-          statusFilter === 'all' ||
-          (statusFilter === 'active' && user.ativo !== false) ||
-          (statusFilter === 'inactive' && user.ativo === false)
-
-        return matchesQuery && matchesRole && matchesStatus
-      }),
-    [initialUsers, query, roleFilter, statusFilter]
-  )
-  const activeCount = initialUsers.filter((user) => user.ativo !== false).length
-  const operationalCount = initialUsers.filter((user) =>
-    [UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN].includes(user.role)
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const activeCount = users.filter((user) => user.ativo !== false).length
+  const operationalCount = users.filter((user) =>
+    [UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN].includes(user.role),
   ).length
+  const formRoleOptions = policy.manageableRoles
+
+  const fetchUsers = useCallback(async () => {
+    if (!policy.canListUsers) {
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      setErrorMessage(null)
+
+      const response = await listUsers({
+        ativo: getActiveFilterValue(statusFilter),
+        limit: PAGE_SIZE,
+        page,
+        perfilAcesso:
+          roleFilter === 'all'
+            ? undefined
+            : mapRoleToBackendProfile(roleFilter),
+        search: query,
+      })
+
+      setUsers(response.items)
+      setTotal(response.total)
+    } catch (error) {
+      if (isSessionInvalidationError(error)) {
+        return
+      }
+
+      setErrorMessage(normalizeApiError(error).message)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [page, policy.canListUsers, query, roleFilter, statusFilter])
+
+  useEffect(() => {
+    void fetchUsers()
+  }, [fetchUsers])
+
+  useEffect(() => {
+    setPage(0)
+  }, [query, roleFilter, statusFilter])
+
+  function openCreateForm() {
+    setEditingUser(null)
+    setForm({
+      ...DEFAULT_FORM,
+      role: formRoleOptions[0] ?? UserRole.RESEARCHER,
+    })
+    setIsFormOpen(true)
+  }
+
+  function openEditForm(user: User) {
+    setEditingUser(user)
+    setForm(buildFormFromUser(user))
+    setIsFormOpen(true)
+  }
+
+  function closeForm() {
+    setIsFormOpen(false)
+    setEditingUser(null)
+    setForm(DEFAULT_FORM)
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!form.nome.trim() || !form.email.trim()) {
+      showToast({
+        title: 'Preencha nome e e-mail',
+        variant: 'error',
+      })
+      return
+    }
+
+    if (!editingUser && form.senha.length < 8) {
+      showToast({
+        title: 'Informe uma senha inicial',
+        description: 'A senha deve ter pelo menos 8 caracteres.',
+        variant: 'error',
+      })
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+
+      if (editingUser?.id) {
+        await updateUser(editingUser.id, {
+          email: form.email,
+          nome: form.nome,
+          role: form.role,
+        })
+        showToast({
+          title: 'Usuario atualizado',
+          variant: 'success',
+        })
+      } else {
+        await createUser({
+          email: form.email,
+          nome: form.nome,
+          role: form.role,
+          senha: form.senha,
+        })
+        showToast({
+          title: 'Usuario criado',
+          variant: 'success',
+        })
+      }
+
+      closeForm()
+      await fetchUsers()
+    } catch (error) {
+      if (isSessionInvalidationError(error)) {
+        return
+      }
+
+      showToast({
+        title: editingUser
+          ? 'Nao foi possivel atualizar o usuario'
+          : 'Nao foi possivel criar o usuario',
+        description: normalizeApiError(error).message,
+        variant: 'error',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleToggleStatus(user: User) {
+    if (!user.id) {
+      return
+    }
+
+    const isActive = user.ativo !== false
+
+    try {
+      setBusyUserId(user.id)
+
+      if (isActive) {
+        await deactivateUser(user.id)
+      } else {
+        await updateUser(user.id, { ativo: true })
+      }
+
+      showToast({
+        title: isActive ? 'Usuario desativado' : 'Usuario ativado',
+        variant: 'success',
+      })
+      await fetchUsers()
+    } catch (error) {
+      if (isSessionInvalidationError(error)) {
+        return
+      }
+
+      showToast({
+        title: 'Nao foi possivel alterar o status',
+        description: normalizeApiError(error).message,
+        variant: 'error',
+      })
+    } finally {
+      setBusyUserId(null)
+    }
+  }
+
+  if (!policy.canListUsers) {
+    return (
+      <DashboardCard className="bg-white/55 shadow-none">
+        <div className="max-w-2xl space-y-3">
+          <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-burgundy">
+            <Shield size={18} strokeWidth={1.8} />
+          </div>
+          <h2 className="text-lg tracking-tight text-burgundy">
+            Acesso restrito
+          </h2>
+          <p className="text-sm leading-6 text-rosewood">
+            {policy.description} Pesquisadores continuam com acesso ao proprio
+            perfil e aos fluxos de monitoramento.
+          </p>
+        </div>
+      </DashboardCard>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <section className="grid gap-4 md:grid-cols-3">
         <SummaryCard
           icon={Users}
-          label="Usuários cadastrados"
-          value={initialUsers.length}
+          label="Usuarios exibidos"
+          value={users.length}
         />
         <SummaryCard
           icon={CheckCircle2}
@@ -155,7 +386,7 @@ export function UserManagementScreen({
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <h2 className="text-lg tracking-tight text-burgundy">
-              Gerenciamento de usuários
+              Gerenciamento de usuarios
             </h2>
             <p className="mt-1 text-sm leading-6 text-rosewood">
               {policy.description}
@@ -165,14 +396,73 @@ export function UserManagementScreen({
           {policy.canCreate ? (
             <Button
               type="button"
-              icon={UserPlus}
+              icon={isFormOpen ? X : UserPlus}
               iconSide="left"
               variant="burgundy"
+              onClick={isFormOpen ? closeForm : openCreateForm}
             >
-              Novo usuário
+              {isFormOpen ? 'Fechar' : 'Novo usuario'}
             </Button>
           ) : null}
         </div>
+
+        {isFormOpen ? (
+          <form
+            className="grid gap-3 rounded-md border border-rosewood/12 bg-card/70 p-4 lg:grid-cols-2"
+            onSubmit={handleSubmit}
+          >
+            <UserFormField
+              label="Nome completo"
+              value={form.nome}
+              onChange={(value) => setForm((current) => ({ ...current, nome: value }))}
+            />
+            <UserFormField
+              label="E-mail"
+              type="email"
+              value={form.email}
+              onChange={(value) => setForm((current) => ({ ...current, email: value }))}
+            />
+            <label className="block">
+              <span className="text-[0.6875rem] uppercase tracking-[0.16em] text-rosewood">
+                Perfil
+              </span>
+              <select
+                value={form.role}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    role: event.target.value as UserRole,
+                  }))
+                }
+                className="mt-2 h-10 w-full rounded-md border border-rosewood/20 bg-white px-3 text-sm text-burgundy outline-none focus:border-sage focus:ring-2 focus:ring-sage/20"
+              >
+                {formRoleOptions.map((role) => (
+                  <option key={role} value={role}>
+                    {ROLE_LABELS[role]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {!editingUser ? (
+              <UserFormField
+                label="Senha inicial"
+                type="password"
+                value={form.senha}
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, senha: value }))
+                }
+              />
+            ) : null}
+            <div className="flex flex-wrap justify-end gap-3 lg:col-span-2">
+              <Button type="button" variant="ghost" onClick={closeForm}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting} variant="burgundy">
+                {isSubmitting ? 'Salvando...' : 'Salvar usuario'}
+              </Button>
+            </div>
+          </form>
+        ) : null}
 
         <div className="grid gap-3 lg:grid-cols-[minmax(16rem,1fr)_auto_auto]">
           <label className="relative block">
@@ -186,7 +476,7 @@ export function UserManagementScreen({
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar por nome, e-mail ou matrícula"
+              placeholder="Buscar por nome ou e-mail"
               className="h-10 w-full rounded-md border border-rosewood/20 bg-white px-9 text-sm text-burgundy outline-none transition-colors placeholder:text-rosewood/55 focus:border-sage focus:ring-2 focus:ring-sage/20"
             />
           </label>
@@ -217,7 +507,7 @@ export function UserManagementScreen({
                     'h-8 rounded px-3 text-xs transition-colors',
                     isActive
                       ? 'bg-sage text-cream'
-                      : 'text-rosewood hover:bg-secondary'
+                      : 'text-rosewood hover:bg-secondary',
                   )}
                   onClick={() => setStatusFilter(filter.value)}
                 >
@@ -230,211 +520,315 @@ export function UserManagementScreen({
       </DashboardCard>
 
       <DashboardCard className="overflow-hidden p-0">
-        <div className="divide-y divide-rosewood/8 md:hidden">
-          {visibleUsers.map((user) => {
-            const isActive = user.ativo !== false
-            const isManageable = canManageUser(user, policy)
-
-            return (
-              <article key={user.id ?? user.email} className="space-y-4 px-4 py-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-medium text-burgundy">{user.nome}</h3>
-                    <div className="mt-1 flex items-start gap-2 text-xs text-rosewood">
-                      <Mail size={13} strokeWidth={1.7} className="mt-0.5 shrink-0" />
-                      <span className="break-all">{user.email}</span>
-                    </div>
-                  </div>
-
-                  <span
-                    className={cn(
-                      'inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs',
-                      ROLE_BADGE_STYLES[user.role]
-                    )}
-                  >
-                    {ROLE_LABELS[user.role]}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 rounded-2xl bg-secondary/35 px-3 py-3">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-rosewood/70">
-                      Matricula
-                    </p>
-                    <p className="mt-1 text-sm text-burgundy">
-                      {user.matricula ?? 'Não informada'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-rosewood/70">
-                      Status
-                    </p>
-                    <span
-                      className={cn(
-                        'mt-1 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs',
-                        isActive
-                          ? 'border-sage/20 bg-sage/10 text-burgundy'
-                          : 'border-rosewood/15 bg-card text-rosewood'
-                      )}
-                    >
-                      <span className="size-1.5 rounded-full bg-current" />
-                      {isActive ? 'Ativo' : 'Inativo'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {policy.canEdit && isManageable ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      icon={Pencil}
-                      iconSide="left"
-                      className="h-10 justify-start rounded-xl border border-rosewood/12 bg-card/70"
-                    >
-                      Editar
-                    </Button>
-                  ) : null}
-                  {policy.canToggleStatus && isManageable ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      icon={CircleSlash}
-                      iconSide="left"
-                      className="h-10 justify-start rounded-xl border border-burgundy/10 bg-burgundy/4 text-burgundy hover:bg-burgundy/6"
-                    >
-                      {isActive ? 'Desativar' : 'Ativar'}
-                    </Button>
-                  ) : null}
-                </div>
-
-                {!policy.canEdit || !policy.canToggleStatus || !isManageable ? (
-                  <p className="text-xs text-rosewood/65">Somente leitura</p>
-                ) : null}
-              </article>
-            )
-          })}
-        </div>
-
-        <div className="hidden overflow-x-auto md:block">
-          <table className="min-w-full border-separate border-spacing-0">
-            <thead>
-              <tr className="text-left text-[10px] uppercase tracking-[0.18em] text-rosewood/75">
-                <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-                  Usuário
-                </th>
-                <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-                  Perfil
-                </th>
-                <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-                  Matrícula
-                </th>
-                <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
-                  Status
-                </th>
-                <th className="border-b border-rosewood/10 px-4 py-4 text-right font-medium">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {visibleUsers.map((user) => {
-                const isActive = user.ativo !== false
-                const isManageable = canManageUser(user, policy)
-
-                return (
-                  <tr
-                    key={user.id ?? user.email}
-                    className="hover:bg-secondary/45"
-                  >
-                    <td className="border-b border-rosewood/8 px-4 py-5">
-                      <div className="text-sm font-medium text-burgundy">
-                        {user.nome}
-                      </div>
-                      <div className="mt-1 flex items-center gap-2 text-xs text-rosewood">
-                        <Mail size={13} strokeWidth={1.7} />
-                        {user.email}
-                      </div>
-                    </td>
-                    <td className="border-b border-rosewood/8 px-4 py-5">
-                      <span
-                        className={cn(
-                          'inline-flex rounded-full border px-2.5 py-1 text-xs',
-                          ROLE_BADGE_STYLES[user.role]
-                        )}
-                      >
-                        {ROLE_LABELS[user.role]}
-                      </span>
-                    </td>
-                    <td className="border-b border-rosewood/8 px-4 py-5 text-sm text-rosewood">
-                      {user.matricula ?? 'Não informada'}
-                    </td>
-                    <td className="border-b border-rosewood/8 px-4 py-5">
-                      <span
-                        className={cn(
-                          'inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs',
-                          isActive
-                            ? 'border-sage/20 bg-sage/10 text-burgundy'
-                            : 'border-rosewood/15 bg-card text-rosewood'
-                        )}
-                      >
-                        <span className="size-1.5 rounded-full bg-current" />
-                        {isActive ? 'Ativo' : 'Inativo'}
-                      </span>
-                    </td>
-                    <td className="border-b border-rosewood/8 px-4 py-5">
-                      <div className="flex justify-end gap-2">
-                        {policy.canEdit && isManageable ? (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            icon={Pencil}
-                            iconSide="left"
-                          >
-                            Editar
-                          </Button>
-                        ) : null}
-                        {policy.canToggleStatus && isManageable ? (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            icon={CircleSlash}
-                            iconSide="left"
-                            className="text-burgundy hover:bg-burgundy/6"
-                          >
-                            {isActive ? 'Desativar' : 'Ativar'}
-                          </Button>
-                        ) : (
-                          <span className="text-xs text-rosewood/65">
-                            Somente leitura
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {visibleUsers.length === 0 ? (
-          <div className="px-6 py-10 text-center">
-            <p className="text-sm font-medium text-burgundy">
-              Nenhum usuário encontrado
-            </p>
-            <p className="mt-2 text-sm text-rosewood">
-              Ajuste a busca ou os filtros para localizar outros perfis.
-            </p>
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2 px-6 py-12 text-sm text-rosewood">
+            <Loader2 size={16} className="animate-spin" />
+            Carregando usuarios...
           </div>
         ) : null}
+
+        {!isLoading && errorMessage ? (
+          <div className="px-6 py-10 text-center">
+            <p className="text-sm font-medium text-burgundy">
+              Nao foi possivel carregar usuarios
+            </p>
+            <p className="mt-2 text-sm text-rosewood">{errorMessage}</p>
+            <Button
+              type="button"
+              className="mt-4"
+              variant="outline"
+              onClick={() => void fetchUsers()}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        ) : null}
+
+        {!isLoading && !errorMessage ? (
+          <>
+            <div className="divide-y divide-rosewood/8 md:hidden">
+              {users.map((user) => (
+                <UserCard
+                  key={user.id ?? user.email}
+                  busyUserId={busyUserId}
+                  onEdit={openEditForm}
+                  onToggleStatus={(selectedUser) =>
+                    void handleToggleStatus(selectedUser)
+                  }
+                  policy={policy}
+                  user={user}
+                />
+              ))}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
+              <table className="min-w-full border-separate border-spacing-0">
+                <thead>
+                  <tr className="text-left text-[10px] uppercase tracking-[0.18em] text-rosewood/75">
+                    <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
+                      Usuario
+                    </th>
+                    <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
+                      Perfil
+                    </th>
+                    <th className="border-b border-rosewood/10 px-4 py-4 font-medium">
+                      Status
+                    </th>
+                    <th className="border-b border-rosewood/10 px-4 py-4 text-right font-medium">
+                      Acoes
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {users.map((user) => (
+                    <UserTableRow
+                      key={user.id ?? user.email}
+                      busyUserId={busyUserId}
+                      onEdit={openEditForm}
+                      onToggleStatus={(selectedUser) =>
+                        void handleToggleStatus(selectedUser)
+                      }
+                      policy={policy}
+                      user={user}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {users.length === 0 ? (
+              <div className="px-6 py-10 text-center">
+                <p className="text-sm font-medium text-burgundy">
+                  Nenhum usuario encontrado
+                </p>
+                <p className="mt-2 text-sm text-rosewood">
+                  Ajuste a busca ou os filtros para localizar outros perfis.
+                </p>
+              </div>
+            ) : null}
+          </>
+        ) : null}
       </DashboardCard>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-rosewood">
+        <span>
+          Pagina {page + 1} de {pageCount} - {total} usuario(s)
+        </span>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={page === 0 || isLoading}
+            onClick={() => setPage((current) => Math.max(0, current - 1))}
+          >
+            Anterior
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={page + 1 >= pageCount || isLoading}
+            onClick={() =>
+              setPage((current) => Math.min(pageCount - 1, current + 1))
+            }
+          >
+            Proxima
+          </Button>
+        </div>
+      </div>
     </div>
+  )
+}
+
+function UserFormField({
+  label,
+  onChange,
+  type = 'text',
+  value,
+}: {
+  label: string
+  onChange: (value: string) => void
+  type?: string
+  value: string
+}) {
+  return (
+    <label className="block">
+      <span className="text-[0.6875rem] uppercase tracking-[0.16em] text-rosewood">
+        {label}
+      </span>
+      <input
+        type={type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 h-10 w-full rounded-md border border-rosewood/20 bg-white px-3 text-sm text-burgundy outline-none transition-colors focus:border-sage focus:ring-2 focus:ring-sage/20"
+      />
+    </label>
+  )
+}
+
+function UserCard({
+  busyUserId,
+  onEdit,
+  onToggleStatus,
+  policy,
+  user,
+}: {
+  busyUserId: string | null
+  onEdit: (user: User) => void
+  onToggleStatus: (user: User) => void
+  policy: UserManagementPolicy
+  user: User
+}) {
+  const isActive = user.ativo !== false
+  const isManageable = canManageUser(user, policy)
+  const isBusy = busyUserId === user.id
+
+  return (
+    <article className="space-y-4 px-4 py-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="text-sm font-medium text-burgundy">{user.nome}</h3>
+          <div className="mt-1 flex items-start gap-2 text-xs text-rosewood">
+            <Mail size={13} strokeWidth={1.7} className="mt-0.5 shrink-0" />
+            <span className="break-all">{user.email}</span>
+          </div>
+        </div>
+
+        <RoleBadge role={user.role} />
+      </div>
+
+      <StatusBadge isActive={isActive} />
+
+      <UserActions
+        isActive={isActive}
+        isBusy={isBusy}
+        isManageable={isManageable}
+        onEdit={() => onEdit(user)}
+        onToggleStatus={() => onToggleStatus(user)}
+        policy={policy}
+      />
+    </article>
+  )
+}
+
+function UserTableRow({
+  busyUserId,
+  onEdit,
+  onToggleStatus,
+  policy,
+  user,
+}: {
+  busyUserId: string | null
+  onEdit: (user: User) => void
+  onToggleStatus: (user: User) => void
+  policy: UserManagementPolicy
+  user: User
+}) {
+  const isActive = user.ativo !== false
+  const isManageable = canManageUser(user, policy)
+  const isBusy = busyUserId === user.id
+
+  return (
+    <tr className="hover:bg-secondary/45">
+      <td className="border-b border-rosewood/8 px-4 py-5">
+        <div className="text-sm font-medium text-burgundy">{user.nome}</div>
+        <div className="mt-1 flex items-center gap-2 text-xs text-rosewood">
+          <Mail size={13} strokeWidth={1.7} />
+          {user.email}
+        </div>
+      </td>
+      <td className="border-b border-rosewood/8 px-4 py-5">
+        <RoleBadge role={user.role} />
+      </td>
+      <td className="border-b border-rosewood/8 px-4 py-5">
+        <StatusBadge isActive={isActive} />
+      </td>
+      <td className="border-b border-rosewood/8 px-4 py-5">
+        <div className="flex justify-end gap-2">
+          <UserActions
+            isActive={isActive}
+            isBusy={isBusy}
+            isManageable={isManageable}
+            onEdit={() => onEdit(user)}
+            onToggleStatus={() => onToggleStatus(user)}
+            policy={policy}
+          />
+        </div>
+      </td>
+    </tr>
+  )
+}
+
+function UserActions({
+  isActive,
+  isBusy,
+  isManageable,
+  onEdit,
+  onToggleStatus,
+  policy,
+}: {
+  isActive: boolean
+  isBusy: boolean
+  isManageable: boolean
+  onEdit: () => void
+  onToggleStatus: () => void
+  policy: UserManagementPolicy
+}) {
+  if (!policy.canEdit || !policy.canToggleStatus || !isManageable) {
+    return <span className="text-xs text-rosewood/65">Somente leitura</span>
+  }
+
+  return (
+    <>
+      <Button type="button" variant="ghost" size="sm" icon={Pencil} onClick={onEdit}>
+        Editar
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        icon={isBusy ? Loader2 : CircleSlash}
+        className={cn(
+          'text-burgundy hover:bg-burgundy/6',
+          isBusy ? '[&_svg]:animate-spin' : '',
+        )}
+        disabled={isBusy}
+        onClick={onToggleStatus}
+      >
+        {isActive ? 'Desativar' : 'Ativar'}
+      </Button>
+    </>
+  )
+}
+
+function RoleBadge({ role }: { role: UserRole }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs',
+        ROLE_BADGE_STYLES[role],
+      )}
+    >
+      {ROLE_LABELS[role]}
+    </span>
+  )
+}
+
+function StatusBadge({ isActive }: { isActive: boolean }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs',
+        isActive
+          ? 'border-sage/20 bg-sage/10 text-burgundy'
+          : 'border-rosewood/15 bg-card text-rosewood',
+      )}
+    >
+      <span className="size-1.5 rounded-full bg-current" />
+      {isActive ? 'Ativo' : 'Inativo'}
+    </span>
   )
 }
 

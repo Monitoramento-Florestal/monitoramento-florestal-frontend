@@ -1,7 +1,6 @@
 import { DashboardPageHeader } from '@/components/features/dashboard'
 import { UserManagementScreen } from '@/components/features/userManagement/UserManagementScreen'
 import { UserRole } from '@/constants/roles'
-import { mockUsers } from '@/types/mockTrees'
 
 export default function ResearcherUsersPage() {
   return (
@@ -11,10 +10,7 @@ export default function ResearcherUsersPage() {
         subtitle="Consulta de perfis vinculados ao monitoramento."
       />
       <div className="p-4 sm:p-6">
-        <UserManagementScreen
-          currentRole={UserRole.RESEARCHER}
-          initialUsers={mockUsers}
-        />
+        <UserManagementScreen currentRole={UserRole.RESEARCHER} />
       </div>
     </>
   )

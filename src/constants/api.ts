@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   CITIZEN_PROFILE: '/citizen/profile',
   USER_PROFILE_ME: '/usuarios/me',
   USER_PROFILE_CHANGE_PASSWORD: '/usuarios/me/change-password',
+  USERS: '/usuarios',
   TREES: '/arvores',
   TREE_RECORDS: '/registros',
   TREE_RECORDS_NEW_TREE: '/registros/nova-arvore',

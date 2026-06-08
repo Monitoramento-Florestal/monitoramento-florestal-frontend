@@ -108,12 +108,11 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
     key: 'users',
     label: 'Usuários',
     href: {
-      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_USERS,
       [UserRole.MANAGER]: APP_ROUTES.MANAGER_USERS,
       [UserRole.ADMIN]: APP_ROUTES.ADMIN_USERS,
     },
     icon: Users,
-    roles: [UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
+    roles: [UserRole.MANAGER, UserRole.ADMIN],
   },
   {
     key: 'profile',

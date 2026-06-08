@@ -1,7 +1,7 @@
 "use client";
 
 import { LogOut, Save } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useToast } from "@/components/ui/toast";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -63,19 +63,24 @@ export function DashboardProfilePage({
   const { showToast } = useToast();
   const [name, setName] = useState(user?.name ?? defaultName);
   const [email, setEmail] = useState(user?.email ?? defaultEmail);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(!user);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const sessionRef = useRef(session);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   useEffect(() => {
     let isMounted = true;
 
     async function syncProfile() {
       try {
-        setIsLoadingProfile(true);
+        setIsLoadingProfile((current) => current || !user);
         const profile = await getMyProfile();
 
         if (!isMounted) {
@@ -85,9 +90,10 @@ export function DashboardProfilePage({
         setName(profile.nome);
         setEmail(profile.email);
 
-        if (session) {
+        const activeSession = sessionRef.current;
+        if (activeSession) {
           setSession({
-            ...session,
+            ...activeSession,
             user: buildSessionUserFromProfile(profile),
           });
         }
@@ -117,7 +123,7 @@ export function DashboardProfilePage({
     return () => {
       isMounted = false;
     };
-  }, [session, setSession, showToast]);
+  }, [setSession, showToast, user?.id]);
 
   useEffect(() => {
     if (!user) {

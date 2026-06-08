@@ -12,6 +12,7 @@ interface DashboardSidebarProps {
   className?: string;
   currentPath: string;
   items: DashboardNavigationItem[];
+  onNavigate?: () => void;
   onLogout?: () => void;
   userName: string;
   userRole: UserRole;
@@ -56,6 +57,7 @@ export function DashboardSidebar({
   className,
   currentPath,
   items,
+  onNavigate,
   onLogout,
   userName,
   userRole,
@@ -64,7 +66,12 @@ export function DashboardSidebar({
   const activeHref = getActiveItemHref(currentPath, items);
 
   return (
-    <div className={cn("flex h-full min-h-screen flex-col bg-forest", className)}>
+    <div
+      className={cn(
+        "flex h-full min-h-[100dvh] flex-col bg-forest pb-[max(0.75rem,env(safe-area-inset-bottom))]",
+        className
+      )}
+    >
       <div className="border-b border-cream/10 px-4 py-4">
         <div className="flex items-center gap-3 rounded-lg px-2 py-3">
           <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cream to-cream/90 shadow-sm ring-2 ring-sage/35 ring-offset-2 ring-offset-forest">
@@ -94,6 +101,7 @@ export function DashboardSidebar({
                 active={item.href === activeHref}
                 key={item.key}
                 item={item}
+                onSelect={onNavigate}
               />
             ))}
           </ul>

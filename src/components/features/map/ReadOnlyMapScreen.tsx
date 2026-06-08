@@ -24,7 +24,7 @@ interface ReadOnlyMapScreenProps {
 }
 
 export function ReadOnlyMapScreen({
-  mapHeightClassName = "h-[calc(100dvh-16rem)]",
+  mapHeightClassName = "h-[min(70dvh,32rem)] sm:h-[calc(100dvh-16rem)]",
   variant = "dashboard",
 }: ReadOnlyMapScreenProps) {
   const [trees, setTrees] = useState<TreePreview[]>([]);
@@ -151,7 +151,7 @@ export function ReadOnlyMapScreen({
           </div>
         </div>
       ) : (
-        <DashboardCard className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+        <DashboardCard className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
           <div className="space-y-2">
             <div className="flex flex-wrap gap-4 text-xs text-burgundy/80">
               <Legend

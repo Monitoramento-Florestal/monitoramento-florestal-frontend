@@ -10,7 +10,7 @@ export default function ResearcherUsersPage() {
         title="Usuários"
         subtitle="Consulta de perfis vinculados ao monitoramento."
       />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <UserManagementScreen
           currentRole={UserRole.RESEARCHER}
           initialUsers={mockUsers}

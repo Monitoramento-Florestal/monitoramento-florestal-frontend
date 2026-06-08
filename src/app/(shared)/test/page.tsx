@@ -20,7 +20,16 @@ export default function TestDashboard (){
     return(
         <div className="relative flex min-h-screen">
             <DashboardShell
-            sidebar={
+            desktopSidebar={
+                <DashboardSidebar
+                    currentPath={pathname}
+                    items={items}
+                    userName={"Visitante"}
+                    userRole={role}
+
+                />
+            }
+            mobileSidebar={
                 <DashboardSidebar
                     currentPath={pathname}
                     items={items}
@@ -35,6 +44,9 @@ export default function TestDashboard (){
                     subtitle="Test 2"
                 />
             }
+            mobileSubtitle="Cidadão"
+            mobileTitle="Header Test"
+            navigationKey={pathname}
             >
                 <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 w-screen">
                     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">

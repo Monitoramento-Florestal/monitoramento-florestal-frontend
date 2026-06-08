@@ -124,19 +124,19 @@ export function AuthenticatedMapScreen({
 
   return (
     <div className="space-y-4">
-      <DashboardCard className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+      <DashboardCard className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
         <div className="flex flex-wrap gap-4 text-xs text-burgundy/80">
           <Legend color={TREE_STATUS_COLORS.saudavel.fill} label="Saudável" />
           <Legend color={TREE_STATUS_COLORS.injuria.fill} label="Com injúria" />
           <Legend color={TREE_STATUS_COLORS.cortada.fill} label="Cortada" />
         </div>
 
-        <Button href={registerHref} icon={Plus} iconSide="left" variant="outline">
+        <Button href={registerHref} icon={Plus} iconSide="left" variant="outline" className="w-full sm:w-auto">
           Registrar árvore
         </Button>
       </DashboardCard>
 
-      <DashboardCard className="relative h-[calc(100dvh-14rem)] overflow-hidden p-0">
+      <DashboardCard className="relative h-[min(70dvh,32rem)] overflow-hidden p-0 sm:h-[calc(100dvh-14rem)]">
         {mapErrorMessage ? (
           <div className="absolute inset-x-4 top-4 z-[700] rounded-xl border border-burgundy/15 bg-cream/95 px-4 py-3 text-sm text-rosewood shadow-sm">
             {mapErrorMessage}

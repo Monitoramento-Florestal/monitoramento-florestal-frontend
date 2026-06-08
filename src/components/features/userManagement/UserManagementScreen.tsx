@@ -205,7 +205,7 @@ export function UserManagementScreen({
             ))}
           </select>
 
-          <div className="flex rounded-md border border-rosewood/20 bg-white p-1">
+          <div className="flex flex-wrap rounded-md border border-rosewood/20 bg-white p-1">
             {STATUS_FILTERS.map((filter) => {
               const isActive = statusFilter === filter.value
 
@@ -230,7 +230,95 @@ export function UserManagementScreen({
       </DashboardCard>
 
       <DashboardCard className="overflow-hidden p-0">
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-rosewood/8 md:hidden">
+          {visibleUsers.map((user) => {
+            const isActive = user.ativo !== false
+            const isManageable = canManageUser(user, policy)
+
+            return (
+              <article key={user.id ?? user.email} className="space-y-4 px-4 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-medium text-burgundy">{user.nome}</h3>
+                    <div className="mt-1 flex items-start gap-2 text-xs text-rosewood">
+                      <Mail size={13} strokeWidth={1.7} className="mt-0.5 shrink-0" />
+                      <span className="break-all">{user.email}</span>
+                    </div>
+                  </div>
+
+                  <span
+                    className={cn(
+                      'inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs',
+                      ROLE_BADGE_STYLES[user.role]
+                    )}
+                  >
+                    {ROLE_LABELS[user.role]}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 rounded-2xl bg-secondary/35 px-3 py-3">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-rosewood/70">
+                      Matricula
+                    </p>
+                    <p className="mt-1 text-sm text-burgundy">
+                      {user.matricula ?? 'Não informada'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-rosewood/70">
+                      Status
+                    </p>
+                    <span
+                      className={cn(
+                        'mt-1 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs',
+                        isActive
+                          ? 'border-sage/20 bg-sage/10 text-burgundy'
+                          : 'border-rosewood/15 bg-card text-rosewood'
+                      )}
+                    >
+                      <span className="size-1.5 rounded-full bg-current" />
+                      {isActive ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {policy.canEdit && isManageable ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      icon={Pencil}
+                      iconSide="left"
+                      className="h-10 justify-start rounded-xl border border-rosewood/12 bg-card/70"
+                    >
+                      Editar
+                    </Button>
+                  ) : null}
+                  {policy.canToggleStatus && isManageable ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      icon={CircleSlash}
+                      iconSide="left"
+                      className="h-10 justify-start rounded-xl border border-burgundy/10 bg-burgundy/4 text-burgundy hover:bg-burgundy/6"
+                    >
+                      {isActive ? 'Desativar' : 'Ativar'}
+                    </Button>
+                  ) : null}
+                </div>
+
+                {!policy.canEdit || !policy.canToggleStatus || !isManageable ? (
+                  <p className="text-xs text-rosewood/65">Somente leitura</p>
+                ) : null}
+              </article>
+            )
+          })}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="min-w-full border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-[10px] uppercase tracking-[0.18em] text-rosewood/75">

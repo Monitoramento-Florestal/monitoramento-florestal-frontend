@@ -123,7 +123,7 @@ export function ApprovalsPageContent({
         title={title}
         subtitle={`${records.length} solicitacoes aguardando revisao`}
       />
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-4 sm:p-6">
         {readOnlyReason ? (
           <DashboardCard className="border-rosewood/12 bg-card/45 text-rosewood">
             {readOnlyReason}

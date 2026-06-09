@@ -111,7 +111,7 @@ function getUserManagementPolicy(
       canEdit: true,
       canListUsers: true,
       canToggleStatus: true,
-      description: 'Gerencia pesquisadores e usuarios publicos.',
+      description: '',
       manageableRoles: [UserRole.RESEARCHER, UserRole.CITIZEN],
     }
   }
@@ -122,7 +122,7 @@ function getUserManagementPolicy(
     canListUsers: false,
     canToggleStatus: false,
     description:
-      'O backend libera gerenciamento de usuarios apenas para gestores e administradores.',
+      'O backend libera gerenciamento de usuários apenas para gestores e administradores.',
     manageableRoles: [],
   }
 }
@@ -272,7 +272,7 @@ export function UserManagementScreen({
           role: form.role,
         })
         showToast({
-          title: 'Usuario atualizado',
+          title: 'Usuário atualizado',
           variant: 'success',
         })
       } else {
@@ -283,7 +283,7 @@ export function UserManagementScreen({
           senha: form.senha,
         })
         showToast({
-          title: 'Usuario criado',
+          title: 'Usuário criado',
           variant: 'success',
         })
       }
@@ -297,8 +297,8 @@ export function UserManagementScreen({
 
       showToast({
         title: editingUser
-          ? 'Nao foi possivel atualizar o usuario'
-          : 'Nao foi possivel criar o usuario',
+          ? 'Não foi possível atualizar o usuário'
+          : 'Não foi possível criar o usuário',
         description: normalizeApiError(error).message,
         variant: 'error',
       })
@@ -324,7 +324,7 @@ export function UserManagementScreen({
       }
 
       showToast({
-        title: isActive ? 'Usuario desativado' : 'Usuario ativado',
+        title: isActive ? 'Usuário desativado' : 'Usuário ativado',
         variant: 'success',
       })
       await fetchUsers()
@@ -334,7 +334,7 @@ export function UserManagementScreen({
       }
 
       showToast({
-        title: 'Nao foi possivel alterar o status',
+        title: 'Não foi possível alterar o status',
         description: normalizeApiError(error).message,
         variant: 'error',
       })
@@ -386,7 +386,7 @@ export function UserManagementScreen({
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <h2 className="text-lg tracking-tight text-burgundy">
-              Gerenciamento de usuarios
+              Gerenciamento de usuários
             </h2>
             <p className="mt-1 text-sm leading-6 text-rosewood">
               {policy.description}
@@ -401,7 +401,7 @@ export function UserManagementScreen({
               variant="burgundy"
               onClick={isFormOpen ? closeForm : openCreateForm}
             >
-              {isFormOpen ? 'Fechar' : 'Novo usuario'}
+              {isFormOpen ? 'Fechar' : 'Novo usuário'}
             </Button>
           ) : null}
         </div>
@@ -458,7 +458,7 @@ export function UserManagementScreen({
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSubmitting} variant="burgundy">
-                {isSubmitting ? 'Salvando...' : 'Salvar usuario'}
+                {isSubmitting ? 'Salvando...' : 'Salvar usuário'}
               </Button>
             </div>
           </form>
@@ -523,14 +523,14 @@ export function UserManagementScreen({
         {isLoading ? (
           <div className="flex items-center justify-center gap-2 px-6 py-12 text-sm text-rosewood">
             <Loader2 size={16} className="animate-spin" />
-            Carregando usuarios...
+            Carregando usuários...
           </div>
         ) : null}
 
         {!isLoading && errorMessage ? (
           <div className="px-6 py-10 text-center">
             <p className="text-sm font-medium text-burgundy">
-              Nao foi possivel carregar usuarios
+              Não foi possível carregar usuários
             </p>
             <p className="mt-2 text-sm text-rosewood">{errorMessage}</p>
             <Button
@@ -600,7 +600,7 @@ export function UserManagementScreen({
             {users.length === 0 ? (
               <div className="px-6 py-10 text-center">
                 <p className="text-sm font-medium text-burgundy">
-                  Nenhum usuario encontrado
+                  Nenhum usuário encontrado
                 </p>
                 <p className="mt-2 text-sm text-rosewood">
                   Ajuste a busca ou os filtros para localizar outros perfis.
@@ -613,7 +613,7 @@ export function UserManagementScreen({
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-rosewood">
         <span>
-          Pagina {page + 1} de {pageCount} - {total} usuario(s)
+          Página {page + 1} de {pageCount} - {total} usuário(s)
         </span>
         <div className="flex gap-2">
           <Button

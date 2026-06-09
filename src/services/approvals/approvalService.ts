@@ -230,10 +230,10 @@ function createApprovalRecord(
     version: 1,
     status: mapTreeStatus(record.estadoGeral),
     localizacao: {
-      bairro: tree.localizacao.bairro || "Nao informado",
-      rua: tree.localizacao.rua || "Nao informado",
+      bairro: tree.localizacao.bairro || "Não informado",
+      rua: tree.localizacao.rua || "Não informado",
       dataColeta: record.dataColeta,
-      equipe: "Nao informado",
+      equipe: "Não informado",
       referencia: tree.localizacao.referencia ?? undefined,
     },
     dimensoes: {
@@ -278,7 +278,7 @@ function createApprovalRecord(
       fotos: [],
       motivoRejeicao: record.motivoRecusa ?? undefined,
       registradoEm: record.dataColeta,
-      registradoPor: record.pesquisador?.nome ?? "Nao informado",
+      registradoPor: record.pesquisador?.nome ?? "Não informado",
       ultimaMedicao: record.dataColeta,
       aprovadoEm: record.dataAnalise ?? undefined,
     },
@@ -292,15 +292,15 @@ function buildFallbackTreeMeta(record: BackendRegistroResponse) {
   return {
     id: syntheticId,
     codigo: buildTreeCode(record.id),
-    especie: "Nao informado",
-    nomeComum: "Nova Arvore Pendente",
+    especie: "Não informada",
+    nomeComum: "",
     lat: null,
     lng: null,
     localizacao: {
-      bairro: "Nao informado",
-      rua: "Nao informado",
+      bairro: "Não informado",
+      rua: "Não informado",
       dataColeta: record.dataColeta,
-      equipe: "Nao informado",
+      equipe: "Não informado",
       referencia: undefined,
     },
   };
@@ -329,15 +329,15 @@ async function hydrateTreeMeta(record: BackendRegistroResponse) {
     return {
       id: treeId,
       codigo: buildTreeCode(treeId),
-      especie: record.arvore?.especie ?? "Nao informado",
-      nomeComum: record.arvore?.especie ?? "Arvore do Sistema",
+      especie: record.arvore?.especie ?? "Não informada",
+      nomeComum: record.arvore?.especie ?? "",
       lat: null,
       lng: null,
       localizacao: {
-        bairro: record.arvore?.bairro ?? "Nao informado",
-        rua: record.arvore?.rua ?? "Nao informado",
+        bairro: record.arvore?.bairro ?? "Não informado",
+        rua: record.arvore?.rua ?? "Não informado",
         dataColeta: record.dataColeta,
-        equipe: "Nao informado",
+        equipe: "Não informado",
         referencia: record.arvore?.referencia ?? undefined,
       },
     };
@@ -354,7 +354,7 @@ async function mapApprovalRequest(record: BackendRegistroResponse): Promise<Tree
     type,
     status: mapApprovalStatus(record.status),
     submittedAt: record.dataColeta,
-    submittedBy: record.pesquisador?.nome ?? "Nao informado",
+    submittedBy: record.pesquisador?.nome ?? "Não informado",
     treeId: record.arvore?.id ?? undefined,
     treeMeta: {
       codigo: treeMeta.codigo,
@@ -363,6 +363,16 @@ async function mapApprovalRequest(record: BackendRegistroResponse): Promise<Tree
       lat: treeMeta.lat,
       lng: treeMeta.lng,
     },
+    treeDraft:
+      type === "create_tree"
+        ? {
+            codigo: treeMeta.codigo,
+            especie: treeMeta.especie,
+            nomeComum: treeMeta.nomeComum,
+            lat: treeMeta.lat,
+            lng: treeMeta.lng,
+          }
+        : undefined,
     record: approvalRecord,
     rejectionReason: record.motivoRecusa ?? undefined,
   };

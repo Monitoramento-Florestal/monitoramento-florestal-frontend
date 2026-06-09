@@ -4,6 +4,7 @@ import type { TreeApprovalRequest } from "@/types/trees";
 import { formatDate } from "@/utils/format";
 import {
   getApprovalRecordCode,
+  getApprovalRecordLinkedTreeLabel,
   getApprovalRecordName,
   getApprovalRecordSpecies,
   getApprovalRecordTypeLabel,
@@ -18,18 +19,18 @@ export function ApprovalRequestContextSummary({
 }: ApprovalRequestContextSummaryProps) {
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-      <SummaryItem label="Tipo da Solicitacao" value={getApprovalRecordTypeLabel(request)} />
-      <SummaryItem label="Codigo" value={getApprovalRecordCode(request)} />
-      <SummaryItem label="Especie" value={getApprovalRecordSpecies(request)} />
+      <SummaryItem label="Tipo da solicitação" value={getApprovalRecordTypeLabel(request)} />
+      <SummaryItem label="Código" value={getApprovalRecordCode(request)} />
+      <SummaryItem label="Espécie" value={getApprovalRecordSpecies(request)} />
       <SummaryItem label="Submetido por" value={request.submittedBy} />
-      <SummaryItem label="Nome Comum" value={getApprovalRecordName(request)} />
-      <SummaryItem label="Data da Submissao" value={formatDate(request.submittedAt)} />
+      <SummaryItem label="Nome comum" value={getApprovalRecordName(request)} />
+      <SummaryItem label="Data da submissão" value={formatDate(request.submittedAt)} />
       <SummaryItem
-        label="Arvore Vinculada"
-        value={request.treeId ?? "Nova arvore em analise"}
+        label="Árvore vinculada"
+        value={getApprovalRecordLinkedTreeLabel(request)}
       />
       <SummaryItem
-        label="Registro Alvo"
+        label="Registro alvo"
         value={request.type === "create_record" ? "Novo registro pendente" : "Novo cadastro"}
       />
     </div>

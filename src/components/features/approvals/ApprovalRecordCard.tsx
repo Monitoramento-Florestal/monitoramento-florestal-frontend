@@ -136,7 +136,7 @@ export function ApprovalRecordCard({
             className="col-span-2 h-9 flex-1"
             onClick={handleOpenDetails}
           >
-            Ver analise completa
+            Ver análise completa
           </Button>
           <Button
             type="button"

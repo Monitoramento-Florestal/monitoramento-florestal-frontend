@@ -63,7 +63,7 @@ export function ApprovalRequestDetailDrawer({
                   {getApprovalRecordName(request)}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-rosewood">
-                  Solicitacao enviada por{" "}
+                  Solicitação enviada por{" "}
                   <span className="text-burgundy">{request.submittedBy}</span> em{" "}
                   {formatDate(request.submittedAt)}.
                 </p>
@@ -100,8 +100,8 @@ export function ApprovalRequestDetailDrawer({
 
           <div className="flex-1 space-y-5 px-5 py-5 sm:px-6">
             <DrawerSectionCard
-              title="Contexto da solicitacao"
-              description="Use este bloco para entender se voce esta aprovando uma criacao de arvore ou um novo registro em uma arvore existente."
+              title="Contexto da solicitação"
+              description="Use este bloco para entender se você está aprovando a criação de uma nova árvore ou um novo registro em uma árvore já existente."
               defaultOpen
             >
               <ApprovalRequestContextSummary request={request} />
@@ -109,7 +109,7 @@ export function ApprovalRequestDetailDrawer({
 
             <DrawerSectionCard
               title="Registro submetido"
-              description="Revise todos os campos tecnicos antes de aprovar ou rejeitar esta solicitacao."
+              description="Revise todos os campos técnicos antes de aprovar ou rejeitar esta solicitação."
               defaultOpen
             >
               <ApprovalRequestRecordDetails request={request} />

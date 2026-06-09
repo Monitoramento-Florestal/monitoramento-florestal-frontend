@@ -2,6 +2,10 @@
 
 import type { TreeApprovalRequest } from "@/types/trees";
 import { formatTreeDate, formatTreeLabel } from "@/utils/treeDetailPanel";
+import {
+  getApprovalRecordName,
+  getApprovalRecordSpecies,
+} from "@/utils/approvals";
 
 interface ApprovalRequestRecordDetailsProps {
   request: TreeApprovalRequest;
@@ -10,7 +14,7 @@ interface ApprovalRequestRecordDetailsProps {
 function formatCoordinate(value: number | null) {
   return typeof value === "number" && Number.isFinite(value)
     ? value.toFixed(5)
-    : "Indisponivel";
+    : "Indisponível";
 }
 
 export function ApprovalRequestRecordDetails({
@@ -18,6 +22,8 @@ export function ApprovalRequestRecordDetails({
 }: ApprovalRequestRecordDetailsProps) {
   const { record, treeDraft, treeMeta } = request;
   const treeInfo = treeDraft ?? treeMeta;
+  const commonName = getApprovalRecordName(request);
+  const species = getApprovalRecordSpecies(request);
   const problemItems =
     record.condicao.problemas[0] === "nenhum"
       ? ["Nenhum problema relatado"]
@@ -25,123 +31,123 @@ export function ApprovalRequestRecordDetails({
 
   return (
     <div className="space-y-4 rounded-2xl border border-rosewood/10 bg-card/45 p-4">
-      <DetailSection title="Identificacao e Localizacao">
+      <DetailSection title="Identificação e localização">
         <DetailGrid>
-          <SummaryItem label="Nome Comum" value={treeInfo.nomeComum || "Nao informado"} />
-          <SummaryItem label="Especie" value={treeInfo.especie || "Nao informado"} />
+          <SummaryItem label="Nome comum" value={commonName} />
+          <SummaryItem label="Espécie" value={species} />
           <SummaryItem label="Latitude" value={formatCoordinate(treeInfo.lat)} />
           <SummaryItem label="Longitude" value={formatCoordinate(treeInfo.lng)} />
-          <SummaryItem label="Bairro" value={record.localizacao.bairro || "Nao informado"} />
-          <SummaryItem label="Rua" value={record.localizacao.rua || "Nao informado"} />
+          <SummaryItem label="Bairro" value={record.localizacao.bairro || "Não informado"} />
+          <SummaryItem label="Rua" value={record.localizacao.rua || "Não informado"} />
           <SummaryItem
-            label="Numero"
-            value={record.localizacao.numeroResidencia ?? "Nao informado"}
+            label="Número"
+            value={record.localizacao.numeroResidencia ?? "Não informado"}
           />
-          <SummaryItem label="Equipe" value={record.localizacao.equipe || "Nao informado"} />
+          <SummaryItem label="Equipe" value={record.localizacao.equipe || "Não informado"} />
           <SummaryItem
-            label="Referencia"
-            value={record.localizacao.referencia ?? "Nao informada"}
+            label="Referência"
+            value={record.localizacao.referencia ?? "Não informada"}
           />
-          <SummaryItem label="Data da Coleta" value={formatTreeDate(record.localizacao.dataColeta)} />
+          <SummaryItem label="Data da coleta" value={formatTreeDate(record.localizacao.dataColeta)} />
         </DetailGrid>
       </DetailSection>
 
-      <DetailSection title="Dimensoes">
+      <DetailSection title="Dimensões">
         <DetailGrid>
           <SummaryItem label="Altura" value={`${record.dimensoes.alturaM} m`} />
           <SummaryItem label="DAP" value={`${record.dimensoes.dapCm} cm`} />
           <SummaryItem label="Copa" value={`${record.dimensoes.copaM} m`} />
           <SummaryItem
-            label="Tipo de Medida"
+            label="Tipo de medida"
             value={record.dimensoes.medidaEstimada ? "Medida estimada" : "Medida aferida"}
           />
         </DetailGrid>
       </DetailSection>
 
-      <DetailSection title="Condicao da Arvore">
+      <DetailSection title="Condição da árvore">
         <DetailGrid>
-          <SummaryItem label="Estado Geral" value={`${record.condicao.estadoGeral}/5`} />
+          <SummaryItem label="Estado geral" value={`${record.condicao.estadoGeral}/5`} />
           <SummaryItem label="Vigor" value={formatTreeLabel(record.condicao.vigor)} />
           <SummaryItem
-            label="Posicao do Problema"
+            label="Posição do problema"
             value={
               record.condicao.posicaoProblema
                 ? formatTreeLabel(record.condicao.posicaoProblema)
-                : "Nao informada"
+                : "Não informada"
             }
           />
         </DetailGrid>
         <TagRow label="Problemas" items={problemItems} />
       </DetailSection>
 
-      <DetailSection title="Estrutura e Risco">
+      <DetailSection title="Estrutura e risco">
         <DetailGrid>
           <SummaryItem
-            label="Inclinacao do Tronco"
+            label="Inclinação do tronco"
             value={formatTreeLabel(record.estruturaRisco.inclinacaoTronco)}
           />
           <SummaryItem
-            label="Ancoragem Radicular"
+            label="Ancoragem radicular"
             value={formatTreeLabel(record.estruturaRisco.ancoragemRadicular)}
           />
           <SummaryItem
-            label="Fluxo de Veiculos"
+            label="Fluxo de veículos"
             value={formatTreeLabel(record.estruturaRisco.fluxoVeiculos)}
           />
           <SummaryItem
-            label="Fluxo de Pedestres"
+            label="Fluxo de pedestres"
             value={formatTreeLabel(record.estruturaRisco.fluxoPedestres)}
           />
-          <SummaryItem label="Tipo de Via" value={formatTreeLabel(record.estruturaRisco.tipoVia)} />
+          <SummaryItem label="Tipo de via" value={formatTreeLabel(record.estruturaRisco.tipoVia)} />
         </DetailGrid>
         <TagRow label="Tronco" items={record.estruturaRisco.tronco.map(formatTreeLabel)} />
-        <TagRow label="Base / Colo" items={record.estruturaRisco.baseColo.map(formatTreeLabel)} />
+        <TagRow label="Base / colo" items={record.estruturaRisco.baseColo.map(formatTreeLabel)} />
         <TagRow label="Copa" items={record.estruturaRisco.copa.map(formatTreeLabel)} />
         <TagRow
-          label="Alvos Potenciais"
+          label="Alvos potenciais"
           items={record.estruturaRisco.alvosPotenciais.map(formatTreeLabel)}
         />
         <TagRow
-          label="Alvos Sensiveis"
+          label="Alvos sensíveis"
           items={record.estruturaRisco.alvosSensiveis.map(formatTreeLabel)}
         />
       </DetailSection>
 
       <DetailSection title="Conflitos">
         <DetailGrid>
-          <SummaryItem label="Fiacao" value={formatTreeLabel(record.conflitos.fiacao)} />
-          <SummaryItem label="Calcada" value={formatTreeLabel(record.conflitos.calcada)} />
-          <SummaryItem label="Iluminacao" value={formatTreeLabel(record.conflitos.iluminacao)} />
-          <SummaryItem label="Edificacao" value={formatTreeLabel(record.conflitos.edificacao)} />
+          <SummaryItem label="Fiação" value={formatTreeLabel(record.conflitos.fiacao)} />
+          <SummaryItem label="Calçada" value={formatTreeLabel(record.conflitos.calcada)} />
+          <SummaryItem label="Iluminação" value={formatTreeLabel(record.conflitos.iluminacao)} />
+          <SummaryItem label="Edificação" value={formatTreeLabel(record.conflitos.edificacao)} />
         </DetailGrid>
       </DetailSection>
 
       <DetailSection title="Manejo">
         <DetailGrid>
-          <SummaryItem label="Acao" value={formatTreeLabel(record.manejo.acao)} />
+          <SummaryItem label="Ação" value={formatTreeLabel(record.manejo.acao)} />
           <SummaryItem label="Prioridade" value={formatTreeLabel(record.manejo.prioridade)} />
         </DetailGrid>
       </DetailSection>
 
       <DetailSection title="Registro">
         <DetailGrid>
-          <SummaryItem label="Ultima Medicao" value={formatTreeDate(record.registro.ultimaMedicao)} />
+          <SummaryItem label="Última medição" value={formatTreeDate(record.registro.ultimaMedicao)} />
           <SummaryItem label="Registrado em" value={formatTreeDate(record.registro.registradoEm)} />
           <SummaryItem label="Registrado por" value={record.registro.registradoPor} />
-          <SummaryItem label="Aprovacao" value={formatTreeLabel(record.registro.aprovacao)} />
-          <SummaryItem label="Fotos Anexadas" value={String(record.registro.fotos.length)} />
+          <SummaryItem label="Aprovação" value={formatTreeLabel(record.registro.aprovacao)} />
+          <SummaryItem label="Fotos anexadas" value={String(record.registro.fotos.length)} />
         </DetailGrid>
         {record.registro.motivoRejeicao ? (
           <p className="text-sm leading-6 text-rosewood">
-            <span className="font-medium text-burgundy">Motivo da Rejeicao:</span>{" "}
+            <span className="font-medium text-burgundy">Motivo da rejeição:</span>{" "}
             {record.registro.motivoRejeicao}
           </p>
         ) : null}
       </DetailSection>
 
-      <DetailSection title="Observacoes">
+      <DetailSection title="Observações">
         <p className="text-sm leading-6 text-rosewood">
-          {record.observacoes ?? "Sem observacoes adicionais registradas."}
+          {record.observacoes ?? "Sem observações adicionais registradas."}
         </p>
       </DetailSection>
     </div>

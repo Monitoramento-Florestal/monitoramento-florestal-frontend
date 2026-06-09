@@ -56,7 +56,7 @@ export function ApprovalsPageContent({
         const normalizedError = normalizeApiError(error);
         setErrorMessage(
           normalizedError.status === 403
-            ? "Seu perfil nao tem permissao no backend para consultar a fila de aprovacao."
+            ? "Seu perfil não tem permissão no backend para consultar a fila de aprovação."
             : normalizedError.message,
         );
       } finally {
@@ -79,7 +79,7 @@ export function ApprovalsPageContent({
       setRecords((current) => current.filter((record) => record.id !== recordId));
       showToast({
         title: "Registro aprovado com sucesso",
-        description: "A solicitacao foi consolidada pelo backend.",
+        description: "A solicitação foi consolidada pelo backend.",
         variant: "success",
       });
     } catch (error) {
@@ -88,7 +88,7 @@ export function ApprovalsPageContent({
       }
 
       showToast({
-        title: "Nao foi possivel aprovar o registro",
+        title: "Não foi possível aprovar o registro",
         description: normalizeApiError(error).message,
         variant: "error",
       });
@@ -101,7 +101,7 @@ export function ApprovalsPageContent({
       setRecords((current) => current.filter((record) => record.id !== recordId));
       showToast({
         title: "Registro rejeitado com sucesso",
-        description: "A solicitacao foi removida da fila.",
+        description: "A solicitação foi removida da fila.",
         variant: "success",
       });
     } catch (error) {
@@ -110,7 +110,7 @@ export function ApprovalsPageContent({
       }
 
       showToast({
-        title: "Nao foi possivel rejeitar o registro",
+        title: "Não foi possível rejeitar o registro",
         description: normalizeApiError(error).message,
         variant: "error",
       });
@@ -121,7 +121,7 @@ export function ApprovalsPageContent({
     <>
       <DashboardPageHeader
         title={title}
-        subtitle={`${records.length} solicitacoes aguardando revisao`}
+        subtitle={`${records.length} solicitações aguardando revisão`}
       />
       <div className="space-y-6 p-4 sm:p-6">
         {readOnlyReason ? (

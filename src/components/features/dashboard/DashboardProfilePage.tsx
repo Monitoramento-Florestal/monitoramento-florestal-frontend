@@ -107,7 +107,7 @@ export function DashboardProfilePage({
         }
 
         showToast({
-          title: "Nao foi possivel carregar o perfil",
+          title: "Não foi possível carregar o perfil",
           description: normalizeApiError(error).message,
           variant: "error",
         });
@@ -123,7 +123,7 @@ export function DashboardProfilePage({
     return () => {
       isMounted = false;
     };
-  }, [setSession, showToast, user?.id]);
+  }, [setSession, showToast, user]);
 
   useEffect(() => {
     if (!user) {
@@ -169,7 +169,7 @@ export function DashboardProfilePage({
       }
 
       showToast({
-        title: "Nao foi possivel salvar o perfil",
+        title: "Não foi possível salvar o perfil",
         description: normalizeApiError(error).message,
         variant: "error",
       });
@@ -183,8 +183,8 @@ export function DashboardProfilePage({
 
     if (newPassword !== confirmPassword) {
       showToast({
-        title: "As senhas nao coincidem",
-        description: "Revise a confirmacao da nova senha antes de continuar.",
+        title: "As senhas não coincidem",
+        description: "Revise a confirmação da nova senha antes de continuar.",
         variant: "error",
       });
       return;
@@ -213,7 +213,7 @@ export function DashboardProfilePage({
       }
 
       showToast({
-        title: "Nao foi possivel atualizar a senha",
+        title: "Não foi possível atualizar a senha",
         description: normalizeApiError(error).message,
         variant: "error",
       });
@@ -226,7 +226,7 @@ export function DashboardProfilePage({
     <>
       <DashboardPageHeader
         title="Meu perfil"
-        subtitle="Dados pessoais e seguranca"
+        subtitle="Dados pessoais e segurança"
       />
       <div className="p-6">
         <div className="max-w-2xl space-y-6">
@@ -236,7 +236,7 @@ export function DashboardProfilePage({
                 Dados pessoais
               </h2>
               <p className="mt-1 text-sm text-rosewood">
-                Atualize suas informacoes de contato.
+                Atualize suas informações de contato.
               </p>
             </div>
 

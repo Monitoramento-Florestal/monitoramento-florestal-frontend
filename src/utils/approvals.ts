@@ -50,11 +50,22 @@ export function getApprovalRecordCode(record: TreeApprovalRequest) {
 }
 
 export function getApprovalRecordName(record: TreeApprovalRequest) {
-  return record.treeDraft?.nomeComum ?? record.treeMeta.nomeComum;
+  const commonName = record.treeDraft?.nomeComum?.trim() || record.treeMeta.nomeComum?.trim();
+  const species = record.treeDraft?.especie?.trim() || record.treeMeta.especie?.trim();
+
+  return commonName || species || "Nova árvore em análise";
 }
 
 export function getApprovalRecordSpecies(record: TreeApprovalRequest) {
-  return record.treeDraft?.especie ?? record.treeMeta.especie;
+  return record.treeDraft?.especie?.trim() || record.treeMeta.especie?.trim() || "Não informada";
+}
+
+export function getApprovalRecordLinkedTreeLabel(record: TreeApprovalRequest) {
+  if (record.type === "create_tree") {
+    return "Nova árvore em análise";
+  }
+
+  return `${getApprovalRecordName(record)} (${getApprovalRecordCode(record)})`;
 }
 
 export function getApprovalRecordTypeLabel(record: TreeApprovalRequest) {

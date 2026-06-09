@@ -62,18 +62,13 @@ export function getTreeRecordCreateRoute(
   return `/admin/management/${treeId}/records/new`
 }
 
-export function getTreeRecordEditRoute(
-  role: 'researcher' | 'manager' | 'admin',
-  treeId: string,
-  recordId: string
+export function getTreeManagementEditRoute(
+  role: 'manager' | 'admin',
+  treeId: string
 ) {
-  if (role === 'researcher') {
-    return `/researcher/trees/${treeId}/history/${recordId}/edit`
-  }
-
   if (role === 'manager') {
-    return `/manager/management/${treeId}/history/${recordId}/edit`
+    return `/manager/management/${treeId}/edit`
   }
 
-  return `/admin/management/${treeId}/history/${recordId}/edit`
+  return `/admin/management/${treeId}/edit`
 }

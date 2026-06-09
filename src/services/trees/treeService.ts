@@ -32,7 +32,11 @@ type BackendManejo = {
 
 type BackendArvoreResponse = {
   id: string;
+  codigo?: string | null;
   especie: string;
+  nomeComum?: string | null;
+  lat?: number | null;
+  lng?: number | null;
   bairro: string;
   rua: string;
   referencia?: string | null;
@@ -97,6 +101,7 @@ type BackendRegistroResponse = {
   observacoes?: string | null;
 };
 
+
 export interface ExistingTreeRecordPayload {
   arvoreId: string;
   alturaColetada: number;
@@ -133,9 +138,50 @@ export interface ExistingTreeRecordPayload {
 export interface NewTreeRecordPayload
   extends Omit<ExistingTreeRecordPayload, "arvoreId"> {
   especie: string;
+  lat: number;
+  lng: number;
   bairro: string;
   rua: string;
   referencia?: string;
+}
+
+export interface TreeUpdatePayload {
+  especie: string;
+  nomeComum?: string;
+  lat: number;
+  lng: number;
+  bairro: string;
+  rua: string;
+  referencia?: string;
+  alturaAtual: number;
+  dapAtual: number;
+  copaAtual: number;
+  estadoGeral: string;
+  vigor: string;
+  problemasCopa: string[];
+  problemasTronco: string[];
+  problemasRaiz: string[];
+  estruturaTronco: string;
+  estruturaBase: string;
+  estruturaCopa: string;
+  inclinacao: string;
+  ancoragem: string;
+  fluxoPedestre: string;
+  fluxoAutomovel: string;
+  tipoVia: string;
+  alvosPotenciais: string[];
+  alvosSensiveis: string[];
+  conflito: {
+    fiacao: string;
+    calcada: string;
+    iluminacao: string;
+    edificacao: string;
+  };
+  manejo: {
+    acoes: string[];
+    prioridade: string;
+  };
+  observacoes?: string;
 }
 
 function buildTreeCode(id: string) {
@@ -255,19 +301,19 @@ function mapManejo(manejo?: BackendManejo) {
   } as TreeManagement;
 }
 
-function toOptionalCoordinate() {
-  return null;
+function toOptionalCoordinate(value: number | null | undefined) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 function createTreePreview(tree: BackendArvoreResponse): TreePreview {
   return {
     id: tree.id,
-    codigo: buildTreeCode(tree.id),
+    codigo: tree.codigo?.trim() || buildTreeCode(tree.id),
     especie: tree.especie,
-    nomeComum: tree.especie,
+    nomeComum: tree.nomeComum?.trim() || tree.especie,
     status: mapTreeStatus(tree.estadoGeral),
-    lat: toOptionalCoordinate(),
-    lng: toOptionalCoordinate(),
+    lat: toOptionalCoordinate(tree.lat),
+    lng: toOptionalCoordinate(tree.lng),
     localizacao: {
       bairro: tree.bairro,
       rua: tree.rua,
@@ -381,12 +427,12 @@ function createManagedTree(
 
   return {
     id: tree.id,
-    codigo: buildTreeCode(tree.id),
+    codigo: tree.codigo?.trim() || buildTreeCode(tree.id),
     especie: tree.especie,
-    nomeComum: tree.especie,
+    nomeComum: tree.nomeComum?.trim() || tree.especie,
     status: mapTreeStatus(tree.estadoGeral),
-    lat: toOptionalCoordinate(),
-    lng: toOptionalCoordinate(),
+    lat: toOptionalCoordinate(tree.lat),
+    lng: toOptionalCoordinate(tree.lng),
     localizacao: {
       bairro: tree.bairro,
       rua: tree.rua,
@@ -473,6 +519,19 @@ export async function createNewTreeRecord(payload: NewTreeRecordPayload) {
   return data;
 }
 
+export async function updateManagedTree(treeId: string, payload: TreeUpdatePayload) {
+  const { data } = await api.put<BackendArvoreResponse>(
+    `${API_ENDPOINTS.TREES}/${treeId}`,
+    payload,
+  );
+
+  return data;
+}
+
+export async function deleteManagedTree(treeId: string) {
+  await api.delete(`${API_ENDPOINTS.TREES}/${treeId}`);
+}
+
 export async function deleteTreeRecord(recordId: string) {
-  await api.delete(`${API_ENDPOINTS.TREE_RECORDS}/${recordId}`)
+  await api.delete(`${API_ENDPOINTS.TREE_RECORDS}/${recordId}`);
 }

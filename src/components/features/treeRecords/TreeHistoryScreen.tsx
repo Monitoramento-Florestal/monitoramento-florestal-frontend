@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ArrowLeft, ChevronDown, PlusCircle, Trash2 } from 'lucide-react'
 
 import { DashboardCard } from '@/components/features/dashboard'
@@ -51,12 +51,6 @@ export function TreeHistoryScreen({
   function selectRecord(recordId: string) {
     setSelectedRecordId(recordId)
   }
-
-  useEffect(() => {
-    if (!orderedRecords.some((record) => record.id === selectedRecordId)) {
-      setSelectedRecordId(orderedRecords[0]?.id ?? latestRecord.id)
-    }
-  }, [latestRecord.id, orderedRecords, selectedRecordId])
 
   return (
     <div className="space-y-6">

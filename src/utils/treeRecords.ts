@@ -7,7 +7,7 @@ import type {
   TreeStatus,
 } from "@/types/trees";
 
-export type TreeRecordFormMode = "create-tree" | "create-record" | "edit-record";
+export type TreeRecordFormMode = "create-tree" | "create-record" | "edit-tree";
 
 function hasFiniteCoordinate(value: number | null | undefined) {
   return Number.isFinite(value);
@@ -119,7 +119,7 @@ export function getTreeRecordFormSubtitle(_: UserRole, mode: TreeRecordFormMode)
     return "Adicione uma nova medição técnica para esta árvore.";
   }
 
-  return "Proponha alterações para este registro técnico.";
+  return "Atualize diretamente os dados correntes desta árvore.";
 }
 
 export function getTreeRecordSubmitLabel(_: UserRole, mode: TreeRecordFormMode) {
@@ -131,7 +131,7 @@ export function getTreeRecordSubmitLabel(_: UserRole, mode: TreeRecordFormMode) 
     return "Enviar registro";
   }
 
-  return "Enviar solicitação de edição";
+  return "Salvar alterações";
 }
 
 export function getTreeHistorySummary(tree: Tree) {

@@ -282,18 +282,6 @@ export function TreeRecordFormScreen({
     return Number.isFinite(Number(value));
   }
 
-  function treeHasCoordinates() {
-    return Boolean(tree && Number.isFinite(tree.lat) && Number.isFinite(tree.lng));
-  }
-
-  function shouldAutofillLocation() {
-    if (mode === "create-record" && treeHasCoordinates()) {
-      return false;
-    }
-
-    return !hasValidCoordinateInput(values.lat) || !hasValidCoordinateInput(values.lng);
-  }
-
   function fillWithCurrentLocation() {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setLocationState("unavailable");
@@ -339,7 +327,14 @@ export function TreeRecordFormScreen({
 
     setHasAttemptedAutoLocation(true);
 
-    if (!shouldAutofillLocation()) {
+    const shouldAutofillLocation =
+      !(mode === "create-record" &&
+        tree &&
+        Number.isFinite(tree.lat) &&
+        Number.isFinite(tree.lng)) &&
+      (!hasValidCoordinateInput(values.lat) || !hasValidCoordinateInput(values.lng));
+
+    if (!shouldAutofillLocation) {
       return;
     }
 
@@ -671,7 +666,7 @@ export function TreeRecordFormScreen({
 
       <FormSectionCard
         title="Localizacao e Coleta"
-        description="Contexto urbano e dados do momento da medicao."
+        description="Contexto urbano e dados do momento da medição."
         defaultOpen
       >
       <DashboardCard className="space-y-4">
@@ -1079,16 +1074,24 @@ function FormSectionCard({
   title: string;
 }) {
   return (
-    <details className="group" open={defaultOpen}>
-      <summary className="mb-3 flex cursor-pointer list-none items-start justify-between gap-4 rounded-2xl border border-rosewood/10 bg-card px-4 py-4 md:hidden">
+    <>
+      <details className="group md:hidden" open={defaultOpen}>
+        <summary className="mb-3 flex cursor-pointer list-none items-start justify-between gap-4 rounded-2xl border border-rosewood/10 bg-card px-4 py-4">
+          <div>
+            <h3 className="text-base tracking-tight text-burgundy">{title}</h3>
+            {description ? <p className="mt-1 text-sm text-rosewood">{description}</p> : null}
+          </div>
+          <ChevronDown className="mt-0.5 h-5 w-5 shrink-0 text-rosewood transition-transform group-open:rotate-180" />
+        </summary>
+        {children}
+      </details>
+
+      <div className="hidden md:block">
         <div>
-          <h3 className="text-base tracking-tight text-burgundy">{title}</h3>
-          {description ? <p className="mt-1 text-sm text-rosewood">{description}</p> : null}
+          {children}
         </div>
-        <ChevronDown className="mt-0.5 h-5 w-5 shrink-0 text-rosewood transition-transform group-open:rotate-180" />
-      </summary>
-      {children}
-    </details>
+      </div>
+    </>
   );
 }
 

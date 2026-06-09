@@ -1,26 +1,4 @@
-import type { ApprovalStatus, Tree } from "@/types/trees";
-
-export const APPROVAL_LABEL: Record<ApprovalStatus, string> = {
-  aprovada: "Aprovada",
-  pendente: "Pendente",
-  rejeitada: "Rejeitada",
-};
-
-export const APPROVAL_TONE: Record<ApprovalStatus, string> = {
-  aprovada: "bg-sage/16 text-sage border-sage/20",
-  pendente: "bg-[#c47c2b]/12 text-[#8a571d] border-[#c47c2b]/20",
-  rejeitada: "bg-burgundy/8 text-burgundy border-burgundy/15",
-};
-
-export function getTreeCoverPhoto(tree: Tree) {
-  return tree.registro.fotos[0] ?? null;
-}
-
-export function getTreeProblemLabels(tree: Tree) {
-  return tree.condicao.problemas[0] === "nenhum"
-    ? ["Nenhum problema relatado"]
-    : tree.condicao.problemas.map(formatTreeLabel);
-}
+import type { ApprovalStatus, TreeProblem, Tree } from "@/types/trees";
 
 export function formatTreeDate(value: string) {
   return new Date(value).toLocaleDateString("pt-BR", {
@@ -49,4 +27,35 @@ export function formatTreeLabel(value: string) {
     .split(/[\s/]+/)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+export const APPROVAL_LABEL: Record<ApprovalStatus, string> = {
+  aprovada: "Aprovada",
+  pendente: "Pendente",
+  rejeitada: "Rejeitada",
+};
+
+export const APPROVAL_TONE: Record<ApprovalStatus, string> = {
+  aprovada: "border-emerald/20 bg-emerald/8 text-emerald",
+  pendente: "border-amber/20 bg-amber/8 text-amber",
+  rejeitada: "border-red/20 bg-red/8 text-red",
+};
+
+export function getTreeCoverPhoto(tree: Tree): string | null {
+  const fotos = tree.registro.fotos;
+  return fotos.length > 0 ? fotos[0] : null;
+}
+
+const PROBLEM_LABELS: Record<TreeProblem, string> = {
+  pragas: "Pragas",
+  fungos: "Fungos",
+  podridao: "Podridão",
+  injuria: "Injúria",
+  nenhum: "Nenhum",
+};
+
+export function getTreeProblemLabels(tree: Tree): string[] {
+  return tree.condicao.problemas
+    .filter((p) => p !== "nenhum")
+    .map((p) => PROBLEM_LABELS[p]);
 }

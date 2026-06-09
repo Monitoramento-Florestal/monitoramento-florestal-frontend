@@ -2,6 +2,7 @@ import type { TreeRecordFormValues } from "@/utils/treeRecords";
 import type {
   ExistingTreeRecordPayload,
   NewTreeRecordPayload,
+  TreeUpdatePayload,
 } from "@/services/trees/treeService";
 
 const VIGOR_MAP = {
@@ -258,6 +259,41 @@ function buildSharedPayload(values: TreeRecordFormValues) {
   };
 }
 
+function buildTreeCorePayload(values: TreeRecordFormValues) {
+  const sharedPayload = buildSharedPayload(values);
+
+  return {
+    especie: values.especie.trim(),
+    nomeComum: values.nomeComum.trim() || undefined,
+    lat: Number(values.lat),
+    lng: Number(values.lng),
+    bairro: values.bairro.trim(),
+    rua: values.rua.trim(),
+    referencia: values.referencia.trim() || undefined,
+    alturaAtual: sharedPayload.alturaColetada,
+    dapAtual: sharedPayload.dapColetada,
+    copaAtual: sharedPayload.copaColetada,
+    estadoGeral: sharedPayload.estadoGeral,
+    vigor: sharedPayload.vigor,
+    problemasCopa: sharedPayload.problemasCopa,
+    problemasTronco: sharedPayload.problemasTronco,
+    problemasRaiz: sharedPayload.problemasRaiz,
+    estruturaTronco: sharedPayload.estruturaTronco,
+    estruturaBase: sharedPayload.estruturaBase,
+    estruturaCopa: sharedPayload.estruturaCopa,
+    inclinacao: sharedPayload.inclinacaoTronco,
+    ancoragem: sharedPayload.ancoragem,
+    fluxoPedestre: sharedPayload.fluxoPedestre,
+    fluxoAutomovel: sharedPayload.fluxoAutomovel,
+    tipoVia: sharedPayload.tipoVia,
+    alvosPotenciais: sharedPayload.alvosPotenciais,
+    alvosSensiveis: sharedPayload.alvosSensiveis,
+    conflito: sharedPayload.conflito,
+    manejo: sharedPayload.manejo,
+    observacoes: sharedPayload.observacoes,
+  };
+}
+
 export function mapFormValuesToExistingTreeRecordPayload(
   treeId: string,
   values: TreeRecordFormValues,
@@ -273,9 +309,17 @@ export function mapFormValuesToNewTreeRecordPayload(
 ): NewTreeRecordPayload {
   return {
     especie: values.especie.trim(),
+    lat: Number(values.lat),
+    lng: Number(values.lng),
     bairro: values.bairro.trim(),
     rua: values.rua.trim(),
     referencia: values.referencia.trim() || undefined,
     ...buildSharedPayload(values),
   };
+}
+
+export function mapFormValuesToTreeUpdatePayload(
+  values: TreeRecordFormValues,
+): TreeUpdatePayload {
+  return buildTreeCorePayload(values);
 }

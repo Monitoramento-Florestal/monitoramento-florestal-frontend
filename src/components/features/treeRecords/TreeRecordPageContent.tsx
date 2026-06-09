@@ -11,7 +11,7 @@ import { getTreeRecordFormSubtitle } from "@/utils/treeRecords";
 import { TreeRecordFormScreen } from "./TreeRecordFormScreen";
 
 interface TreeRecordPageContentProps {
-  mode: "create-tree" | "create-record";
+  mode: "create-tree" | "create-record" | "edit-tree";
   role: UserRole.RESEARCHER | UserRole.MANAGER | UserRole.ADMIN;
   treeId?: string;
 }
@@ -22,11 +22,13 @@ export function TreeRecordPageContent({
   treeId,
 }: TreeRecordPageContentProps) {
   const [tree, setTree] = useState<Tree | null>(null);
-  const [isLoading, setIsLoading] = useState(mode === "create-record");
+  const [isLoading, setIsLoading] = useState(
+    mode === "create-record" || mode === "edit-tree",
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (mode !== "create-record" || !treeId) {
+    if ((mode !== "create-record" && mode !== "edit-tree") || !treeId) {
       return;
     }
 
@@ -76,7 +78,13 @@ export function TreeRecordPageContent({
   return (
     <>
       <DashboardPageHeader
-        title={mode === "create-tree" ? "Registrar árvore" : "Adicionar Registro"}
+        title={
+          mode === "create-tree"
+            ? "Registrar árvore"
+            : mode === "create-record"
+              ? "Adicionar Registro"
+              : "Editar árvore"
+        }
         subtitle={getTreeRecordFormSubtitle(role, mode)}
       />
       <div className="space-y-6 p-6">

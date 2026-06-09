@@ -19,12 +19,16 @@ import { TreeManagementTable } from './TreeManagementTable'
 interface TreeManagementScreenProps {
   initialTrees: TreePreview[]
   loading?: boolean
+  onDeleteTree?: (tree: TreePreview) => void | Promise<void>
+  onEditTree?: (tree: TreePreview) => void
   role: UserRole
 }
 
 export function TreeManagementScreen({
   initialTrees,
   loading = false,
+  onDeleteTree,
+  onEditTree,
   role,
 }: TreeManagementScreenProps) {
   const [query, setQuery] = useState('')
@@ -57,7 +61,13 @@ export function TreeManagementScreen({
 
       {!loading && filteredTrees.length > 0 ? (
         <DashboardCard className="overflow-hidden p-0">
-          <TreeManagementTable trees={filteredTrees} policy={policy} role={role} />
+          <TreeManagementTable
+            trees={filteredTrees}
+            policy={policy}
+            role={role}
+            onDeleteTree={onDeleteTree}
+            onEditTree={onEditTree}
+          />
         </DashboardCard>
       ) : null}
     </div>

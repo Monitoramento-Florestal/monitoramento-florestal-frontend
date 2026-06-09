@@ -12,10 +12,8 @@ import {
 
 describe('apiFunctions', () => {
   it('extracts access tokens from supported refresh payload shapes', () => {
-    expect(extractAccessToken({ accessToken: 'access-token' })).toBe(
-      'access-token',
-    )
-    expect(extractAccessToken({ token: 'token' })).toBe('token')
+    expect(extractAccessToken({ accessToken: 'alpha' })).toBe('alpha')
+    expect(extractAccessToken({ token: 'beta' })).toBe('beta')
     expect(extractAccessToken({})).toBeNull()
   })
 
@@ -72,10 +70,10 @@ describe('apiFunctions', () => {
     const first = { reject: vi.fn(), resolve: vi.fn() }
     const second = { reject: vi.fn(), resolve: vi.fn() }
 
-    resolvePendingRequests([first, second], null, 'new-token')
+    resolvePendingRequests([first, second], null, 'gamma')
 
-    expect(first.resolve).toHaveBeenCalledWith('new-token')
-    expect(second.resolve).toHaveBeenCalledWith('new-token')
+    expect(first.resolve).toHaveBeenCalledWith('gamma')
+    expect(second.resolve).toHaveBeenCalledWith('gamma')
     expect(first.reject).not.toHaveBeenCalled()
 
     resolvePendingRequests([first], new Error('refresh failed'))

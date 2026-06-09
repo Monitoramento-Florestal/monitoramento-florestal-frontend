@@ -18,8 +18,8 @@ describe('authMapper', () => {
 
   it('builds the authenticated user from login payloads', () => {
     const user = mapLoginResponseToAuthUser({
-      accessToken: 'access-token',
-      refreshToken: 'refresh-token',
+      accessToken: 'alpha',
+      refreshToken: 'beta',
       usuario: {
         email: 'gestor@example.com',
         id: 'user-1',
@@ -50,7 +50,7 @@ describe('authMapper', () => {
   it('validates refresh responses before updating the session user', () => {
     expect(
       hasSessionUserPayload({
-        accessToken: 'token',
+        accessToken: 'alpha',
         usuario: {
           email: 'admin@example.com',
           nome: 'Admin',
@@ -61,7 +61,7 @@ describe('authMapper', () => {
 
     expect(
       hasSessionUserPayload({
-        accessToken: 'token',
+        accessToken: 'alpha',
       }),
     ).toBe(false)
   })

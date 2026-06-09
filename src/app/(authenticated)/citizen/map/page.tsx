@@ -6,7 +6,7 @@ export default function CitizenMapPage() {
     <>
       <DashboardPageHeader
         title="Mapa"
-        subtitle="Consulta autenticada das arvores monitoradas."
+        subtitle="Consulta autenticada das árvores monitoradas."
       />
       <div className="p-4 sm:p-6">
         <ReadOnlyMapScreen mapHeightClassName="h-[min(70dvh,32rem)] sm:h-[calc(100dvh-18rem)]" />

@@ -5,9 +5,14 @@ import { useMap } from "react-leaflet";
 
 import {
   makeClusterIcon,
+  makeStaticClusterIcon,
   makeTreeImageIcon,
 } from "./mapIcons";
-import type { TreePreview } from "@/types/trees";
+import type {
+  MapTreeCluster,
+  MapTreeCollectionMode,
+  MapTreePreview,
+} from "@/types/map";
 
 type LeafletModule = typeof import("leaflet");
 type LeafletImportModule = LeafletModule & { default?: LeafletModule };
@@ -19,13 +24,17 @@ async function loadLeafletModule(): Promise<LeafletModule> {
 }
 
 export interface MapClusterLayerProps {
-  trees: TreePreview[];
+  mode: MapTreeCollectionMode;
+  clusters?: MapTreeCluster[];
+  trees: MapTreePreview[];
   selectedTreeId?: string | null;
   focusTreeId?: string | null;
-  onSelect?: (tree: TreePreview) => void;
+  onSelect?: (tree: MapTreePreview) => void;
 }
 
 export function MapClusterLayer({
+  mode,
+  clusters = [],
   trees,
   selectedTreeId = null,
   focusTreeId = null,
@@ -34,8 +43,9 @@ export function MapClusterLayer({
   const map = useMap();
   const leafletRef = useRef<LeafletModule | null>(null);
   const clusterGroupRef = useRef<import("leaflet").MarkerClusterGroup | null>(null);
+  const staticClusterLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const markersByTreeIdRef = useRef<Map<string, import("leaflet").Marker>>(new Map());
-  const treesByIdRef = useRef<Map<string, TreePreview>>(new Map());
+  const treesByIdRef = useRef<Map<string, MapTreePreview>>(new Map());
   const previousSelectedTreeIdRef = useRef<string | null>(null);
   const [clusterReady, setClusterReady] = useState(false);
   const renderableTrees = trees.filter(
@@ -44,18 +54,16 @@ export function MapClusterLayer({
 
   useEffect(() => {
     let active = true;
+    const markersByTreeId = markersByTreeIdRef.current;
+    const treesById = treesByIdRef.current;
 
     async function setupClusterGroup() {
-      // Leaflet.markercluster is a legacy side-effect plugin: it expects
-      // Leaflet to exist on the client global scope when the plugin executes.
-      // We therefore load Leaflet and the plugin lazily inside the client effect
-      // to avoid SSR evaluation and to guarantee the correct initialization order.
       const leaflet = await loadLeafletModule();
 
       (globalThis as GlobalLeaflet).L = leaflet;
       await import("leaflet.markercluster");
 
-      if (!active || clusterGroupRef.current) {
+      if (!active || clusterGroupRef.current || staticClusterLayerRef.current) {
         return;
       }
 
@@ -72,10 +80,11 @@ export function MapClusterLayer({
 
       clusterGroup.addTo(map);
       clusterGroupRef.current = clusterGroup;
+      staticClusterLayerRef.current = leaflet.layerGroup().addTo(map);
       setClusterReady(true);
     }
 
-    setupClusterGroup();
+    void setupClusterGroup();
 
     return () => {
       active = false;
@@ -85,8 +94,13 @@ export function MapClusterLayer({
         clusterGroupRef.current = null;
       }
 
-      markersByTreeIdRef.current.clear();
-      treesByIdRef.current.clear();
+      if (staticClusterLayerRef.current) {
+        map.removeLayer(staticClusterLayerRef.current);
+        staticClusterLayerRef.current = null;
+      }
+
+      markersByTreeId.clear();
+      treesById.clear();
       leafletRef.current = null;
       previousSelectedTreeIdRef.current = null;
       setClusterReady(false);
@@ -94,16 +108,42 @@ export function MapClusterLayer({
   }, [map]);
 
   useEffect(() => {
-    if (!clusterReady || !clusterGroupRef.current || !leafletRef.current) {
+    if (
+      !clusterReady ||
+      !clusterGroupRef.current ||
+      !staticClusterLayerRef.current ||
+      !leafletRef.current
+    ) {
       return;
     }
 
     const leaflet = leafletRef.current;
     const clusterGroup = clusterGroupRef.current;
+    const staticClusterLayer = staticClusterLayerRef.current;
+
     clusterGroup.clearLayers();
+    staticClusterLayer.clearLayers();
     markersByTreeIdRef.current.clear();
     treesByIdRef.current = new Map(renderableTrees.map((tree) => [tree.id, tree]));
     previousSelectedTreeIdRef.current = null;
+
+    if (mode === "cluster") {
+      clusters.forEach((cluster) => {
+        const marker = leaflet.marker([cluster.lat, cluster.lng], {
+          icon: makeStaticClusterIcon(leaflet, cluster.count),
+        });
+
+        marker.on("click", () => {
+          map.flyTo([cluster.lat, cluster.lng], Math.max(map.getZoom() + 2, 16), {
+            duration: 0.8,
+          });
+        });
+
+        staticClusterLayer.addLayer(marker);
+      });
+
+      return;
+    }
 
     renderableTrees.forEach((tree) => {
       const marker = leaflet.marker([tree.lat!, tree.lng!], {
@@ -117,10 +157,10 @@ export function MapClusterLayer({
       clusterGroup.addLayer(marker);
       markersByTreeIdRef.current.set(tree.id, marker);
     });
-  }, [clusterReady, onSelect, renderableTrees]);
+  }, [clusterReady, clusters, map, mode, onSelect, renderableTrees]);
 
   useEffect(() => {
-    if (!clusterReady || !leafletRef.current) {
+    if (!clusterReady || !leafletRef.current || mode !== "trees") {
       return;
     }
 
@@ -150,10 +190,10 @@ export function MapClusterLayer({
     }
 
     previousSelectedTreeIdRef.current = selectedTreeId;
-  }, [clusterReady, selectedTreeId, trees]);
+  }, [clusterReady, mode, selectedTreeId, trees]);
 
   useEffect(() => {
-    if (!clusterReady || !clusterGroupRef.current || !focusTreeId) {
+    if (!clusterReady || !clusterGroupRef.current || !focusTreeId || mode !== "trees") {
       return;
     }
 
@@ -166,7 +206,7 @@ export function MapClusterLayer({
       const latLng = marker.getLatLng();
       map.flyTo(latLng, Math.max(map.getZoom(), 18), { duration: 0.8 });
     });
-  }, [clusterReady, focusTreeId, map]);
+  }, [clusterReady, focusTreeId, map, mode]);
 
   return null;
 }

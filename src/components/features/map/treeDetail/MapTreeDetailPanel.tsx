@@ -5,6 +5,7 @@ import {
   Camera,
   History,
   MapPin,
+  PlusCircle,
   Ruler,
   ShieldAlert,
   Sprout,
@@ -14,7 +15,9 @@ import {
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import type { Tree } from '@/types/trees'
+import type { MapTreeDetail } from '@/types/map'
+import type { Tree, TreeStatus } from '@/types/trees'
+import type { TreeVigor } from '@/types/trees'
 import {
   APPROVAL_LABEL,
   APPROVAL_TONE,
@@ -31,10 +34,73 @@ import { Section } from './Section'
 import { StatusPill } from './StatusPill'
 import { TagList } from './TagList'
 
-interface TreeDetailPanelProps {
+function toFullTree(detail: MapTreeDetail): Tree {
+  return {
+    id: detail.id,
+    codigo: detail.codigo,
+    nomeComum: detail.nomeComum,
+    especie: detail.especie,
+    status: detail.status as unknown as TreeStatus,
+    lat: detail.lat,
+    lng: detail.lng,
+    localizacao: {
+      bairro: detail.localizacao.bairro,
+      rua: detail.localizacao.rua,
+      referencia: detail.localizacao.referencia,
+      dataColeta: '',
+      equipe: 'Indisponivel',
+    },
+    dimensoes: {
+      alturaM: 0,
+      dapCm: 0,
+      copaM: 0,
+      medidaEstimada: false,
+    },
+    condicao: {
+      estadoGeral: 3 as 1 | 2 | 3 | 4 | 5,
+      vigor: (detail.vigor ?? 'medio') as TreeVigor,
+      problemas: [],
+      posicaoProblema: null,
+    },
+    estruturaRisco: {
+      tronco: [],
+      baseColo: [],
+      copa: [],
+      inclinacaoTronco: 'ausente' as const,
+      ancoragemRadicular: 'estavel' as const,
+      alvosPotenciais: [],
+      fluxoVeiculos: 'baixo' as const,
+      fluxoPedestres: 'baixo' as const,
+      tipoVia: 'residencial' as const,
+      alvosSensiveis: [],
+    },
+    conflitos: {
+      fiacao: 'ausente' as const,
+      calcada: 'sem dano' as const,
+      iluminacao: 'sem' as const,
+      edificacao: 'sem' as const,
+    },
+    manejo: {
+      acao: 'nenhuma' as const,
+      prioridade: 'baixa' as const,
+    },
+    registro: {
+      aprovacao: 'pendente' as const,
+      fotos: [],
+      registradoEm: new Date().toISOString(),
+      registradoPor: 'Indisponivel',
+      ultimaMedicao: new Date().toISOString(),
+    },
+    records: [],
+    observacoes: detail.observacoes,
+  }
+}
+
+interface MapTreeDetailPanelProps {
   historyHref?: string
+  recordCreateHref?: string
   mode?: 'default' | 'readOnly'
-  tree: Tree | null
+  tree: MapTreeDetail | Tree | null
   onClose: () => void
 }
 
@@ -44,12 +110,19 @@ function formatCoordinate(value: number | null) {
     : 'Indisponivel'
 }
 
-export function TreeDetailPanel({
+export function MapTreeDetailPanel({
   historyHref,
+  recordCreateHref,
   mode = 'default',
-  tree,
+  tree: rawTree,
   onClose,
-}: TreeDetailPanelProps) {
+}: MapTreeDetailPanelProps) {
+  const tree: Tree | null = rawTree
+    ? 'dimensoes' in rawTree
+      ? rawTree
+      : toFullTree(rawTree)
+    : null
+
   if (!tree) {
     return null
   }
@@ -68,7 +141,7 @@ export function TreeDetailPanel({
         onClick={onClose}
       />
 
-      <aside className="fixed top-0 right-0 z-[900] flex h-dvh w-full max-w-[440px] flex-col overflow-hidden border-l border-rosewood/20 bg-cream shadow-[0_0_36px_rgba(62,0,12,0.14)]">
+      <aside className="fixed sm:absolute top-0 right-0 z-[1100] flex h-dvh sm:h-full w-full max-w-[440px] flex-col overflow-hidden border-l border-rosewood/20 bg-cream shadow-[0_0_36px_rgba(62,0,12,0.14)]">
         <div className="grain border-b border-rosewood/14 bg-card/96 px-5 pt-5 pb-4">
           <div className="mb-4 flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -189,7 +262,7 @@ export function TreeDetailPanel({
             />
           </Section>
 
-          <Section title="Condicao da arvore">
+          <Section title="Condição da árvore">
             <Metric
               icon={Sprout}
               label="Estado geral"
@@ -293,7 +366,7 @@ export function TreeDetailPanel({
           <Section title={isReadOnly ? 'Acompanhamento' : 'Registro atual'}>
             <Metric
               icon={Calendar}
-              label="Ultima medicao"
+              label="Última medição"
               value={formatTreeDate(tree.registro.ultimaMedicao)}
             />
             {!isReadOnly ? (
@@ -315,7 +388,7 @@ export function TreeDetailPanel({
                   value={String(tree.registro.fotos.length)}
                 />
                 {tree.registro.motivoRejeicao ? (
-                  <DetailNote title="Motivo da rejeicao">
+                  <DetailNote title="Motivo da rejeição">
                     {tree.registro.motivoRejeicao}
                   </DetailNote>
                 ) : null}
@@ -330,18 +403,35 @@ export function TreeDetailPanel({
           ) : null}
         </div>
 
-        {historyHref && !isReadOnly ? (
+        {(historyHref || recordCreateHref) && !isReadOnly ? (
           <div className="border-t border-rosewood/14 bg-card/95 px-5 py-4">
-            <Button
-              variant="outline"
-              size="lg"
-              icon={History}
-              iconSide="left"
-              className="w-full"
-              href={historyHref}
-            >
-              Ver historico
-            </Button>
+            <div className="flex flex-col gap-3">
+              {recordCreateHref ? (
+                <Button
+                  variant="primary"
+                  size="lg"
+                  icon={PlusCircle}
+                  iconSide="left"
+                  className="w-full"
+                  href={recordCreateHref}
+                >
+                  Adicionar registro
+                </Button>
+              ) : null}
+
+              {historyHref ? (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  icon={History}
+                  iconSide="left"
+                  className="w-full"
+                  href={historyHref}
+                >
+                  Ver historico
+                </Button>
+              ) : null}
+            </div>
           </div>
         ) : null}
       </aside>

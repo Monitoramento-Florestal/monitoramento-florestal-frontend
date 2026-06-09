@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   USER_PROFILE_CHANGE_PASSWORD: '/usuarios/me/change-password',
   USERS: '/usuarios',
   TREES: '/arvores',
+  MAP_TREES: '/map/trees',
   TREE_RECORDS: '/registros',
   TREE_RECORDS_NEW_TREE: '/registros/nova-arvore',
 } as const

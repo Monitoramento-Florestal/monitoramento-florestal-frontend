@@ -1,26 +1,38 @@
 "use client";
 
-import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, ZoomControl, useMapEvents } from "react-leaflet";
 
 import { MapClusterLayer } from "./MapClusterLayer";
-import type { TreePreview } from "@/types/trees";
+import type {
+  MapTreeCluster,
+  MapTreeCollectionMode,
+  MapTreePreview,
+  MapViewport,
+} from "@/types/map";
 
 const UFRPE = { lat: -8.0175, lng: -34.9447 };
 
 export interface MapViewProps {
-  trees: TreePreview[];
+  mode?: MapTreeCollectionMode;
+  clusters?: MapTreeCluster[];
+  trees: MapTreePreview[];
   selectedTreeId?: string | null;
   focusTreeId?: string | null;
   className?: string;
-  onSelect?: (tree: TreePreview) => void;
+  onSelect?: (tree: MapTreePreview) => void;
+  onViewportChange?: (viewport: MapViewport) => void;
 }
 
 export default function MapView({
+  mode = "trees",
+  clusters = [],
   trees,
   selectedTreeId = null,
   focusTreeId = null,
   className = "",
   onSelect,
+  onViewportChange,
 }: MapViewProps) {
   return (
     <MapContainer
@@ -29,14 +41,15 @@ export default function MapView({
       minZoom={15}
       maxZoom={20}
       zoomControl={false}
+      attributionControl={false}
       className={`leaflet-arbor h-full w-full ${className}`}
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <ZoomControl position="bottomleft" />
+      <MapViewportTracker onViewportChange={onViewportChange} />
       <MapClusterLayer
+        mode={mode}
+        clusters={clusters}
         trees={trees}
         selectedTreeId={selectedTreeId}
         focusTreeId={focusTreeId}
@@ -44,4 +57,40 @@ export default function MapView({
       />
     </MapContainer>
   );
+}
+
+function MapViewportTracker({
+  onViewportChange,
+}: {
+  onViewportChange?: (viewport: MapViewport) => void;
+}) {
+  const map = useMapEvents({
+    moveend: emitViewport,
+    zoomend: emitViewport,
+  });
+
+  useEffect(() => {
+    emitViewport();
+    // The map instance is stable during the component lifetime, so a single
+    // initial emission plus the event handlers above is enough here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function emitViewport() {
+    if (!onViewportChange) {
+      return;
+    }
+
+    const bounds = map.getBounds();
+
+    onViewportChange({
+      minLat: bounds.getSouth(),
+      minLng: bounds.getWest(),
+      maxLat: bounds.getNorth(),
+      maxLng: bounds.getEast(),
+      zoom: map.getZoom(),
+    });
+  }
+
+  return null;
 }

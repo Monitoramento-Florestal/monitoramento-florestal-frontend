@@ -61,3 +61,24 @@ export function makeClusterIcon(
     iconAnchor: [Math.round(size / 2), Math.round(size / 2)],
   });
 }
+
+export function makeStaticClusterIcon(
+  leaflet: LeafletModule,
+  count: number
+) {
+  const size = count < 10 ? 40 : count < 50 ? 48 : 56;
+
+  return leaflet.divIcon({
+    className: "arbor-static-cluster-wrap",
+    html: `
+      <div
+        class="flex items-center justify-center rounded-full border-2 border-cream bg-forest text-cream font-sans font-medium shadow-[0_10px_24px_rgb(9_30_5_/_0.18)]"
+        style="width:${size}px;height:${size}px;"
+      >
+        <span class="text-[13px] leading-none">${count}</span>
+      </div>
+    `,
+    iconSize: [size, size],
+    iconAnchor: [Math.round(size / 2), Math.round(size / 2)],
+  });
+}

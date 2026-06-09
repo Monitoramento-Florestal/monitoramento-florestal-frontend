@@ -5,13 +5,19 @@ import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
 
 import { DashboardCard } from "@/components/features/dashboard";
-import { getTreeHistoryRoute } from "@/constants/routes";
+import { getTreeHistoryRoute, getTreeRecordCreateRoute } from "@/constants/routes";
 import { UserRole } from "@/constants/roles";
-import { getManagedTree, listManagedTrees } from "@/services/trees/treeService";
+import { getMapTreeDetail, listMapTrees } from "@/services/maps/mapService";
 import { Button } from "@/components/ui/button";
-import type { Tree, TreePreview } from "@/types/trees";
+import type {
+  MapTreeCluster,
+  MapTreeCollectionMode,
+  MapTreeDetail,
+  MapTreePreview,
+  MapViewport,
+} from "@/types/map";
 import { isSessionInvalidationError, normalizeApiError } from "@/utils/apiFunctions";
-import { TreeDetailPanel } from "./treeDetail/TreeDetailPanel";
+import { MapTreeDetailPanel } from "./treeDetail/MapTreeDetailPanel";
 import { TREE_STATUS_COLORS } from "./mapIcons";
 
 const MapView = dynamic(() => import("@/components/features/map/MapView"), {
@@ -28,50 +34,47 @@ export function AuthenticatedMapScreen({
   registerHref,
   role,
 }: AuthenticatedMapScreenProps) {
-  const [trees, setTrees] = useState<TreePreview[]>([]);
+  const [trees, setTrees] = useState<MapTreePreview[]>([]);
+  const [clusters, setClusters] = useState<MapTreeCluster[]>([]);
+  const [mapMode, setMapMode] = useState<MapTreeCollectionMode>("trees");
+  const [viewport, setViewport] = useState<MapViewport | null>(null);
   const [isLoadingTrees, setIsLoadingTrees] = useState(true);
   const [mapErrorMessage, setMapErrorMessage] = useState<string | null>(null);
-  const [selectedTreePreview, setSelectedTreePreview] = useState<TreePreview | null>(null);
-  const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
-  const [isLoadingSelectedTree, setIsLoadingSelectedTree] = useState(false);
+  const [selectedTreePreview, setSelectedTreePreview] = useState<MapTreePreview | null>(null);
+  const [selectedTree, setSelectedTree] = useState<MapTreeDetail | null>(null);
+  const [, setIsLoadingSelectedTree] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
+    if (!viewport) {
+      return;
+    }
+
+    const currentViewport = viewport;
 
     async function loadTrees() {
       try {
         setIsLoadingTrees(true);
         setMapErrorMessage(null);
-        const nextTrees = await listManagedTrees();
+        const nextMapResult = await listMapTrees(currentViewport);
 
-        if (!isMounted) {
-          return;
-        }
-
-        setTrees(nextTrees);
+        setMapMode(nextMapResult.mode);
+        setTrees(nextMapResult.items);
+        setClusters(nextMapResult.clusters);
       } catch (error) {
-        if (!isMounted) {
-          return;
-        }
-
         if (isSessionInvalidationError(error)) {
           return;
         }
 
         setMapErrorMessage(normalizeApiError(error).message);
+        setTrees([]);
+        setClusters([]);
       } finally {
-        if (isMounted) {
-          setIsLoadingTrees(false);
-        }
+        setIsLoadingTrees(false);
       }
     }
 
     void loadTrees();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  }, [viewport]);
 
   useEffect(() => {
     if (!selectedTreePreview) {
@@ -85,7 +88,7 @@ export function AuthenticatedMapScreen({
     async function loadSelectedTree() {
       try {
         setIsLoadingSelectedTree(true);
-        const nextTree = await getManagedTree(currentTreeId);
+        const nextTree = await getMapTreeDetail(currentTreeId);
 
         if (!isMounted) {
           return;
@@ -121,6 +124,10 @@ export function AuthenticatedMapScreen({
     () => (selectedTree ? getTreeHistoryRoute(role, selectedTree.id) : undefined),
     [role, selectedTree]
   );
+  const recordCreateHref = useMemo(
+    () => (selectedTree ? getTreeRecordCreateRoute(role, selectedTree.id) : undefined),
+    [role, selectedTree]
+  );
 
   return (
     <div className="space-y-4">
@@ -143,28 +150,32 @@ export function AuthenticatedMapScreen({
           </div>
         ) : null}
 
-        {isLoadingTrees || isLoadingSelectedTree ? (
-          <div className="absolute inset-x-4 top-4 z-[700] rounded-xl border border-rosewood/12 bg-cream/95 px-4 py-3 text-sm text-rosewood shadow-sm">
-            Carregando dados do mapa...
+        {mapMode === "cluster" && !isLoadingTrees ? (
+          <div className="absolute inset-x-4 top-4 z-[700] rounded-xl border border-sage/20 bg-cream/95 px-4 py-3 text-sm text-rosewood shadow-sm">
+            O viewport atual está agregado em clusters. Aproxime o mapa para inspecionar e selecionar árvores individuais.
           </div>
         ) : null}
 
         <MapView
+          mode={mapMode}
+          clusters={clusters}
           trees={trees}
           selectedTreeId={selectedTreePreview?.id ?? null}
           onSelect={setSelectedTreePreview}
+          onViewportChange={setViewport}
           className="absolute inset-0"
         />
-      </DashboardCard>
 
-      <TreeDetailPanel
-        historyHref={historyHref}
-        tree={selectedTree}
-        onClose={() => {
-          setSelectedTreePreview(null);
-          setSelectedTree(null);
-        }}
-      />
+        <MapTreeDetailPanel
+          historyHref={historyHref}
+          recordCreateHref={recordCreateHref}
+          tree={selectedTree}
+          onClose={() => {
+            setSelectedTreePreview(null);
+            setSelectedTree(null);
+          }}
+        />
+      </DashboardCard>
     </div>
   );
 }

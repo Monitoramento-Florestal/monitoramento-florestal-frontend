@@ -102,48 +102,6 @@ type BackendRegistroResponse = {
 };
 
 
-export interface ExistingTreeRecordPayload {
-  arvoreId: string;
-  alturaColetada: number;
-  dapColetada: number;
-  copaColetada: number;
-  estadoGeral: string;
-  vigor: string;
-  problemasCopa: string[];
-  problemasTronco: string[];
-  problemasRaiz: string[];
-  estruturaTronco: string;
-  estruturaBase: string;
-  estruturaCopa: string;
-  inclinacaoTronco: string;
-  ancoragem: string;
-  fluxoPedestre: string;
-  fluxoAutomovel: string;
-  tipoVia: string;
-  alvosPotenciais: string[];
-  alvosSensiveis: string[];
-  conflito: {
-    fiacao: string;
-    calcada: string;
-    iluminacao: string;
-    edificacao: string;
-  };
-  manejo: {
-    acoes: string[];
-    prioridade: string;
-  };
-  observacoes?: string;
-}
-
-export interface NewTreeRecordPayload
-  extends Omit<ExistingTreeRecordPayload, "arvoreId"> {
-  especie: string;
-  lat: number;
-  lng: number;
-  bairro: string;
-  rua: string;
-  referencia?: string;
-}
 
 export interface TreeUpdatePayload {
   especie: string;
@@ -501,22 +459,23 @@ export async function getManagedTree(treeId: string) {
   return createManagedTree(treeResponse.data, recordsResponse.data);
 }
 
-export async function createExistingTreeRecord(payload: ExistingTreeRecordPayload) {
-  const { data } = await api.post<BackendRegistroResponse>(
-    API_ENDPOINTS.TREE_RECORDS,
+
+export async function createNewTree(payload: TreeUpdatePayload) {
+  const { data } = await api.post<BackendArvoreResponse>(
+    API_ENDPOINTS.TREES,
     payload,
   );
 
   return data;
 }
 
-export async function createNewTreeRecord(payload: NewTreeRecordPayload) {
-  const { data } = await api.post(
-    API_ENDPOINTS.TREE_RECORDS_NEW_TREE,
-    payload,
-  );
+export async function uploadTreePhoto(treeId: string, file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
 
-  return data;
+  await api.put(`${API_ENDPOINTS.TREES}/${treeId}/foto`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 }
 
 export async function updateManagedTree(treeId: string, payload: TreeUpdatePayload) {

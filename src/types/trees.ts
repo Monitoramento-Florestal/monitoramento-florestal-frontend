@@ -126,6 +126,7 @@ export interface TreeMeasurementRecord {
   treeId: string;
   kind: TreeRecordKind;
   version: number;
+  isSynthetic?: boolean;
   status: TreeStatus;
   localizacao: TreeLocation;
   dimensoes: TreeDimensions;

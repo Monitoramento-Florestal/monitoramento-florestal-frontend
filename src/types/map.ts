@@ -65,4 +65,5 @@ export interface MapTreeDetail {
   vigor: TreeVigor | null
   observacoes?: string
   currentRecord: unknown | null
+  fotoUrl?: string | null
 }

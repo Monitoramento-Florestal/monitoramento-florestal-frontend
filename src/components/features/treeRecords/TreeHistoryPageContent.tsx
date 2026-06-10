@@ -68,6 +68,16 @@ export function TreeHistoryPageContent({
   }, [treeId]);
 
   async function handleDeleteRecord(record: TreeMeasurementRecord) {
+    if (record.isSynthetic) {
+      showToast({
+        title: "Histórico indisponível para exclusão",
+        description:
+          "Esse item foi reconstruído a partir do cadastro atual da árvore e não existe como registro persistido no backend.",
+        variant: "error",
+      });
+      return;
+    }
+
     const confirmed = window.confirm(
       `Excluir o registro v${record.version}? Essa ação não pode ser desfeita.`
     );

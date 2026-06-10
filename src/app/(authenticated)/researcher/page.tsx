@@ -15,41 +15,19 @@ import {
   DashboardPageHeader,
 } from "@/components/features/dashboard";
 import { Button } from "@/components/ui/button";
-import { fetchDashboardPesquisador } from "@/services/dashboard/dashboardService";
-import type { DashboardPesquisador } from "@/services/dashboard/dashboardService";
+import { fetchDashboardPesquisador, fetchRegistrosRecentes } from "@/services/dashboard/dashboardService";
+import type { DashboardPesquisador, DashboardRegistroRecente } from "@/services/dashboard/dashboardService";
 
-const LAST_RECORDS = [
-  {
-    key: "pau-brasil-1",
-    name: "Pau-brasil",
-    details: "UFRPE-1002 - 14.6m - DAP 17.2cm",
-    status: "Saudável",
-  },
-  {
-    key: "oiti-1",
-    name: "Oiti",
-    details: "UFRPE-1005 - 8.6m - DAP 86.5cm",
-    status: "Saudável",
-  },
-  {
-    key: "caja-1",
-    name: "Caja",
-    details: "UFRPE-1010 - 4.5m - DAP 73.7cm",
-    status: "Saudável",
-  },
-  {
-    key: "pau-brasil-2",
-    name: "Pau-brasil",
-    details: "UFRPE-1014 - 4.3m - DAP 65.6cm",
-    status: "Saudável",
-  },
-  {
-    key: "oiti-2",
-    name: "Oiti",
-    details: "UFRPE-1018 - 11.1m - DAP 18.7cm",
-    status: "Saudável",
-  },
-];
+function getStatusLabel(estadoGeral: string) {
+  const map: Record<string, string> = {
+    otimo: "Saudável",
+    bom: "Saudável",
+    regular: "Regular",
+    ruim: "Ruim",
+    morta: "Cortada",
+  };
+  return map[estadoGeral.trim().toLowerCase()] ?? estadoGeral;
+}
 
 const QUICK_ACTIONS = [
   { key: "map", label: "Mapa", href: APP_ROUTES.RESEARCHER_MAP, icon: Map },
@@ -60,6 +38,7 @@ const QUICK_ACTIONS = [
 
 export default function ResearcherDashboardPage() {
   const [dashboard, setDashboard] = useState<DashboardPesquisador | null>(null);
+  const [recentRecords, setRecentRecords] = useState<DashboardRegistroRecente[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -69,11 +48,21 @@ export default function ResearcherDashboardPage() {
         const data = await fetchDashboardPesquisador();
         if (isMounted) setDashboard(data);
       } catch {
-        // fallback silencioso
+        // fallback
+      }
+    }
+
+    async function loadRecentRecords() {
+      try {
+        const data = await fetchRegistrosRecentes();
+        if (isMounted) setRecentRecords(data);
+      } catch {
+        // fallback
       }
     }
 
     void loadDashboard();
+    void loadRecentRecords();
     return () => { isMounted = false };
   }, []);
 
@@ -110,26 +99,25 @@ export default function ResearcherDashboardPage() {
         <section className="mt-6 grid gap-4">
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.2em] text-rosewood/70">
-              Meus últimos registros
+              Atividade recente
             </p>
             <div className="mt-3 overflow-hidden rounded-lg border border-rosewood/15 bg-white/55">
-              {LAST_RECORDS.map((record) => (
+              {recentRecords.map((record) => (
                 <div
-                  key={record.key}
+                  key={record.id}
                   className="flex flex-col gap-3 border-b border-rosewood/10 px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
                     <div className="text-sm font-medium text-burgundy">
-                      {record.name}
+                      {record.nomeComum || record.especie || "Sem nome"}
                     </div>
                     <div className="text-xs text-rosewood/70">
-                      {record.details}
+                      {record.codigo ?? "---"} - {record.alturaColetada}m - DAP {record.dapColetada}cm
                     </div>
                   </div>
-
                   <div className="flex items-center gap-2 text-xs text-sage">
                     <span className="size-1.5 rounded-full bg-sage" />
-                    {record.status}
+                    {getStatusLabel(record.estadoGeral)}
                   </div>
                 </div>
               ))}

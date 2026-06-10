@@ -19,8 +19,27 @@ import {
   DashboardPageHeader,
 } from "@/components/features/dashboard";
 import { Button } from "@/components/ui/button";
-import { fetchDashboardGestor } from "@/services/dashboard/dashboardService";
-import type { DashboardAdministrativo } from "@/services/dashboard/dashboardService";
+import { fetchDashboardGestor, fetchRegistrosRecentes } from "@/services/dashboard/dashboardService";
+import type { DashboardAdministrativo, DashboardRegistroRecente } from "@/services/dashboard/dashboardService";
+
+function getStatusTone(estadoGeral: string) {
+  const normalized = estadoGeral.trim().toLowerCase();
+  if (normalized === "otimo" || normalized === "bom") return "healthy";
+  if (normalized === "regular" || normalized === "ruim") return "warning";
+  if (normalized === "morta") return "critical";
+  return "healthy";
+}
+
+function getStatusLabel(estadoGeral: string) {
+  const map: Record<string, string> = {
+    otimo: "Saudável",
+    bom: "Saudável",
+    regular: "Regular",
+    ruim: "Ruim",
+    morta: "Cortada",
+  };
+  return map[estadoGeral.trim().toLowerCase()] ?? estadoGeral;
+}
 
 function StatusBadge({ status, tone }: { status: string; tone: string }) {
   const classes = {
@@ -39,6 +58,7 @@ function StatusBadge({ status, tone }: { status: string; tone: string }) {
 
 export default function ManagerDashboardPage() {
   const [dashboard, setDashboard] = useState<DashboardAdministrativo | null>(null);
+  const [recentRecords, setRecentRecords] = useState<DashboardRegistroRecente[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -48,11 +68,21 @@ export default function ManagerDashboardPage() {
         const data = await fetchDashboardGestor();
         if (isMounted) setDashboard(data);
       } catch {
-        // fallback silencioso
+        // fallback
+      }
+    }
+
+    async function loadRecentRecords() {
+      try {
+        const data = await fetchRegistrosRecentes();
+        if (isMounted) setRecentRecords(data);
+      } catch {
+        // fallback
       }
     }
 
     void loadDashboard();
+    void loadRecentRecords();
     return () => { isMounted = false };
   }, []);
 
@@ -108,6 +138,30 @@ export default function ManagerDashboardPage() {
               <Button text="Ver fila" icon={ListChecks} href={APP_ROUTES.MANAGER_APPROVALS} variant="ghost" />
             </div>
           </DashboardCard>
+        </section>
+
+        <section className="mt-6">
+          <p className="text-[0.7rem] uppercase tracking-[0.2em] text-rosewood/70">
+            Atividade recente
+          </p>
+          <div className="mt-3 overflow-hidden rounded-lg border border-rosewood/15 bg-white/55">
+            {recentRecords.map((record) => (
+              <div
+                key={record.id}
+                className="flex flex-col gap-3 border-b border-rosewood/10 px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <div className="text-sm font-medium text-burgundy">
+                    {record.nomeComum || record.especie || "Sem nome"}
+                  </div>
+                  <div className="text-xs text-rosewood/70">
+                    {record.codigo ?? "---"} - {record.alturaColetada}m - DAP {record.dapColetada}cm
+                  </div>
+                </div>
+                <StatusBadge status={getStatusLabel(record.estadoGeral)} tone={getStatusTone(record.estadoGeral)} />
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="mt-6 flex flex-wrap gap-3">

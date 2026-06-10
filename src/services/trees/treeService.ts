@@ -492,7 +492,7 @@ export async function exportArvores(
   );
 
   const disposicao = response.headers["content-disposition"] as string | undefined;
-  const match = disposicao?.match(/filename\*?=(?:UTF-8''|")([^"]+)/);
+  const match = disposicao?.match(/filename\*=UTF-8''([^"]+)/);
   const nomeArquivo = match?.[1] ?? `arvores.${formato}`;
 
   const blob = response.data instanceof Blob

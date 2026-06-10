@@ -9,12 +9,17 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { UserRole } from "@/constants/roles";
 import {
-  mapFormValuesToExistingTreeRecordPayload,
-  mapFormValuesToNewTreeRecordPayload,
+  mapFormValuesToCreateRecordApprovalPayload,
+  mapFormValuesToCreateTreeApprovalPayload,
+  mapFormValuesToTreeUpdatePayload,
 } from "@/services/trees/treeFormMappers";
 import {
-  createExistingTreeRecord,
-  createNewTreeRecord,
+  createRecordApprovalRequest,
+  createTreeApprovalRequest,
+} from "@/services/approvals/approvalService";
+import {
+  createNewTree,
+  uploadTreePhoto,
 } from "@/services/trees/treeService";
 import type { Tree, TreeMeasurementRecord } from "@/types/trees";
 import { cn } from "@/utils/cn";
@@ -237,6 +242,8 @@ export function TreeRecordFormScreen({
   );
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
   const [locationState, setLocationState] = useState<
     "idle" | "loading" | "success" | "denied" | "unavailable" | "error"
   >("idle");
@@ -245,6 +252,8 @@ export function TreeRecordFormScreen({
   const fieldRefs = useRef<Partial<Record<FieldKey, HTMLDivElement | null>>>({});
 
   const isCreateTree = mode === "create-tree";
+  const isApprovalRequestFlow =
+    mode === "create-record" || role === UserRole.RESEARCHER;
   const selectedProblemValues = useMemo(
     () => values.problemas.filter((value) => value !== "nenhum"),
     [values.problemas],
@@ -340,6 +349,17 @@ export function TreeRecordFormScreen({
 
     fillWithCurrentLocation();
   }, [hasAttemptedAutoLocation, mode, tree, values.lat, values.lng]);
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+
+    if (filePreviewUrl) {
+      URL.revokeObjectURL(filePreviewUrl);
+    }
+
+    setSelectedFile(file);
+    setFilePreviewUrl(file ? URL.createObjectURL(file) : null);
+  }
 
   function toggleArrayValue(
     key:
@@ -534,28 +554,58 @@ export function TreeRecordFormScreen({
     setIsSubmitting(true);
 
     try {
+      let treeId: string | undefined;
+
       if (mode === "create-record") {
         if (!tree) {
           throw new Error("Árvore não encontrada para criar o registro.");
         }
 
-        await createExistingTreeRecord(
-          mapFormValuesToExistingTreeRecordPayload(tree.id, values),
+        await createRecordApprovalRequest(
+          mapFormValuesToCreateRecordApprovalPayload(tree.id, values),
         );
       } else if (mode === "create-tree") {
-        await createNewTreeRecord(mapFormValuesToNewTreeRecordPayload(values));
+        const isDirectCreation =
+          role === UserRole.ADMIN || role === UserRole.MANAGER;
+
+        if (isDirectCreation) {
+          const newTree = await createNewTree(
+            mapFormValuesToTreeUpdatePayload(values),
+          );
+          treeId = newTree.id;
+        } else {
+          await createTreeApprovalRequest(
+            mapFormValuesToCreateTreeApprovalPayload(values),
+          );
+        }
       } else {
         throw new Error("Edição de registros ainda não está disponível.");
       }
 
+      if (treeId && selectedFile) {
+        try {
+          await uploadTreePhoto(treeId, selectedFile);
+        } catch {
+          // Foto é opcional — não bloquear o fluxo
+        }
+      }
+
+      const isDirectCreation =
+        mode === "create-tree" &&
+        (role === UserRole.ADMIN || role === UserRole.MANAGER);
+
       showToast({
         title:
           mode === "create-tree"
-            ? "Solicitação enviada com sucesso"
-            : "Registro enviado com sucesso",
+            ? isDirectCreation
+              ? "Árvore cadastrada com sucesso"
+              : "Solicitação enviada com sucesso"
+            : "Registro enviado para análise",
         description:
           mode === "create-tree"
-            ? "A nova árvore foi enviada para análise."
+            ? isDirectCreation
+              ? "A nova árvore foi cadastrada imediatamente."
+              : "A nova árvore foi enviada para análise."
             : "O novo registro foi enviado para análise.",
         variant: "success",
       });
@@ -574,7 +624,10 @@ export function TreeRecordFormScreen({
     }
   }
 
-  const submitLabel = getTreeRecordSubmitLabel(role, mode);
+  const submitLabel =
+    isCreateTree && (role === UserRole.ADMIN || role === UserRole.MANAGER)
+      ? "Cadastrar árvore"
+      : getTreeRecordSubmitLabel(role, mode);
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit} noValidate>
@@ -661,6 +714,32 @@ export function TreeRecordFormScreen({
               : "Usar Localização Atual"}
           </Button>
         </div>
+
+        {(mode === "create-tree" || mode === "create-record") ? (
+          <div className="space-y-3 rounded-xl border border-rosewood/10 bg-card/45 px-4 py-3">
+            <LabeledField label="Foto da Árvore">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                disabled={isApprovalRequestFlow}
+                className="w-full text-sm text-rosewood file:mr-3 file:rounded-full file:border file:border-rosewood/20 file:bg-secondary file:px-4 file:py-2 file:text-sm file:text-rosewood hover:file:bg-cream"
+              />
+            </LabeledField>
+            {isApprovalRequestFlow ? (
+              <p className="text-sm text-rosewood/80">
+                O upload de foto não está disponível para solicitações pendentes.
+              </p>
+            ) : null}
+            {filePreviewUrl ? (
+              <img
+                src={filePreviewUrl}
+                alt="Preview da foto"
+                className="h-32 w-full rounded-xl object-cover border border-rosewood/12"
+              />
+            ) : null}
+          </div>
+        ) : null}
       </DashboardCard>
       </FormSectionCard>
 

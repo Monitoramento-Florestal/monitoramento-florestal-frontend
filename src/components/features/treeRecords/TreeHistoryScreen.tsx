@@ -42,6 +42,8 @@ export function TreeHistoryScreen({
   const selectedRecord =
     orderedRecords.find((record) => record.id === selectedRecordId) ??
     latestRecord
+  const canDeleteSelectedRecord =
+    canDelete && Boolean(onDeleteRecord) && !selectedRecord.isSynthetic
   const selectedRecordIndex = orderedRecords.findIndex(
     (record) => record.id === selectedRecord.id
   )
@@ -193,7 +195,7 @@ export function TreeHistoryScreen({
               <span className="rounded-full border border-sage/20 bg-sage/10 px-3 py-1 text-xs text-burgundy">
                 {TREE_RECORD_STATUS_LABELS[selectedRecord.status]}
               </span>
-              {canDelete && onDeleteRecord ? (
+              {canDeleteSelectedRecord ? (
                 <Button
                   type="button"
                   icon={Trash2}
@@ -202,7 +204,7 @@ export function TreeHistoryScreen({
                   size="sm"
                   className="text-burgundy hover:bg-burgundy/6"
                   disabled={deletingRecordId === selectedRecord.id}
-                  onClick={() => onDeleteRecord(selectedRecord)}
+                  onClick={() => onDeleteRecord?.(selectedRecord)}
                 >
                   {deletingRecordId === selectedRecord.id
                     ? 'Excluindo...'
@@ -211,6 +213,13 @@ export function TreeHistoryScreen({
               ) : null}
             </div>
           </div>
+
+          {selectedRecord.isSynthetic ? (
+            <div className="rounded-xl border border-amber-700/15 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              Este histórico inicial foi reconstruído a partir do cadastro atual da árvore.
+              Nenhum registro técnico vinculado foi encontrado no backend para esta árvore.
+            </div>
+          ) : null}
 
           <div className="grid gap-3 md:grid-cols-4">
             <SummaryItem

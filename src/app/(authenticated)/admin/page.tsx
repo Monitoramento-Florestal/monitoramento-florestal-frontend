@@ -17,46 +17,27 @@ import {
   DashboardPageHeader,
 } from "@/components/features/dashboard";
 import { Button } from "@/components/ui/button";
-import { fetchDashboardAdmin } from "@/services/dashboard/dashboardService";
-import type { DashboardAdministrativo } from "@/services/dashboard/dashboardService";
+import { fetchDashboardAdmin, fetchRegistrosRecentes } from "@/services/dashboard/dashboardService";
+import type { DashboardAdministrativo, DashboardRegistroRecente } from "@/services/dashboard/dashboardService";
 
-const RECENT_RECORDS = [
-  {
-    key: "ipe-roxo",
-    name: "Ipe-roxo",
-    details: "UFRPE-1001 - 15.7m - DAP 24.2cm",
-    status: "Com injúria",
-    tone: "warning",
-  },
-  {
-    key: "pau-brasil",
-    name: "Pau-brasil",
-    details: "UFRPE-1002 - 14.6m - DAP 17.2cm",
-    status: "Saudável",
-    tone: "healthy",
-  },
-  {
-    key: "cajueiro",
-    name: "Cajueiro",
-    details: "UFRPE-1003 - 7.2m - DAP 44.8cm",
-    status: "Saudável",
-    tone: "healthy",
-  },
-  {
-    key: "mangueira",
-    name: "Mangueira",
-    details: "UFRPE-1004 - 10.4m - DAP 81.8cm",
-    status: "Cortada",
-    tone: "critical",
-  },
-  {
-    key: "cajueiro-2",
-    name: "Cajueiro",
-    details: "UFRPE-1005 - 9.7m - DAP 54.5cm",
-    status: "Com injúria",
-    tone: "warning",
-  },
-];
+function getStatusTone(estadoGeral: string) {
+  const normalized = estadoGeral.trim().toLowerCase();
+  if (normalized === "otimo" || normalized === "bom") return "healthy";
+  if (normalized === "regular" || normalized === "ruim") return "warning";
+  if (normalized === "morta") return "critical";
+  return "healthy";
+}
+
+function getStatusLabel(estadoGeral: string) {
+  const map: Record<string, string> = {
+    otimo: "Saudável",
+    bom: "Saudável",
+    regular: "Regular",
+    ruim: "Ruim",
+    morta: "Cortada",
+  };
+  return map[estadoGeral.trim().toLowerCase()] ?? estadoGeral;
+}
 
 const QUICK_ACTIONS = [
   { key: "map", label: "Mapa", href: APP_ROUTES.ADMIN_MAP, icon: Map },
@@ -84,6 +65,7 @@ function StatusBadge({ status, tone }: { status: string; tone: string }) {
 
 export default function AdminDashboardPage() {
   const [dashboard, setDashboard] = useState<DashboardAdministrativo | null>(null);
+  const [recentRecords, setRecentRecords] = useState<DashboardRegistroRecente[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -93,11 +75,21 @@ export default function AdminDashboardPage() {
         const data = await fetchDashboardAdmin();
         if (isMounted) setDashboard(data);
       } catch {
-        // fallback silencioso
+        // fallback
+      }
+    }
+
+    async function loadRecentRecords() {
+      try {
+        const data = await fetchRegistrosRecentes();
+        if (isMounted) setRecentRecords(data);
+      } catch {
+        // fallback
       }
     }
 
     void loadDashboard();
+    void loadRecentRecords();
     return () => { isMounted = false };
   }, []);
 
@@ -160,16 +152,20 @@ export default function AdminDashboardPage() {
             Atividade recente
           </p>
           <div className="mt-3 overflow-hidden rounded-lg border border-rosewood/15 bg-white/55">
-            {RECENT_RECORDS.map((record) => (
+            {recentRecords.map((record) => (
               <div
-                key={record.key}
+                key={record.id}
                 className="flex flex-col gap-3 border-b border-rosewood/10 px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
-                  <div className="text-sm font-medium text-burgundy">{record.name}</div>
-                  <div className="text-xs text-rosewood/70">{record.details}</div>
+                  <div className="text-sm font-medium text-burgundy">
+                    {record.nomeComum || record.especie || "Sem nome"}
+                  </div>
+                  <div className="text-xs text-rosewood/70">
+                    {record.codigo ?? "---"} - {record.alturaColetada}m - DAP {record.dapColetada}cm
+                  </div>
                 </div>
-                <StatusBadge status={record.status} tone={record.tone} />
+                <StatusBadge status={getStatusLabel(record.estadoGeral)} tone={getStatusTone(record.estadoGeral)} />
               </div>
             ))}
           </div>

@@ -15,6 +15,7 @@ export const APP_ROUTES = {
   RESEARCHER_REPORTS: '/researcher/reports',
   RESEARCHER_USERS: '/researcher/users',
   RESEARCHER_MAP: '/researcher/map',
+  RESEARCHER_APPROVALS: '/researcher/approvals',
   MANAGER_HOME: '/manager',
   MANAGER_PROFILE: '/manager/profile',
   MANAGER_TREES_NEW: '/manager/trees/new',

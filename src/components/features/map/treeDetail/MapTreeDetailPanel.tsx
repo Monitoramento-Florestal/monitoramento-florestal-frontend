@@ -86,7 +86,7 @@ function toFullTree(detail: MapTreeDetail): Tree {
     },
     registro: {
       aprovacao: 'pendente' as const,
-      fotos: [],
+      fotos: detail.fotoUrl ? [detail.fotoUrl] : [],
       registradoEm: new Date().toISOString(),
       registradoPor: 'Indisponivel',
       ultimaMedicao: new Date().toISOString(),

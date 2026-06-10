@@ -478,6 +478,33 @@ export async function uploadTreePhoto(treeId: string, file: File) {
   });
 }
 
+export async function exportArvores(
+  dataInicial: string,
+  dataFinal: string,
+  formato: "csv" | "xlsx" = "csv",
+) {
+  const response = await api.get(
+    `${API_ENDPOINTS.TREES}/exportacao`,
+    {
+      params: { dataInicial, dataFinal, formato },
+      responseType: "blob",
+    },
+  );
+
+  const disposicao = response.headers["content-disposition"] as string | undefined;
+  const match = disposicao?.match(/filename\*?=(?:UTF-8''|")([^"]+)/);
+  const nomeArquivo = match?.[1] ?? `arvores.${formato}`;
+
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = nomeArquivo;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
+
 export async function updateManagedTree(treeId: string, payload: TreeUpdatePayload) {
   const { data } = await api.put<BackendArvoreResponse>(
     `${API_ENDPOINTS.TREES}/${treeId}`,

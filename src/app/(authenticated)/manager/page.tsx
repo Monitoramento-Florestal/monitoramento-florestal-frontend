@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import {
   ClipboardList,
+  Download,
   ListChecks,
   Map,
   PlusCircle,
@@ -21,6 +22,7 @@ import {
 } from "@/components/features/dashboard";
 import { Button } from "@/components/ui/button";
 import { fetchDashboardGestor, fetchRegistrosRecentes } from "@/services/dashboard/dashboardService";
+import { exportArvores } from "@/services/trees/treeService";
 import type { DashboardAdministrativo, DashboardRegistroRecente } from "@/services/dashboard/dashboardService";
 
 function getStatusTone(estadoGeral: string) {
@@ -40,6 +42,15 @@ function getStatusLabel(estadoGeral: string) {
     morta: "Cortada",
   };
   return map[estadoGeral.trim().toLowerCase()] ?? estadoGeral;
+}
+
+function LabeledField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[10px] uppercase tracking-[0.18em] text-rosewood/70">{label}</p>
+      {children}
+    </div>
+  );
 }
 
 function StatusBadge({ status, tone }: { status: string; tone: string }) {
@@ -97,6 +108,27 @@ export default function ManagerDashboardPage() {
     : [];
 
   const pendingCount = dashboard?.aprovacoesPendentes ?? 0;
+
+  const [exportDataInicial, setExportDataInicial] = useState("");
+  const [exportDataFinal, setExportDataFinal] = useState("");
+  const [exportFormato, setExportFormato] = useState<"csv" | "xlsx">("csv");
+  const [isExporting, setIsExporting] = useState(false);
+
+  async function handleExport() {
+    if (!exportDataInicial || !exportDataFinal || isExporting) {
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      await exportArvores(exportDataInicial, exportDataFinal, exportFormato);
+    } catch {
+      // fallback silencioso
+    } finally {
+      setIsExporting(false);
+    }
+  }
 
   return (
     <>
@@ -163,6 +195,64 @@ export default function ManagerDashboardPage() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="mt-6">
+          <DashboardCard className="bg-white/55 shadow-none">
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="text-[0.7rem] uppercase tracking-[0.2em] text-rosewood/70">
+                  Exportar dados
+                </p>
+                <h2 className="mt-2 text-base font-medium text-burgundy">
+                  Exportar árvores
+                </h2>
+                <p className="mt-1 text-sm text-rosewood">
+                  Selecione o período e formato para download.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-end gap-4">
+                <LabeledField label="Data inicial">
+                  <input
+                    type="date"
+                    value={exportDataInicial}
+                    onChange={(e) => setExportDataInicial(e.target.value)}
+                    className="w-full rounded-md border border-rosewood/30 bg-white px-3 py-2 text-sm outline-none focus:border-sage"
+                  />
+                </LabeledField>
+                <LabeledField label="Data final">
+                  <input
+                    type="date"
+                    value={exportDataFinal}
+                    onChange={(e) => setExportDataFinal(e.target.value)}
+                    className="w-full rounded-md border border-rosewood/30 bg-white px-3 py-2 text-sm outline-none focus:border-sage"
+                  />
+                </LabeledField>
+                <LabeledField label="Formato">
+                  <select
+                    value={exportFormato}
+                    onChange={(e) => setExportFormato(e.target.value as "csv" | "xlsx")}
+                    className="w-full rounded-md border border-rosewood/30 bg-white px-3 py-2 text-sm outline-none focus:border-sage"
+                  >
+                    <option value="csv">CSV</option>
+                    <option value="xlsx">Excel (XLSX)</option>
+                  </select>
+                </LabeledField>
+                <div className="flex items-end pb-0.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    icon={Download}
+                    iconSide="left"
+                    disabled={isExporting || !exportDataInicial || !exportDataFinal}
+                    onClick={handleExport}
+                  >
+                    {isExporting ? "Exportando..." : "Exportar"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </DashboardCard>
         </section>
 
         <section className="mt-6 flex flex-wrap gap-3">

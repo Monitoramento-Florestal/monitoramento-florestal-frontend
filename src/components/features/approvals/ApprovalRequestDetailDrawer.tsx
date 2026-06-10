@@ -101,7 +101,7 @@ export function ApprovalRequestDetailDrawer({
           <div className="flex-1 space-y-5 px-5 py-5 sm:px-6">
             <DrawerSectionCard
               title="Contexto da solicitação"
-              description="Use este bloco para entender se você está aprovando a criação de uma nova árvore ou um novo registro em uma árvore já existente."
+              description="Use este bloco para entender se você está analisando a criação de uma nova árvore ou uma atualização em árvore existente."
               defaultOpen
             >
               <ApprovalRequestContextSummary request={request} />
@@ -116,31 +116,33 @@ export function ApprovalRequestDetailDrawer({
             </DrawerSectionCard>
           </div>
 
-          <div className="sticky bottom-0 z-10 border-t border-rosewood/10 bg-cream/95 px-5 py-4 backdrop-blur sm:px-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                icon={X}
-                iconSide="left"
-                className="border-burgundy/30 px-8 py-5 text-burgundy hover:bg-burgundy/5"
-                disabled={!canReview || isActing}
-                onClick={() => onReject(request.id)}
-              >
-                Rejeitar
-              </Button>
-              <Button
-                type="button"
-                icon={Check}
-                iconSide="left"
-                className="px-8 py-5"
-                disabled={!canReview || isActing}
-                onClick={() => onApprove(request.id)}
-              >
-                {isActing ? "Processando..." : "Aprovar"}
-              </Button>
+          {canReview ? (
+            <div className="sticky bottom-0 z-10 border-t border-rosewood/10 bg-cream/95 px-5 py-4 backdrop-blur sm:px-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  icon={X}
+                  iconSide="left"
+                  className="border-burgundy/30 px-8 py-5 text-burgundy hover:bg-burgundy/5"
+                  disabled={isActing}
+                  onClick={() => onReject(request.id)}
+                >
+                  Rejeitar
+                </Button>
+                <Button
+                  type="button"
+                  icon={Check}
+                  iconSide="left"
+                  className="px-8 py-5"
+                  disabled={isActing}
+                  onClick={() => onApprove(request.id)}
+                >
+                  {isActing ? "Processando..." : "Aprovar"}
+                </Button>
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </aside>
     </div>

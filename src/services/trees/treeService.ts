@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from "@/constants/api";
 import { api } from "@/services/api/api";
+import { getToken, setAuthTokens } from "@/services/storage/tokenStorage";
 import type {
   Tree,
   TreeBaseIssue,
@@ -478,29 +479,70 @@ export async function uploadTreePhoto(treeId: string, file: File) {
   });
 }
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+
 export async function exportArvores(
   dataInicial: string,
   dataFinal: string,
   formato: "csv" | "xlsx" = "csv",
 ) {
-  const response = await api.get(
-    `${API_ENDPOINTS.TREES}/exportacao`,
-    {
-      params: { dataInicial, dataFinal, formato },
-      responseType: "blob",
-    },
-  );
+  const token = getToken();
 
-  const disposicao = response.headers["content-disposition"] as string | undefined;
-  const match = disposicao?.match(/filename\*=UTF-8''([^"]+)/);
-  const nomeArquivo = match?.[1] ?? `arvores.${formato}`;
+  if (!token) {
+    throw new Error("Usuário não autenticado.");
+  }
 
-  const blob = response.data instanceof Blob
-    ? response.data
-    : new Blob([response.data]);
-  const url = window.URL.createObjectURL(blob);
+  const params = new URLSearchParams({ dataInicial, dataFinal, formato });
+  const url = `${API_BASE}/arvores/exportacao?${params}`;
+
+  // Primeira tentativa
+  let resp = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  // Se 401, tenta refresh e retry
+  if (resp.status === 401) {
+    const refreshResp = await fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!refreshResp.ok) {
+      throw new Error("Sessão expirada. Faça login novamente.");
+    }
+
+    const refreshData = await refreshResp.json();
+    const newToken: string | undefined = refreshData.accessToken;
+
+    if (!newToken) {
+      throw new Error("Falha ao renovar sessão.");
+    }
+
+    setAuthTokens({
+      token: newToken,
+      refreshToken: refreshData.refreshToken ?? null,
+    });
+
+    resp = await fetch(url, {
+      headers: { Authorization: `Bearer ${newToken}` },
+    });
+  }
+
+  if (!resp.ok) {
+    const erro = await resp.json().catch(() => null);
+    throw new Error(erro?.message ?? "Não foi possível gerar a exportação.");
+  }
+
+  const disposicao = resp.headers.get("Content-Disposition") ?? "";
+  const match = disposicao.match(/filename\*=UTF-8''([^";]+)/i);
+  const nomeArquivo = match
+    ? decodeURIComponent(match[1])
+    : `arvores_${dataInicial}_a_${dataFinal}.${formato}`;
+
+  const blob = await resp.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.href = url;
+  link.href = blobUrl;
   link.download = nomeArquivo;
   link.style.display = "none";
   document.body.appendChild(link);
@@ -508,8 +550,8 @@ export async function exportArvores(
 
   setTimeout(() => {
     document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  }, 200);
+    window.URL.revokeObjectURL(blobUrl);
+  }, 60_000);
 }
 
 export async function updateManagedTree(treeId: string, payload: TreeUpdatePayload) {

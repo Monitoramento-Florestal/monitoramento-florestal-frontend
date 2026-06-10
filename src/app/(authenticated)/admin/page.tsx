@@ -117,8 +117,12 @@ export default function AdminDashboardPage() {
 
   const pendingCount = dashboard?.aprovacoesPendentes ?? 0;
 
-  const [exportDataInicial, setExportDataInicial] = useState("");
-  const [exportDataFinal, setExportDataFinal] = useState("");
+  const [exportDataInicial, setExportDataInicial] = useState(
+    () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+  );
+  const [exportDataFinal, setExportDataFinal] = useState(
+    () => new Date().toISOString().slice(0, 10),
+  );
   const [exportFormato, setExportFormato] = useState<"csv" | "xlsx">("csv");
   const [isExporting, setIsExporting] = useState(false);
 
@@ -131,8 +135,8 @@ export default function AdminDashboardPage() {
 
     try {
       await exportArvores(exportDataInicial, exportDataFinal, exportFormato);
-    } catch {
-      // fallback silencioso
+    } catch (err) {
+      console.error("[export] Erro ao exportar árvores:", err);
     } finally {
       setIsExporting(false);
     }

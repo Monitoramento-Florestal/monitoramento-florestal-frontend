@@ -15,7 +15,7 @@ function getFirstName(name?: string | null) {
 export default function CitizenDashboardPage() {
   const { user } = useAuthContext()
   const firstName = getFirstName(user?.name)
-  const [dashboard, setDashboard] = useState({ totalArvores: 42, arvoresSaudaveis: 30, arvoresAcompanhamento: 7 })
+  const [dashboard, setDashboard] = useState({ totalArvores: 0, arvoresSaudaveis: 0, arvoresAcompanhamento: 0 })
 
   useEffect(() => {
     let isMounted = true

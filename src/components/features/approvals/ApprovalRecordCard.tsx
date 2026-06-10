@@ -133,7 +133,7 @@ export function ApprovalRecordCard({
             variant="burgundy"
             icon={Eye}
             iconSide="left"
-            className="col-span-2 h-9 flex-1"
+            className="col-span-2 h-9 flex-1 max-h-14"
             onClick={handleOpenDetails}
           >
             Ver análise completa

@@ -138,27 +138,32 @@ export function ApprovalRecordCard({
           >
             Ver análise completa
           </Button>
-          <Button
-            type="button"
-            icon={Check}
-            iconSide="left"
-            className="h-9 flex-1"
-            disabled={!canReview || isActing}
-            onClick={() => onApprove(request.id)}
-          >
-            {isActing ? "Processando..." : "Aprovar"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            icon={X}
-            iconSide="left"
-            className="h-9 flex-1 border-burgundy/30 text-burgundy hover:bg-burgundy/5"
-            disabled={!canReview || isActing}
-            onClick={() => onReject(request.id)}
-          >
-            Rejeitar
-          </Button>
+
+          {canReview ? (
+            <>
+              <Button
+                type="button"
+                icon={Check}
+                iconSide="left"
+                className="h-9 flex-1"
+                disabled={isActing}
+                onClick={() => onApprove(request.id)}
+              >
+                {isActing ? "Processando..." : "Aprovar"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                icon={X}
+                iconSide="left"
+                className="h-9 flex-1 border-burgundy/30 text-burgundy hover:bg-burgundy/5"
+                disabled={isActing}
+                onClick={() => onReject(request.id)}
+              >
+                Rejeitar
+              </Button>
+            </>
+          ) : null}
         </div>
       </div>
     </DashboardCard>

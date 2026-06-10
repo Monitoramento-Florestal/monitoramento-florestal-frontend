@@ -495,14 +495,21 @@ export async function exportArvores(
   const match = disposicao?.match(/filename\*?=(?:UTF-8''|")([^"]+)/);
   const nomeArquivo = match?.[1] ?? `arvores.${formato}`;
 
-  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const blob = response.data instanceof Blob
+    ? response.data
+    : new Blob([response.data]);
+  const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = nomeArquivo;
+  link.style.display = "none";
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
+
+  setTimeout(() => {
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }, 200);
 }
 
 export async function updateManagedTree(treeId: string, payload: TreeUpdatePayload) {

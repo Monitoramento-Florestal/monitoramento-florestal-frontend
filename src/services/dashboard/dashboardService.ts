@@ -52,9 +52,30 @@ export async function fetchDashboardGestor() {
   return data;
 }
 
+export interface DashboardRegistroRecente {
+  id: string;
+  codigo: string | null;
+  nomeComum: string | null;
+  especie: string | null;
+  estadoGeral: string;
+  alturaColetada: number;
+  dapColetada: number;
+  copaColetada: number;
+  dataColeta: string;
+  pesquisadorNome: string | null;
+}
+
 export async function fetchDashboardAdmin() {
   const { data } = await api.get<DashboardAdministrativo>(
     API_ENDPOINTS.DASHBOARD_ADMIN,
+  );
+
+  return data;
+}
+
+export async function fetchRegistrosRecentes() {
+  const { data } = await api.get<DashboardRegistroRecente[]>(
+    API_ENDPOINTS.DASHBOARD_RECENTES,
   );
 
   return data;

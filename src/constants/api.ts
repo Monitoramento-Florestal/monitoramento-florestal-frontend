@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
   DASHBOARD_PESQUISADOR: '/dashboard/pesquisador',
   DASHBOARD_GESTOR: '/dashboard/gestor',
   DASHBOARD_ADMIN: '/dashboard/admin',
+  DASHBOARD_RECENTES: '/dashboard/recentes',
   CITIZEN_PROFILE: '/citizen/profile',
   USER_PROFILE_ME: '/usuarios/me',
   USER_PROFILE_CHANGE_PASSWORD: '/usuarios/me/change-password',

@@ -76,6 +76,15 @@ const DASHBOARD_NAVIGATION: DashboardNavigationDefinition[] = [
     roles: [UserRole.RESEARCHER, UserRole.MANAGER, UserRole.ADMIN],
   },
   {
+    key: 'my-approval-requests',
+    label: 'Minhas solicitações',
+    href: {
+      [UserRole.RESEARCHER]: APP_ROUTES.RESEARCHER_APPROVALS,
+    },
+    icon: ListChecks,
+    roles: [UserRole.RESEARCHER],
+  },
+  {
     key: 'approvals',
     label: 'Fila de aprovação',
     href: {

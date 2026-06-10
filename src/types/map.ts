@@ -63,6 +63,9 @@ export interface MapTreeDetail {
   localizacao: MapTreeLocationDetail
   status: TreeStatus
   vigor: TreeVigor | null
+  alturaAtual: number | null
+  dapAtual: number | null
+  copaAtual: number | null
   observacoes?: string
   currentRecord: unknown | null
   fotoUrl?: string | null

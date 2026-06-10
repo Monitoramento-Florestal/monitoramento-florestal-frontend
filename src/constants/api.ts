@@ -13,7 +13,10 @@ export const API_ENDPOINTS = {
   TREES: '/arvores',
   MAP_TREES: '/map/trees',
   TREE_RECORDS: '/registros',
-  TREE_RECORDS_NEW_TREE: '/registros/nova-arvore',
+  APPROVAL_REQUESTS: '/approval-requests',
+  APPROVAL_REQUESTS_CREATE_TREE: '/approval-requests/criacao-arvore',
+  APPROVAL_REQUESTS_CREATE_RECORD: '/approval-requests/criacao-registro',
+  APPROVAL_REQUESTS_EDIT_RECORD: '/approval-requests/edicao-registro',
 } as const
 
 export const AUTH_ROUTE_ENDPOINTS = {

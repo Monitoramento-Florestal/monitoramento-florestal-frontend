@@ -1,4 +1,7 @@
-﻿import {
+﻿"use client";
+
+import { useEffect, useState } from "react";
+import {
   ListChecks,
   Map,
   PlusCircle,
@@ -12,33 +15,8 @@ import {
   DashboardPageHeader,
 } from "@/components/features/dashboard";
 import { Button } from "@/components/ui/button";
-
-const STATS = [
-  {
-    key: "my-records",
-    label: "Meus registros",
-    value: 11,
-    icon: Trees,
-  },
-  {
-    key: "pending",
-    label: "Aguardando aprovação",
-    value: 1,
-    icon: ListChecks,
-  },
-  {
-    key: "healthy",
-    label: "Saudáveis (sistema)",
-    value: 30,
-    icon: Trees,
-  },
-  {
-    key: "total",
-    label: "Total no campus",
-    value: 42,
-    icon: Trees,
-  },
-];
+import { fetchDashboardPesquisador } from "@/services/dashboard/dashboardService";
+import type { DashboardPesquisador } from "@/services/dashboard/dashboardService";
 
 const LAST_RECORDS = [
   {
@@ -81,24 +59,53 @@ const QUICK_ACTIONS = [
 ];
 
 export default function ResearcherDashboardPage() {
+  const [dashboard, setDashboard] = useState<DashboardPesquisador | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDashboard() {
+      try {
+        const data = await fetchDashboardPesquisador();
+        if (isMounted) setDashboard(data);
+      } catch {
+        // fallback silencioso
+      }
+    }
+
+    void loadDashboard();
+    return () => { isMounted = false };
+  }, []);
+
+  const stats = dashboard
+    ? [
+        { key: "my-records", label: "Meus registros", value: dashboard.registrosCriados, icon: Trees },
+        { key: "pending", label: "Aguardando aprovação", value: dashboard.solicitacoesPendentes, icon: ListChecks },
+        { key: "healthy", label: "Saudáveis (sistema)", value: dashboard.arvoresSaudaveis, icon: Trees },
+        { key: "total", label: "Total no campus", value: dashboard.totalArvores, icon: Trees },
+      ]
+    : [];
+
   return (
     <>
       <DashboardPageHeader
         title="Painel do pesquisador"
-        subtitle="11 registros sob sua responsabilidade"
+        subtitle={dashboard ? `${dashboard.registrosCriados} registros sob sua responsabilidade` : "Carregando..."}
       />
       <div className="p-6">
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {STATS.map(({ key, label, value, icon: Icon }) => (
-            <DashboardCard key={key} className="flex flex-col gap-4 bg-white/55 shadow-none">
-              <div className="flex items-start justify-between text-xs uppercase tracking-[0.18em] text-rosewood/70">
-                <span>{label}</span>
-                <Icon size={16} strokeWidth={1.6} className="text-sage" />
-              </div>
-              <div className="text-2xl font-semibold text-burgundy">{value}</div>
-            </DashboardCard>
-          ))}
-        </section>
+        {stats.length > 0 ? (
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {stats.map(({ key, label, value, icon: Icon }) => (
+              <DashboardCard key={key} className="flex flex-col gap-4 bg-white/55 shadow-none">
+                <div className="flex items-start justify-between text-xs uppercase tracking-[0.18em] text-rosewood/70">
+                  <span>{label}</span>
+                  <Icon size={16} strokeWidth={1.6} className="text-sage" />
+                </div>
+                <div className="text-2xl font-semibold text-burgundy">{value}</div>
+              </DashboardCard>
+            ))}
+          </section>
+        ) : null}
 
         <section className="mt-6 grid gap-4">
           <div>

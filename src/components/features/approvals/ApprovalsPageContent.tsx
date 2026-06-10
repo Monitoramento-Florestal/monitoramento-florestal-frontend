@@ -6,6 +6,7 @@ import { DashboardCard, DashboardPageHeader } from "@/components/features/dashbo
 import { useToast } from "@/components/ui/toast";
 import {
   approvePendingRecord,
+  listMyApprovalRequests,
   listPendingApprovalRequests,
   rejectPendingRecord,
 } from "@/services/approvals/approvalService";
@@ -16,12 +17,14 @@ import { ApprovalsScreen } from "./ApprovalsScreen";
 
 interface ApprovalsPageContentProps {
   canReview: boolean;
+  scope?: "mine" | "pending";
   title: string;
   readOnlyReason?: string;
 }
 
 export function ApprovalsPageContent({
   canReview,
+  scope = "pending",
   title,
   readOnlyReason,
 }: ApprovalsPageContentProps) {
@@ -33,30 +36,30 @@ export function ApprovalsPageContent({
   useEffect(() => {
     let isMounted = true;
 
-    async function loadPendingRecords() {
+    async function loadApprovalRequests() {
       try {
         setIsLoading(true);
         setErrorMessage(null);
-        const pendingRecords = await listPendingApprovalRequests();
+
+        const loadedRecords =
+          scope === "mine"
+            ? await listMyApprovalRequests()
+            : await listPendingApprovalRequests();
 
         if (!isMounted) {
           return;
         }
 
-        setRecords(pendingRecords);
+        setRecords(loadedRecords);
       } catch (error) {
-        if (!isMounted) {
-          return;
-        }
-
-        if (isSessionInvalidationError(error)) {
+        if (!isMounted || isSessionInvalidationError(error)) {
           return;
         }
 
         const normalizedError = normalizeApiError(error);
         setErrorMessage(
           normalizedError.status === 403
-            ? "Seu perfil não tem permissão no backend para consultar a fila de aprovação."
+            ? "Seu perfil não tem permissão no backend para consultar esta área."
             : normalizedError.message,
         );
       } finally {
@@ -66,19 +69,19 @@ export function ApprovalsPageContent({
       }
     }
 
-    void loadPendingRecords();
+    void loadApprovalRequests();
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [scope]);
 
   async function handleApprove(recordId: string) {
     try {
       await approvePendingRecord(recordId);
       setRecords((current) => current.filter((record) => record.id !== recordId));
       showToast({
-        title: "Registro aprovado com sucesso",
+        title: "Solicitação aprovada com sucesso",
         description: "A solicitação foi consolidada pelo backend.",
         variant: "success",
       });
@@ -88,7 +91,7 @@ export function ApprovalsPageContent({
       }
 
       showToast({
-        title: "Não foi possível aprovar o registro",
+        title: "Não foi possível aprovar a solicitação",
         description: normalizeApiError(error).message,
         variant: "error",
       });
@@ -100,7 +103,7 @@ export function ApprovalsPageContent({
       await rejectPendingRecord(recordId, reason);
       setRecords((current) => current.filter((record) => record.id !== recordId));
       showToast({
-        title: "Registro rejeitado com sucesso",
+        title: "Solicitação rejeitada com sucesso",
         description: "A solicitação foi removida da fila.",
         variant: "success",
       });
@@ -110,7 +113,7 @@ export function ApprovalsPageContent({
       }
 
       showToast({
-        title: "Não foi possível rejeitar o registro",
+        title: "Não foi possível rejeitar a solicitação",
         description: normalizeApiError(error).message,
         variant: "error",
       });
@@ -121,7 +124,11 @@ export function ApprovalsPageContent({
     <>
       <DashboardPageHeader
         title={title}
-        subtitle={`${records.length} solicitações aguardando revisão`}
+        subtitle={
+          scope === "mine"
+            ? `${records.length} solicitações encontradas`
+            : `${records.length} solicitações aguardando revisão`
+        }
       />
       <div className="space-y-6 p-4 sm:p-6">
         {readOnlyReason ? (
@@ -141,6 +148,7 @@ export function ApprovalsPageContent({
             initialRecords={records}
             loading={isLoading}
             canReview={canReview}
+            statusMode={scope === "mine" ? "all" : "pending-only"}
             onApprove={handleApprove}
             onReject={handleReject}
           />

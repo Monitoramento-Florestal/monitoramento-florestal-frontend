@@ -23,20 +23,29 @@ interface ApprovalsScreenProps {
   canReview?: boolean;
   initialRecords: TreeApprovalRequest[];
   loading?: boolean;
+  statusMode?: "pending-only" | "all";
   onApprove?: (id: string) => Promise<void>;
   onReject?: (id: string, reason: string) => Promise<void>;
+}
+
+function applyStatusMode(
+  records: TreeApprovalRequest[],
+  statusMode: "pending-only" | "all",
+) {
+  return statusMode === "pending-only" ? getPendingApprovalRecords(records) : records;
 }
 
 export function ApprovalsScreen({
   canReview = true,
   initialRecords,
   loading = false,
+  statusMode = "pending-only",
   onApprove,
   onReject,
 }: ApprovalsScreenProps) {
   const { showToast } = useToast();
   const [records, setRecords] = useState<TreeApprovalRequest[]>(() =>
-    getPendingApprovalRecords(initialRecords),
+    applyStatusMode(initialRecords, statusMode),
   );
   const [query, setQuery] = useState("");
   const [searchField, setSearchField] = useState<ApprovalSearchField>("researcher");
@@ -47,8 +56,8 @@ export function ApprovalsScreen({
   const [activeActionId, setActiveActionId] = useState<string | null>(null);
 
   useEffect(() => {
-    setRecords(getPendingApprovalRecords(initialRecords));
-  }, [initialRecords]);
+    setRecords(applyStatusMode(initialRecords, statusMode));
+  }, [initialRecords, statusMode]);
 
   const filteredRecords = useMemo(
     () => filterApprovalRecords(records, query, searchField),
@@ -72,8 +81,8 @@ export function ApprovalsScreen({
 
     if (!canReview || !onApprove) {
       showToast({
-        title: "Acao indisponivel para este perfil",
-        description: "Seu perfil nao tem permissao para concluir esta acao.",
+        title: "Ação indisponível para este perfil",
+        description: "Seu perfil não tem permissão para concluir esta ação.",
         variant: "info",
       });
       return;
@@ -109,14 +118,14 @@ export function ApprovalsScreen({
     }
 
     if (!rejectReason.trim()) {
-      setRejectError("Informe um motivo curto antes de rejeitar este registro.");
+      setRejectError("Informe um motivo curto antes de rejeitar esta solicitação.");
       return;
     }
 
     if (!canReview || !onReject) {
       showToast({
-        title: "Acao indisponivel para este perfil",
-        description: "Seu perfil nao tem permissao para concluir esta acao.",
+        title: "Ação indisponível para este perfil",
+        description: "Seu perfil não tem permissão para concluir esta ação.",
         variant: "info",
       });
       return;

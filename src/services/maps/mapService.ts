@@ -49,6 +49,9 @@ interface BackendMapTreeDetail {
   referencia?: string | null
   status: string
   vigor?: string | null
+  alturaAtual?: number | null
+  dapAtual?: number | null
+  copaAtual?: number | null
   observacoes?: string | null
   currentRecord?: unknown | null
   fotoUrl?: string | null
@@ -73,6 +76,12 @@ function toOptionalCoordinate(value: number | null | undefined) {
 function mapTreeStatus(status: string): TreeStatus {
   const normalized = normalizeToken(status)
 
+  // Direct values from the map endpoint
+  if (normalized === 'saudavel') return 'saudavel'
+  if (normalized === 'injuria') return 'injuria'
+  if (normalized === 'cortada') return 'cortada'
+
+  // Legacy fallback (from general-state field)
   if (normalized === 'morta') {
     return 'cortada'
   }
@@ -130,6 +139,9 @@ function mapTreeDetail(tree: BackendMapTreeDetail): MapTreeDetail {
     },
     status: mapTreeStatus(tree.status),
     vigor: mapTreeVigor(tree.vigor),
+    alturaAtual: tree.alturaAtual ?? null,
+    dapAtual: tree.dapAtual ?? null,
+    copaAtual: tree.copaAtual ?? null,
     observacoes: tree.observacoes ?? undefined,
     currentRecord: tree.currentRecord ?? null,
     fotoUrl: tree.fotoUrl

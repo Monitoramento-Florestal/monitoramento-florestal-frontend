@@ -16,7 +16,7 @@ import {
 
 import { Button } from '@/components/ui/button'
 import type { MapTreeDetail } from '@/types/map'
-import type { Tree, TreeStatus } from '@/types/trees'
+import type { Tree } from '@/types/trees'
 import type { TreeVigor } from '@/types/trees'
 import {
   APPROVAL_LABEL,
@@ -34,65 +34,216 @@ import { Section } from './Section'
 import { StatusPill } from './StatusPill'
 import { TagList } from './TagList'
 
+// --------------- helpers to unpack currentRecord ---------------
+
+function normalizeToken(value: string | null | undefined) {
+  return value?.trim().toLowerCase() ?? ''
+}
+
+function toFrontendToken(value: string | null | undefined) {
+  return normalizeToken(value).replaceAll('_', ' ')
+}
+
+function asNum(val: unknown, fallback: number): number {
+  return typeof val === 'number' && Number.isFinite(val) ? val : fallback
+}
+
+function asStr(val: unknown, fallback: string): string
+function asStr(val: unknown, fallback?: undefined): string | undefined
+function asStr(val: unknown, fallback?: string | undefined): string | undefined {
+  return typeof val === 'string' ? val : fallback
+}
+
+function asStrArr(val: unknown): string[] {
+  return Array.isArray(val) ? val.filter((x): x is string => typeof x === 'string') : []
+}
+
+function asObject(val: unknown): Record<string, unknown> | null {
+  return typeof val === 'object' && val !== null ? (val as Record<string, unknown>) : null
+}
+
+function mapEstadoGeral(raw: string): 1 | 2 | 3 | 4 | 5 {
+  switch (normalizeToken(raw)) {
+    case 'otimo':  return 1
+    case 'bom':    return 2
+    case 'regular': return 3
+    case 'ruim':   return 4
+    case 'morta':  return 5
+    default:       return 3
+  }
+}
+
+function mapRecordVigor(raw: string): TreeVigor {
+  const n = normalizeToken(raw)
+  if (n === 'alto' || n === 'medio' || n === 'baixo') return n
+  return 'medio'
+}
+
+function mapRecordConflicts(
+  conflito: unknown,
+): Tree['conflitos'] {
+  const c = asObject(conflito)
+  return {
+    fiacao: normalizeToken(asStr(c?.fiacao, '')) === 'ocorrido'
+      ? 'conflito' : (toFrontendToken(asStr(c?.fiacao, '')) || 'ausente') as Tree['conflitos']['fiacao'],
+    calcada: (toFrontendToken(asStr(c?.calcada, '')) || 'sem dano') as Tree['conflitos']['calcada'],
+    iluminacao: normalizeToken(asStr(c?.iluminacao, '')) === 'sem_conflito'
+      ? 'sem' : (toFrontendToken(asStr(c?.iluminacao, '')) || 'sem') as Tree['conflitos']['iluminacao'],
+    edificacao: normalizeToken(asStr(c?.edificacao, '')) === 'ocorrido'
+      ? 'conflito' : (toFrontendToken(asStr(c?.edificacao, '')) || 'sem') as Tree['conflitos']['edificacao'],
+  }
+}
+
+function mapRecordManejo(manejo: unknown): Tree['manejo'] {
+  const m = asObject(manejo)
+  const acoes = asStrArr(m?.acoes)
+  return {
+    acao: (toFrontendToken(acoes[0]) || 'nenhuma') as Tree['manejo']['acao'],
+    prioridade: (toFrontendToken(asStr(m?.prioridade, '')) || 'baixa') as Tree['manejo']['prioridade'],
+  }
+}
+
+function mapRecordApproval(status: string): Tree['registro']['aprovacao'] {
+  const n = normalizeToken(status)
+  if (n === 'pendente') return 'pendente'
+  if (n === 'recusado') return 'rejeitada'
+  return 'aprovada'
+}
+
+// --------------------------------------------------------------
+
 function toFullTree(detail: MapTreeDetail): Tree {
+  const rec = asObject(detail.currentRecord)
+
+  // ---- extrair dados do currentRecord (se existir) ----
+  const rawEstado   = asStr(rec?.estadoGeral, '')
+  const rawVigor    = asStr(rec?.vigor, detail.vigor ?? 'medio')
+
+  const problemasCopa  = asStrArr(rec?.problemasCopa)
+  const problemasTronco = asStrArr(rec?.problemasTronco)
+  const problemasRaiz  = asStrArr(rec?.problemasRaiz)
+
+  const todosProblemas = [...problemasCopa, ...problemasTronco, ...problemasRaiz]
+    .map(toFrontendToken)
+    .filter((p) => p !== 'nenhum')
+
+  const posicaoProblema: Tree['condicao']['posicaoProblema'] =
+    problemasCopa.length > 0 ? 'copa'
+    : problemasTronco.length > 0 ? 'tronco'
+    : problemasRaiz.length > 0 ? 'raiz'
+    : null
+
+  const conflitoRaw = rec?.conflito
+  const manejoRaw   = rec?.manejo
+
+  const pesquisador = asObject(rec?.pesquisador)
+
+  // ---- montar objeto Tree ----
   return {
     id: detail.id,
     codigo: detail.codigo,
     nomeComum: detail.nomeComum,
     especie: detail.especie,
-    status: detail.status as unknown as TreeStatus,
+    status: detail.status,
     lat: detail.lat,
     lng: detail.lng,
     localizacao: {
       bairro: detail.localizacao.bairro,
       rua: detail.localizacao.rua,
       referencia: detail.localizacao.referencia,
-      dataColeta: '',
-      equipe: 'Indisponivel',
+      dataColeta: asStr(rec?.dataColeta, ''),
+      equipe: asStr(pesquisador?.nome, 'Indisponivel'),
     },
-    dimensoes: {
-      alturaM: 0,
-      dapCm: 0,
-      copaM: 0,
-      medidaEstimada: false,
-    },
-    condicao: {
-      estadoGeral: 3 as 1 | 2 | 3 | 4 | 5,
-      vigor: (detail.vigor ?? 'medio') as TreeVigor,
-      problemas: [],
-      posicaoProblema: null,
-    },
-    estruturaRisco: {
-      tronco: [],
-      baseColo: [],
-      copa: [],
-      inclinacaoTronco: 'ausente' as const,
-      ancoragemRadicular: 'estavel' as const,
-      alvosPotenciais: [],
-      fluxoVeiculos: 'baixo' as const,
-      fluxoPedestres: 'baixo' as const,
-      tipoVia: 'residencial' as const,
-      alvosSensiveis: [],
-    },
-    conflitos: {
-      fiacao: 'ausente' as const,
-      calcada: 'sem dano' as const,
-      iluminacao: 'sem' as const,
-      edificacao: 'sem' as const,
-    },
-    manejo: {
-      acao: 'nenhuma' as const,
-      prioridade: 'baixa' as const,
-    },
-    registro: {
-      aprovacao: 'pendente' as const,
-      fotos: detail.fotoUrl ? [detail.fotoUrl] : [],
-      registradoEm: new Date().toISOString(),
-      registradoPor: 'Indisponivel',
-      ultimaMedicao: new Date().toISOString(),
-    },
+    dimensoes: rec
+      ? {
+          alturaM: asNum(rec.alturaColetada, detail.alturaAtual ?? 0),
+          dapCm: asNum(rec.dapColetada, detail.dapAtual ?? 0),
+          copaM: asNum(rec.copaColetada, detail.copaAtual ?? 0),
+          medidaEstimada: false,
+        }
+      : {
+          alturaM: detail.alturaAtual ?? 0,
+          dapCm: detail.dapAtual ?? 0,
+          copaM: detail.copaAtual ?? 0,
+          medidaEstimada: false,
+        },
+    condicao: rec
+      ? {
+          estadoGeral: mapEstadoGeral(rawEstado),
+          vigor: mapRecordVigor(rawVigor),
+          problemas: todosProblemas as Tree['condicao']['problemas'],
+          posicaoProblema,
+        }
+      : {
+          estadoGeral: 3 as const,
+          vigor: mapRecordVigor(rawVigor),
+          problemas: [],
+          posicaoProblema: null,
+        },
+    estruturaRisco: rec
+      ? {
+          tronco: [toFrontendToken(asStr(rec.estruturaTronco, ''))].filter(Boolean) as Tree['estruturaRisco']['tronco'],
+          baseColo: [toFrontendToken(asStr(rec.estruturaBase, ''))].filter(Boolean) as Tree['estruturaRisco']['baseColo'],
+          copa: [toFrontendToken(asStr(rec.estruturaCopa, ''))].filter(Boolean) as Tree['estruturaRisco']['copa'],
+          inclinacaoTronco: (toFrontendToken(asStr(rec.inclinacaoTronco, '')) || 'ausente') as Tree['estruturaRisco']['inclinacaoTronco'],
+          ancoragemRadicular: (toFrontendToken(asStr(rec.ancoragem, '')) || 'estavel') as Tree['estruturaRisco']['ancoragemRadicular'],
+          alvosPotenciais: asStrArr(rec.alvosPotenciais).map(toFrontendToken) as Tree['estruturaRisco']['alvosPotenciais'],
+          fluxoVeiculos: (toFrontendToken(asStr(rec.fluxoAutomovel, '')) || 'baixo') as Tree['estruturaRisco']['fluxoVeiculos'],
+          fluxoPedestres: (toFrontendToken(asStr(rec.fluxoPedestre, '')) || 'baixo') as Tree['estruturaRisco']['fluxoPedestres'],
+          tipoVia: (normalizeToken(asStr(rec.tipoVia, '')) === 'central'
+            ? 'comercial/central'
+            : toFrontendToken(asStr(rec.tipoVia, '')) || 'residencial') as Tree['estruturaRisco']['tipoVia'],
+          alvosSensiveis: asStrArr(rec.alvosSensiveis).map((v) =>
+            normalizeToken(v) === 'area_lazer' ? 'praca/area de lazer' : toFrontendToken(v),
+          ) as Tree['estruturaRisco']['alvosSensiveis'],
+        }
+      : {
+          tronco: [],
+          baseColo: [],
+          copa: [],
+          inclinacaoTronco: 'ausente' as const,
+          ancoragemRadicular: 'estavel' as const,
+          alvosPotenciais: [],
+          fluxoVeiculos: 'baixo' as const,
+          fluxoPedestres: 'baixo' as const,
+          tipoVia: 'residencial' as const,
+          alvosSensiveis: [],
+        },
+    conflitos: rec && conflitoRaw
+      ? mapRecordConflicts(conflitoRaw)
+      : {
+          fiacao: 'ausente' as const,
+          calcada: 'sem dano' as const,
+          iluminacao: 'sem' as const,
+          edificacao: 'sem' as const,
+        },
+    manejo: rec && manejoRaw
+      ? mapRecordManejo(manejoRaw)
+      : {
+          acao: 'nenhuma' as const,
+          prioridade: 'baixa' as const,
+        },
+    registro: rec
+      ? {
+          aprovacao: mapRecordApproval(asStr(rec.status, '')),
+          fotos: detail.fotoUrl ? [detail.fotoUrl] : [],
+          motivoRejeicao: asStr(rec.motivoRecusa, undefined) || undefined,
+          registradoEm: asStr(rec.dataColeta, new Date().toISOString()),
+          registradoPor: asStr(pesquisador?.nome, 'Indisponivel'),
+          ultimaMedicao: asStr(rec.dataColeta, new Date().toISOString()),
+          aprovadoEm: asStr(rec.dataAnalise, undefined) || undefined,
+        }
+      : {
+          aprovacao: 'pendente' as const,
+          fotos: detail.fotoUrl ? [detail.fotoUrl] : [],
+          registradoEm: new Date().toISOString(),
+          registradoPor: 'Indisponivel',
+          ultimaMedicao: new Date().toISOString(),
+        },
     records: [],
-    observacoes: detail.observacoes,
+    observacoes: rec
+      ? (asStr(rec.observacoes, undefined) || detail.observacoes || undefined)
+      : detail.observacoes,
   }
 }
 

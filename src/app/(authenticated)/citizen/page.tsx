@@ -1,34 +1,12 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { BookOpen, Leaf, Map, Trees, TriangleAlert } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { APP_ROUTES } from '@/constants/routes'
 import { useAuthContext } from '@/contexts/AuthContext'
-
-const metrics = [
-  {
-    key: 'cataloged',
-    icon: Trees,
-    label: 'Árvores catalogadas',
-    value: 42,
-    valueClassName: 'text-burgundy',
-  },
-  {
-    key: 'healthy',
-    icon: Leaf,
-    label: 'Saudáveis',
-    value: 30,
-    valueClassName: 'text-sage',
-  },
-  {
-    key: 'monitoring',
-    icon: TriangleAlert,
-    label: 'Sob acompanhamento',
-    value: 7,
-    valueClassName: 'text-rosewood',
-  },
-]
+import { fetchDashboardPublico } from '@/services/dashboard/dashboardService'
 
 function getFirstName(name?: string | null) {
   return name?.trim().split(' ').filter(Boolean)[0] ?? 'Cidadão'
@@ -37,6 +15,47 @@ function getFirstName(name?: string | null) {
 export default function CitizenDashboardPage() {
   const { user } = useAuthContext()
   const firstName = getFirstName(user?.name)
+  const [dashboard, setDashboard] = useState({ totalArvores: 42, arvoresSaudaveis: 30, arvoresAcompanhamento: 7 })
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadDashboard() {
+      try {
+        const data = await fetchDashboardPublico()
+        if (isMounted) setDashboard(data)
+      } catch {
+        // fallback silencioso
+      }
+    }
+
+    void loadDashboard()
+    return () => { isMounted = false }
+  }, [])
+
+  const metrics = [
+    {
+      key: 'cataloged',
+      icon: Trees,
+      label: 'Árvores catalogadas',
+      value: dashboard.totalArvores,
+      valueClassName: 'text-burgundy',
+    },
+    {
+      key: 'healthy',
+      icon: Leaf,
+      label: 'Saudáveis',
+      value: dashboard.arvoresSaudaveis,
+      valueClassName: 'text-sage',
+    },
+    {
+      key: 'monitoring',
+      icon: TriangleAlert,
+      label: 'Sob acompanhamento',
+      value: dashboard.arvoresAcompanhamento,
+      valueClassName: 'text-rosewood',
+    },
+  ]
 
   return (
     <>

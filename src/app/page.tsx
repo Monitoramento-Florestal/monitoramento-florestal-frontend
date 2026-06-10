@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   MapPin,
@@ -9,21 +10,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { Topbar } from "@/components/features/landing/TopBar";
 import { Logo } from "@/components/ui/Logo";
+import { fetchDashboardPublico } from "@/services/dashboard/dashboardService";
 
-
-interface Stats {
-  total:   number;
-  species: number;
-}
-
-
-const MOCK_STATS: Stats = {
-  total:   42,
-  species: 12,
-};
+const SPECIES_MOCK = 12;
 
 export default function LandingPage() {
-  const { total, species } = MOCK_STATS;
+  const [total, setTotal] = useState(42);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDashboard() {
+      try {
+        const data = await fetchDashboardPublico();
+
+        if (isMounted) {
+          setTotal(data.totalArvores);
+        }
+      } catch {
+        // Fallback silencioso para valores mockados
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadDashboard();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream text-burgundy flex flex-col">
@@ -69,7 +88,7 @@ export default function LandingPage() {
             {/* Inline stats */}
             <div className="mt-12 grid grid-cols-2 gap-6 max-w-sm border-t border-rosewood/20 pt-6 animate-fade-up [animation-delay:300ms]">
               <StatItem value={total}   label="espécimes" />
-              <StatItem value={species} label="espécies"  />
+              <StatItem value={SPECIES_MOCK} label="espécies"  />
             </div>
           </div>
 

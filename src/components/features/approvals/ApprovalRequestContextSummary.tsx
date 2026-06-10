@@ -25,13 +25,16 @@ export function ApprovalRequestContextSummary({
       <SummaryItem label="Submetido por" value={request.submittedBy} />
       <SummaryItem label="Nome comum" value={getApprovalRecordName(request)} />
       <SummaryItem label="Data da submissão" value={formatDate(request.submittedAt)} />
+      <SummaryItem label="Árvore vinculada" value={getApprovalRecordLinkedTreeLabel(request)} />
       <SummaryItem
-        label="Árvore vinculada"
-        value={getApprovalRecordLinkedTreeLabel(request)}
-      />
-      <SummaryItem
-        label="Registro alvo"
-        value={request.type === "create_record" ? "Novo registro pendente" : "Novo cadastro"}
+        label="Destino do registro"
+        value={
+          request.type === "create_tree"
+            ? "Novo cadastro de árvore"
+            : request.targetRecordId
+              ? `Registro ${request.targetRecordId.slice(0, 8)}`
+              : "Novo registro técnico"
+        }
       />
     </div>
   );

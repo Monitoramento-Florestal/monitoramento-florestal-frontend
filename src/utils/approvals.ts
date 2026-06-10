@@ -11,7 +11,7 @@ export function getPendingApprovalRecords(requests: TreeApprovalRequest[]) {
 export function filterApprovalRecords(
   records: TreeApprovalRequest[],
   query: string,
-  field: ApprovalSearchField
+  field: ApprovalSearchField,
 ) {
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -34,15 +34,17 @@ export function approveRecord(records: TreeApprovalRequest[], id: string) {
 }
 
 export function rejectRecord(records: TreeApprovalRequest[], id: string, reason: string) {
-  return records.map((record) =>
-    record.id === id
-      ? {
-          ...record,
-          status: "rejeitada" as const,
-          rejectionReason: reason,
-        }
-      : record
-  ).filter((record) => record.status === "pendente");
+  return records
+    .map((record) =>
+      record.id === id
+        ? {
+            ...record,
+            status: "rejeitada" as const,
+            rejectionReason: reason,
+          }
+        : record,
+    )
+    .filter((record) => record.status === "pendente");
 }
 
 export function getApprovalRecordCode(record: TreeApprovalRequest) {

@@ -1,4 +1,5 @@
-﻿import {
+﻿import { useEffect, useState } from "react";
+import {
   ClipboardList,
   ListChecks,
   Map,
@@ -16,33 +17,8 @@ import {
   DashboardPageHeader,
 } from "@/components/features/dashboard";
 import { Button } from "@/components/ui/button";
-
-const STATS = [
-  {
-    key: "total",
-    label: "Total no campus",
-    value: 42,
-    icon: Trees,
-  },
-  {
-    key: "healthy",
-    label: "Saudáveis",
-    value: 30,
-    icon: Trees,
-  },
-  {
-    key: "injury",
-    label: "Com injúria",
-    value: 7,
-    icon: TriangleAlert,
-  },
-  {
-    key: "removed",
-    label: "Cortadas",
-    value: 5,
-    icon: Scissors,
-  },
-];
+import { fetchDashboardAdmin } from "@/services/dashboard/dashboardService";
+import type { DashboardAdministrativo } from "@/services/dashboard/dashboardService";
 
 const RECENT_RECORDS = [
   {
@@ -107,24 +83,55 @@ function StatusBadge({ status, tone }: { status: string; tone: string }) {
 }
 
 export default function AdminDashboardPage() {
+  const [dashboard, setDashboard] = useState<DashboardAdministrativo | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDashboard() {
+      try {
+        const data = await fetchDashboardAdmin();
+        if (isMounted) setDashboard(data);
+      } catch {
+        // fallback silencioso
+      }
+    }
+
+    void loadDashboard();
+    return () => { isMounted = false };
+  }, []);
+
+  const stats = dashboard
+    ? [
+        { key: "total", label: "Total no campus", value: dashboard.totalArvores, icon: Trees },
+        { key: "healthy", label: "Saudáveis", value: dashboard.arvoresSaudaveis, icon: Trees },
+        { key: "injury", label: "Com injúria", value: dashboard.arvoresInjuriadas, icon: TriangleAlert },
+        { key: "removed", label: "Cortadas", value: dashboard.arvoresCortadas, icon: Scissors },
+      ]
+    : [];
+
+  const pendingCount = dashboard?.aprovacoesPendentes ?? 0;
+
   return (
     <>
       <DashboardPageHeader
         title="Visão geral"
-        subtitle="42 árvores monitoradas"
+        subtitle={dashboard ? `${dashboard.totalArvores} árvores monitoradas` : "Carregando..."}
       />
       <div className="p-6">
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {STATS.map(({ key, label, value, icon: Icon }) => (
-            <DashboardCard key={key} className="flex flex-col gap-4 bg-white/55 shadow-none">
-              <div className="flex items-start justify-between text-xs uppercase tracking-[0.18em] text-rosewood/70">
-                <span>{label}</span>
-                <Icon size={16} strokeWidth={1.6} className="text-sage" />
-              </div>
-              <div className="text-2xl font-semibold text-burgundy">{value}</div>
-            </DashboardCard>
-          ))}
-        </section>
+        {stats.length > 0 ? (
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {stats.map(({ key, label, value, icon: Icon }) => (
+              <DashboardCard key={key} className="flex flex-col gap-4 bg-white/55 shadow-none">
+                <div className="flex items-start justify-between text-xs uppercase tracking-[0.18em] text-rosewood/70">
+                  <span>{label}</span>
+                  <Icon size={16} strokeWidth={1.6} className="text-sage" />
+                </div>
+                <div className="text-2xl font-semibold text-burgundy">{value}</div>
+              </DashboardCard>
+            ))}
+          </section>
+        ) : null}
 
         <section className="mt-6 grid gap-4">
           <DashboardCard className="bg-white/55 shadow-none">
@@ -136,9 +143,11 @@ export default function AdminDashboardPage() {
                 <h2 className="mt-3 text-base font-medium text-burgundy">
                   Aguardando sua revisão
                 </h2>
-                <p className="mt-2 text-3xl font-semibold text-burgundy">3</p>
+                <p className="mt-2 text-3xl font-semibold text-burgundy">{pendingCount}</p>
                 <p className="mt-2 text-sm text-rosewood">
-                  Registros precisam de aprovação ou correção.
+                  {pendingCount > 0
+                    ? "Solicitações precisam de aprovação ou correção."
+                    : "Nenhuma pendência no momento."}
                 </p>
               </div>
               <Button text="Ver fila" icon={ListChecks} href={APP_ROUTES.ADMIN_APPROVALS} variant="ghost" />

@@ -51,6 +51,7 @@ interface BackendMapTreeDetail {
   vigor?: string | null
   observacoes?: string | null
   currentRecord?: unknown | null
+  fotoUrl?: string | null
 }
 
 interface MapServiceOptions {
@@ -131,6 +132,9 @@ function mapTreeDetail(tree: BackendMapTreeDetail): MapTreeDetail {
     vigor: mapTreeVigor(tree.vigor),
     observacoes: tree.observacoes ?? undefined,
     currentRecord: tree.currentRecord ?? null,
+    fotoUrl: tree.fotoUrl
+      ? `${process.env.NEXT_PUBLIC_API_URL || ''}${tree.fotoUrl.replace(/^\/api/, '')}`
+      : null,
   }
 }
 

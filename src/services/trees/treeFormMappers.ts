@@ -1,7 +1,9 @@
 import type { TreeRecordFormValues } from "@/utils/treeRecords";
 import type {
-  ExistingTreeRecordPayload,
-  NewTreeRecordPayload,
+  CreateRecordApprovalPayload,
+  CreateTreeApprovalPayload,
+} from "@/services/approvals/approvalService";
+import type {
   TreeUpdatePayload,
 } from "@/services/trees/treeService";
 
@@ -294,32 +296,69 @@ function buildTreeCorePayload(values: TreeRecordFormValues) {
   };
 }
 
-export function mapFormValuesToExistingTreeRecordPayload(
-  treeId: string,
-  values: TreeRecordFormValues,
-): ExistingTreeRecordPayload {
-  return {
-    arvoreId: treeId,
-    ...buildSharedPayload(values),
-  };
-}
-
-export function mapFormValuesToNewTreeRecordPayload(
-  values: TreeRecordFormValues,
-): NewTreeRecordPayload {
-  return {
-    especie: values.especie.trim(),
-    lat: Number(values.lat),
-    lng: Number(values.lng),
-    bairro: values.bairro.trim(),
-    rua: values.rua.trim(),
-    referencia: values.referencia.trim() || undefined,
-    ...buildSharedPayload(values),
-  };
-}
-
 export function mapFormValuesToTreeUpdatePayload(
   values: TreeRecordFormValues,
 ): TreeUpdatePayload {
   return buildTreeCorePayload(values);
+}
+
+function toOptionalNumber(value: string) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : undefined;
+}
+
+function buildApprovalRequestRecordPayload(
+  values: TreeRecordFormValues,
+): import("@/services/approvals/approvalService").ApprovalRequestRecordPayload {
+  const shared = buildSharedPayload(values);
+  return {
+    alturaColetada: shared.alturaColetada,
+    dapColetada: shared.dapColetada,
+    copaColetada: shared.copaColetada,
+    estadoGeral: shared.estadoGeral,
+    vigor: shared.vigor,
+    problemasCopa: shared.problemasCopa,
+    problemasTronco: shared.problemasTronco,
+    problemasRaiz: shared.problemasRaiz,
+    estruturaTronco: shared.estruturaTronco,
+    estruturaBase: shared.estruturaBase,
+    estruturaCopa: shared.estruturaCopa,
+    inclinacao: shared.inclinacaoTronco,
+    ancoragem: shared.ancoragem,
+    fluxoPedestre: shared.fluxoPedestre,
+    fluxoAutomovel: shared.fluxoAutomovel,
+    tipoVia: shared.tipoVia,
+    alvosPotenciais: shared.alvosPotenciais,
+    alvosSensiveis: shared.alvosSensiveis,
+    conflito: shared.conflito,
+    manejo: shared.manejo,
+    observacoes: shared.observacoes,
+  };
+}
+
+export function mapFormValuesToCreateTreeApprovalPayload(
+  values: TreeRecordFormValues,
+): CreateTreeApprovalPayload {
+  return {
+    propostaArvore: {
+      nomeComum: values.nomeComum.trim() || undefined,
+      especie: values.especie.trim(),
+      bairro: values.bairro.trim(),
+      rua: values.rua.trim(),
+      referencia: values.referencia.trim() || undefined,
+      lat: toOptionalNumber(values.lat),
+      lng: toOptionalNumber(values.lng),
+    },
+    propostaRegistro: buildApprovalRequestRecordPayload(values),
+  };
+}
+
+export function mapFormValuesToCreateRecordApprovalPayload(
+  treeId: string,
+  values: TreeRecordFormValues,
+): CreateRecordApprovalPayload {
+  return {
+    arvoreId: treeId,
+    propostaRegistro: buildApprovalRequestRecordPayload(values),
+  };
 }

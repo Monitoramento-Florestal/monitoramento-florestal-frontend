@@ -12,6 +12,8 @@ import type {
 } from "@/types/map";
 
 const UFRPE = { lat: -8.0175, lng: -34.9447 };
+const MAX_ZOOM = 20;
+const TILE_MAX_NATIVE_ZOOM = 19;
 
 export interface MapViewProps {
   mode?: MapTreeCollectionMode;
@@ -39,12 +41,16 @@ export default function MapView({
       center={UFRPE}
       zoom={16}
       minZoom={15}
-      maxZoom={20}
+      maxZoom={MAX_ZOOM}
       zoomControl={false}
       attributionControl={false}
       className={`leaflet-arbor h-full w-full ${className}`}
     >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        maxZoom={MAX_ZOOM}
+        maxNativeZoom={TILE_MAX_NATIVE_ZOOM}
+      />
       <ZoomControl position="bottomleft" />
       <MapViewportTracker onViewportChange={onViewportChange} />
       <MapClusterLayer
